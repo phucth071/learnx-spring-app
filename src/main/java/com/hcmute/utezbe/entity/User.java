@@ -35,7 +35,7 @@ public class User extends Auditable implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Provider provider;
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
-    private ProviderUser providerId;
+    //private ProviderUser providerId;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
