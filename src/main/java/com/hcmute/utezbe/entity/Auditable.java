@@ -28,8 +28,16 @@ public abstract class Auditable {
     private Long id;
     private String referenceId = new AlternativeJdkIdGenerator().generateId().toString();
     @NotNull
+//    Tham chiếu đến Id của Account
+//    (tránh trường hợp ID create hoặc modified không tồn tại trong bảng Account)
+//    @ManyToOne
+//    @JoinColumn(name = "created_by", referencedColumnName = "id")
+//    private User createdBy;
     private Long createdBy;
     @NotNull
+//    @ManyToOne
+//    @JoinColumn(name = "created_by", referencedColumnName = "id")
+//    private User createdBy;
     private Long updatedBy;
     @NotNull
     @CreatedDate
@@ -43,7 +51,8 @@ public abstract class Auditable {
     public void prePersist() {
         var userId = RequestContext.getUserId();
         if (userId == null) {
-            throw new ApiException("Cannot persist entity without userID in Request Context");
+//            throw new ApiException("Cannot persist entity without userID in Request Context");
+            userId = 0L;
         }
         setCreatedAt(LocalDateTime.now());
         setCreatedBy(userId);
@@ -55,7 +64,8 @@ public abstract class Auditable {
     public void preUpdate() {
         var userId = RequestContext.getUserId();
         if (userId == null) {
-            throw new ApiException("Cannot persist entity without userID in Request Context");
+            //            throw new ApiException("Cannot persist entity without userID in Request Context");
+            userId = 0L;
         };
         setUpdatedAt(LocalDateTime.now());
         setUpdatedBy(userId);
