@@ -50,16 +50,14 @@
 		<!--            <scope>test</scope>-->
 		<!--        </dependency>-->
 
-		<!--    Oauth2 Client     -->
-		<!--        <dependency>-->
-		<!--            <groupId>org.springframework.boot</groupId>-->
-		<!--            <artifactId>spring-boot-starter-oauth2-client</artifactId>-->
-		<!--        </dependency>-->
-
 		<!--    Security     -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-oauth2-client</artifactId>
 		</dependency>
 		<!--        <dependency>-->
 		<!--            <groupId>org.springframework.security</groupId>-->
@@ -85,6 +83,38 @@
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-jackson</artifactId>
 			<version>0.11.5</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/com.google.api-client/google-api-client -->
+		<dependency>
+			<groupId>com.google.api-client</groupId>
+			<artifactId>google-api-client</artifactId>
+			<version>1.30.8</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.auth</groupId>
+			<artifactId>google-auth-library-oauth2-http</artifactId>
+			<version>1.23.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.auth0</groupId>
+			<artifactId>jwks-rsa</artifactId>
+			<version>0.22.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-oauth2-resource-server</artifactId>
+			<version>6.2.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
+			<version>6.0.0</version>
+			<scope>provided</scope>
 		</dependency>
 
 		<!--    Database     -->
@@ -142,6 +172,7 @@
 			<artifactId>gson</artifactId>
 			<version>2.8.8</version>
 		</dependency>
+
 
 
 	</dependencies>
