@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.security.Principal;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -27,14 +29,10 @@ public class AuthController {
 
     @PostMapping("/oauth2/oauth-authenticate")
     public ResponseEntity<?> oauthAuthenticate(@RequestBody IdTokenRequest idTokenRequest, HttpServletResponse response) {
-        final ResponseCookie cookie = ResponseCookie.from("Access-Token", service.loginWithGoogle(idTokenRequest))
-                .httpOnly(true)
-                .maxAge(60 * 60 * 24 * 30)
-                .path("/")
-                .secure(false)
-                .build();
-        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-        return ResponseEntity.ok(Response.builder().error(false).success(true).message("Login successfully!").data(cookie.toString()).build());
+        String token = service.loginWithGoogle(idTokenRequest);
+        Map<String, String> tokenResponse = new HashMap<>();
+        tokenResponse.put("access_token", token);
+        return ResponseEntity.ok(Response.builder().error(false).success(true).message("Login successfully!").data(tokenResponse).build());
     }
 
     @GetMapping("/user/info")
