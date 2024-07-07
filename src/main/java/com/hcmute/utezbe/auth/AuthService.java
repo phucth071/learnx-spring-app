@@ -124,7 +124,10 @@ public class AuthService {
             String email = payload.getEmail();
             String fullName = payload.get("name").toString();
             String avatarUrl = (String) payload.get("picture");
-            Role role = payload.get("hd") == "student.hcmute.edu.vn" ? Role.TSUDENT : Role.TEACHER;
+            System.out.println(payload.get("hd"));
+            Role role = payload.get("hd").equals("hcmute.edu.vn") ? Role.TEACHER : Role.TSUDENT;
+            System.out.println("ROLE::: " + role.name().toString());
+
             return User.builder()
                     .email(email)
                     .fullName(fullName)

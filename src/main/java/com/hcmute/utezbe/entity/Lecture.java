@@ -25,6 +25,6 @@ public class Lecture extends Auditable{
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "modules_id", foreignKey = @ForeignKey(name = "FK_lecture_modules"))
-    private Modules modules;
+    private Module modules;
 
 }
