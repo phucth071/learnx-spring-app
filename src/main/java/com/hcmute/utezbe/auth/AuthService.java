@@ -94,7 +94,6 @@ public class AuthService {
         GoogleIdToken token;
         try {
             token = verifier.verify(idTokenRequest.getIdToken());
-            System.out.println(token);
             if (Objects.isNull(token)) {
                 throw new ApiException("Invalid id token");
             }
@@ -109,7 +108,6 @@ public class AuthService {
         }
         user = createOrUpdateUser(user);
         return jwtService.generateAccessToken(user);
-
     }
 
     private User verifyGoogleIdToken(String idToken) {
@@ -123,9 +121,8 @@ public class AuthService {
                 throw new ApiException("Invalid id token");
             }
             var payload = token.getPayload();
-            System.out.println(payload);
             String email = payload.getEmail();
-            String fullName = payload.get("given_name") + " " + payload.get("family_name");
+            String fullName = payload.get("name").toString();
             String avatarUrl = (String) payload.get("picture");
             Role role = payload.get("hd") == "student.hcmute.edu.vn" ? Role.TSUDENT : Role.TEACHER;
             return User.builder()
@@ -145,12 +142,17 @@ public class AuthService {
         User existedUser = repository.findByEmailIgnoreCase(user.getEmail()).orElse(null);
         if (existedUser == null) {
             System.out.println("Create new user");
-            return repository.save(user);
+            repository.save(user);
         }
         if (existedUser.getProvider() != Provider.GOOGLE) {
-            throw new ApiException("Email already registered");
+            throw new ApiException("Email already registered by another method!");
         }
         System.out.println("Update existed user");
+        existedUser.setFullName(user.getFullName());
+        existedUser.setAvatarUrl(user.getAvatarUrl());
+        existedUser.setRole(user.getRole());
+        existedUser.setProvider(user.getProvider());
+        existedUser = repository.save(existedUser);
         return existedUser == null ? user : existedUser;
     }
 
