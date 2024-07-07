@@ -13,4 +13,10 @@ public class UserService {
     public User getUserById(Long id) {
         return userRepository.findById(id).orElse(null);
     }
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmailIgnoreCase(email).orElse(null);
+    }
+    public User getUserByFullName(String fullName) {
+        return userRepository.findByFullName(fullName).orElse(null);
+    }
 }

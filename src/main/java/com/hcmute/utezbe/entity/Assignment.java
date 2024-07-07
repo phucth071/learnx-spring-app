@@ -38,6 +38,6 @@ public class Assignment extends Auditable{
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "modules_id", foreignKey = @ForeignKey(name = "FK_assignment_modules"))
-    private Modules modules;
+    private Module modules;
 
 }

@@ -18,7 +18,7 @@ import java.util.List;
 @Entity
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "lessonPlan"})
 @Table(name = "modules_db")
-public class Modules extends Auditable{
+public class Module extends Auditable{
 
     @Column(name="description", columnDefinition = "LONGTEXT")
     private String description;

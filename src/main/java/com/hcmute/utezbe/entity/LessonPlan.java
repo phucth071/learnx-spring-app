@@ -34,6 +34,6 @@ public class LessonPlan extends Auditable {
 
     @OneToMany(mappedBy = "lessonPlan", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
     @JsonIgnore
-    private List<Modules> modules = new ArrayList<>();
+    private List<Module> modules = new ArrayList<>();
 
 }
