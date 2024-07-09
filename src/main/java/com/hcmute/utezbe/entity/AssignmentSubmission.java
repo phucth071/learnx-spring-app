@@ -15,8 +15,12 @@ import javax.persistence.*;
 @AllArgsConstructor
 @Entity
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "student", "course"})
-@Table(name = "assignment_submission_db")
+@Table(name = "assignment_submission")
 public class AssignmentSubmission extends Auditable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(updatable = false)
+    private Long id;
 
     @Column(name = "score")
     private Double score;

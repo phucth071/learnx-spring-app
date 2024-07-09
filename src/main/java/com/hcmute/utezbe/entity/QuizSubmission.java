@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -14,21 +16,22 @@ import javax.persistence.*;
 @AllArgsConstructor
 @Entity
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "modules"})
-@Table(name = "resources")
-public class Resources extends Auditable{
+@Table(name = "quiz_submission")
+public class QuizSubmission extends Auditable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(updatable = false)
     private Long id;
 
-    @Column(name="title")
-    private String title;
+    private Double score;
 
-    @Column(name="url_document")
-    private String urlDocument;
+    @Column(name = "total_times")
+    private int totalTimes;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "modules_id", foreignKey = @ForeignKey(name = "FK_resources_modules"))
-    private Module modules;
+    @Transient
+    private int totalCorrects;
+
+    @OneToMany(mappedBy = "quizSubmission", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
+    private List<QuizAnswer> answers = new ArrayList<>();
 
 }

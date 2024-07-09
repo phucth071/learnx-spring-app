@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.util.Date;
+import java.util.List;
 
 @Getter
 @Setter
@@ -15,33 +15,27 @@ import java.util.Date;
 @AllArgsConstructor
 @Entity
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "modules"})
-@Table(name = "assignment")
-public class Assignment extends Auditable{
+@Table(name = "question_quiz")
+public class Question extends Auditable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(updatable = false)
     private Long id;
 
-    @Column(name="content", columnDefinition = "LONGTEXT")
     private String content;
-
-    @Column(name="start_date")
-    private Date startDate;
-
-    @Column(name="end_date")
-    private Date endDate;
-
-    @Column(name="state")
-    private int state; // 1 created, 2 started, 3 expired
-
-    @Column(name="title")
-    private String title;
-
-    @Column(name="url_document")
-    private String url_document;
+    @Column(name = "question_type")
+    private String questionType;
+    @ElementCollection
+    private List<String> options;
+    @ElementCollection
+    private List<String> answers;
+    private double score;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "modules_id", foreignKey = @ForeignKey(name = "FK_assignment_modules"))
-    private Module module;
-
+    @JoinColumns({
+            @JoinColumn(name = "quiz_id", foreignKey = @ForeignKey(name = "FK_quiz_questions")),
+            @JoinColumn(name = "module_id", foreignKey = @ForeignKey(name = "FK_module_quiz_questions"))
+    }
+    )
+    private Quiz quiz;
 }

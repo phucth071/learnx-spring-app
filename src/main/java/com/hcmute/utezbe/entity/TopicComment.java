@@ -14,8 +14,12 @@ import javax.persistence.*;
 @AllArgsConstructor
 @Entity
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "account", "topic"})
-@Table(name = "topic_comment_db")
+@Table(name = "topic_comment")
 public class TopicComment extends Auditable{
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(updatable = false)
+    private Long id;
 
     @Column(name="content", columnDefinition = "LONGTEXT")
     private String content;

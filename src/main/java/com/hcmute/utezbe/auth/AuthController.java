@@ -2,6 +2,7 @@ package com.hcmute.utezbe.auth;
 
 import com.hcmute.utezbe.auth.request.AuthenticationRequest;
 import com.hcmute.utezbe.auth.request.IdTokenRequest;
+import com.hcmute.utezbe.auth.request.RefreshTokenRequest;
 import com.hcmute.utezbe.response.Response;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -27,12 +28,15 @@ public class AuthController {
         return ResponseEntity.ok(service.authenticate(request));
     }
 
-    @PostMapping("/oauth2/oauth-authenticate")
+    @PostMapping("/oauth2/google")
     public ResponseEntity<?> oauthAuthenticate(@RequestBody IdTokenRequest idTokenRequest, HttpServletResponse response) {
-        String token = service.loginWithGoogle(idTokenRequest);
-        Map<String, String> tokenResponse = new HashMap<>();
-        tokenResponse.put("access_token", token);
-        return ResponseEntity.ok(Response.builder().error(false).success(true).message("Login successfully!").data(tokenResponse).build());
+        System.out.println("TOKEN REQUEST:::" + idTokenRequest.getIdToken());
+        return ResponseEntity.ok(service.loginWithGoogle(idTokenRequest));
+    }
+
+    @PostMapping("/refresh-token")
+    public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequest refreshTokenRequest) {
+        return ResponseEntity.ok(service.refreshToken(refreshTokenRequest));
     }
 
     @GetMapping("/user/info")

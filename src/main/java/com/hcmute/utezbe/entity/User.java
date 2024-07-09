@@ -20,6 +20,11 @@ import java.util.Collections;
 @Entity
 @Table(name = "users")
 public class User extends Auditable implements UserDetails {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(updatable = false)
+    private Long id;
+
     @Column(name = "full_name", columnDefinition = "nvarchar(1000)")
     private String fullName;
     @Column(unique = true, nullable = false)

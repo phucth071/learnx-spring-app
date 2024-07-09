@@ -18,8 +18,12 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "category", "lessonPlan", "teacher"})
-@Table(name = "course_db")
+@Table(name = "course")
 public class Course extends Auditable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(updatable = false)
+    private Long id;
 
     @Column(name="name")
     private String name;
@@ -41,19 +45,18 @@ public class Course extends Auditable {
     private Category category;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "lesson_plan_id", foreignKey = @ForeignKey(name = "FK_course_lesson_plan"))
-    private LessonPlan lessonPlan;
-
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "teacher_id", foreignKey = @ForeignKey(name = "FK_course_account"))
     private User teacher;
 
     @OneToMany(mappedBy = "course", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
-    @JsonIgnore
     private List<CourseRegistration> courseRegistrations = new ArrayList<>();
 
     @OneToMany(mappedBy = "course", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<AssignmentSubmission> assignmentSubmissions = new ArrayList<>();
+
+    @OneToMany(mappedBy = "course", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
+    private List<Module> modules = new ArrayList<>();
+
 
 }

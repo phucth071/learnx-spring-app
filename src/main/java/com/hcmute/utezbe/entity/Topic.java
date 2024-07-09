@@ -17,8 +17,12 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "account", "forum"})
-@Table(name = "topic_db")
+@Table(name = "topic")
 public class Topic extends Auditable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(updatable = false)
+    private Long id;
 
     @Column(name="content", columnDefinition = "LONGTEXT")
     private String content;

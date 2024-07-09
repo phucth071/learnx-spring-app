@@ -15,8 +15,12 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "forum_db")
+@Table(name = "forum")
 public class Forum extends Auditable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(updatable = false)
+    private Long id;
 
     @Column(name="description", columnDefinition = "LONGTEXT")
     private String description;
