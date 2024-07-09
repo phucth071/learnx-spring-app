@@ -86,7 +86,8 @@ public class AuthService {
     }
 
 
-    public String loginWithGoogle(IdTokenRequest idTokenRequest) {
+    @Transactional
+    public Response loginWithGoogle(IdTokenRequest idTokenRequest) {
         String googleClientId = "520023696041-0higl4mtq1q9t9u5o8mqvk3nialo71tl.apps.googleusercontent.com";
         GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new JacksonFactory())
                 .setAudience(Collections.singleton(googleClientId))
@@ -99,7 +100,7 @@ public class AuthService {
             }
 
         } catch (Exception e) {
-            return null;
+            e.printStackTrace();
         }
 
         User user = verifyGoogleIdToken(idTokenRequest.getIdToken());
@@ -107,7 +108,21 @@ public class AuthService {
             throw new ApiException("Invalid id token");
         }
         user = createOrUpdateUser(user);
-        return jwtService.generateAccessToken(user);
+        String accessToken = jwtService.generateAccessToken(user);
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getEmail());
+        return Response.builder()
+                .error(false)
+                .success(true)
+                .message("Login successfully!")
+                .data(objectMapper.createObjectNode()
+                        .put("access_token", accessToken)
+                        .put("refresh_token", refreshToken.getToken())
+                        .put("email", user.getEmail())
+                        .put("full_name", user.getFullName())
+                        .put("avatar", user.getAvatarUrl())
+                        .put("role", user.getRole().name())
+                )
+                .build();
     }
 
     private User verifyGoogleIdToken(String idToken) {
@@ -118,13 +133,13 @@ public class AuthService {
         try {
             var token = verifier.verify(idToken);
             if (Objects.isNull(token)) {
-                throw new ApiException("Invalid id token");
+                throw new ApiException("Token verification failed!");
             }
             var payload = token.getPayload();
             String email = payload.getEmail();
             String fullName = payload.get("name").toString();
             String avatarUrl = (String) payload.get("picture");
-            Role role = payload.get("hd").equals("hcmute.edu.vn") ? Role.TEACHER : Role.TSUDENT;
+            Role role = payload.get("hd").equals("hcmute.edu.vn") ? Role.TEACHER : Role.STUDENT;
 
             return User.builder()
                     .email(email)
@@ -134,8 +149,9 @@ public class AuthService {
                     .role(role)
                     .build();
         } catch (Exception e) {
-            return null;
+            e.printStackTrace();
         }
+        return null;
     }
 
     @Transactional
@@ -144,6 +160,7 @@ public class AuthService {
         if (existedUser == null) {
             System.out.println("Create new user");
             repository.save(user);
+            return user;
         }
         if (existedUser.getProvider() != Provider.GOOGLE) {
             throw new ApiException("Email already registered by another method!");

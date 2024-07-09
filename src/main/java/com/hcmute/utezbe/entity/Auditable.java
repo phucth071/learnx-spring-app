@@ -22,11 +22,7 @@ import java.time.LocalDateTime;
         value = {"createdAt", "updatedAt"},
         allowGetters = true)
 public abstract class Auditable {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", updatable = false)
-    private Long id;
-    private String referenceId = new AlternativeJdkIdGenerator().generateId().toString();
+
     @NotNull
 //    Tham chiếu đến Id của Account
 //    (tránh trường hợp ID create hoặc modified không tồn tại trong bảng Account)
