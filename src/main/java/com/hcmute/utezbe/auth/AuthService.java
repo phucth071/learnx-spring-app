@@ -88,7 +88,7 @@ public class AuthService {
 
     @Transactional
     public Response loginWithGoogle(IdTokenRequest idTokenRequest) {
-        String googleClientId = "520023696041-0higl4mtq1q9t9u5o8mqvk3nialo71tl.apps.googleusercontent.com";
+        String googleClientId = "660554863773-c5na5d9dvnogok0i23ekgnpr15to3rvn.apps.googleusercontent.com";
         GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new JacksonFactory())
                 .setAudience(Collections.singleton(googleClientId))
                 .build();
@@ -126,7 +126,7 @@ public class AuthService {
     }
 
     private User verifyGoogleIdToken(String idToken) {
-        String googleClientId = "520023696041-0higl4mtq1q9t9u5o8mqvk3nialo71tl.apps.googleusercontent.com";
+        String googleClientId = "660554863773-c5na5d9dvnogok0i23ekgnpr15to3rvn.apps.googleusercontent.com";
         GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new JacksonFactory())
                 .setAudience(Collections.singleton(googleClientId))
                 .build();
@@ -139,7 +139,7 @@ public class AuthService {
             String email = payload.getEmail();
             String fullName = payload.get("name").toString();
             String avatarUrl = (String) payload.get("picture");
-            Role role = payload.get("hd").equals("hcmute.edu.vn") ? Role.TEACHER : Role.STUDENT;
+            Role role = (payload.get("hd") == null) ? Role.STUDENT :  (payload.get("hd").equals("hcmute.edu.vn") ? Role.TEACHER : Role.STUDENT);
 
             return User.builder()
                     .email(email)
