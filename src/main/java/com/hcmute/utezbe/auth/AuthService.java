@@ -167,7 +167,6 @@ public class AuthService {
         System.out.println("Update existed user");
         existedUser.setFullName(user.getFullName());
         existedUser.setAvatarUrl(user.getAvatarUrl());
-        existedUser.setRole(user.getRole());
         existedUser.setProvider(user.getProvider());
         existedUser = repository.save(existedUser);
         return existedUser == null ? user : existedUser;

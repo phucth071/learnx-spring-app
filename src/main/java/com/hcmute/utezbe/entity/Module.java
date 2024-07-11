@@ -34,7 +34,7 @@ public class Module extends Auditable{
     @JsonIgnore
     private List<Assignment> assignments = new ArrayList<>();
 
-    @OneToMany(mappedBy = "modules", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "module", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<Resources> resources = new ArrayList<>();
 

@@ -30,7 +30,6 @@ public abstract class Auditable {
 //    @JoinColumn(name = "created_by", referencedColumnName = "id")
 //    private User createdBy;
     private Long createdBy;
-    @NotNull
 //    @ManyToOne
 //    @JoinColumn(name = "created_by", referencedColumnName = "id")
 //    private User createdBy;

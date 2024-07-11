@@ -28,7 +28,7 @@ public class Resources extends Auditable{
     private String urlDocument;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "modules_id", foreignKey = @ForeignKey(name = "FK_resources_modules"))
-    private Module modules;
+    @JoinColumn(name = "module_id", foreignKey = @ForeignKey(name = "FK_resources_modules"))
+    private Module module;
 
 }
