@@ -1,4 +1,4 @@
-package com.hcmute.utezbe.entity;
+package com.hcmute.utezbe.entity.enumClass;
 
 public enum Role {
     STUDENT,
