@@ -1,6 +1,6 @@
 package com.hcmute.utezbe.security;
 
-import com.hcmute.utezbe.entity.Role;
+import com.hcmute.utezbe.entity.enumClass.Role;
 import com.hcmute.utezbe.security.jwt.JWTRequestFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

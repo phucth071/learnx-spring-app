@@ -28,5 +28,4 @@ public class Category extends Auditable{
     @OneToMany(mappedBy = "category", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<Course> courses = new ArrayList<>();
-
 }

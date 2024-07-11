@@ -1,6 +1,7 @@
 package com.hcmute.utezbe.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.hcmute.utezbe.entity.enumClass.State;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -32,7 +33,8 @@ public class Assignment extends Auditable{
     private Date endDate;
 
     @Column(name="state")
-    private int state; // 1 created, 2 started, 3 expired
+    @Enumerated(EnumType.STRING)
+    private State state;
 
     @Column(name="title")
     private String title;

@@ -34,4 +34,7 @@ public class QuizSubmission extends Auditable {
     @OneToMany(mappedBy = "quizSubmission", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
     private List<QuizAnswer> answers = new ArrayList<>();
 
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinColumn(name = "student_id", foreignKey = @ForeignKey(name = "FK_quiz_submission_account"))
+    private User student;
 }

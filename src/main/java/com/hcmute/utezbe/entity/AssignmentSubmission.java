@@ -2,6 +2,7 @@ package com.hcmute.utezbe.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.hcmute.utezbe.entity.embeddedId.AssignmentSubmissionId;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,10 +18,8 @@ import javax.persistence.*;
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "student", "course"})
 @Table(name = "assignment_submission")
 public class AssignmentSubmission extends Auditable {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(updatable = false)
-    private Long id;
+    @EmbeddedId
+    private AssignmentSubmissionId id;
 
     @Column(name = "score")
     private Double score;
@@ -35,16 +34,13 @@ public class AssignmentSubmission extends Auditable {
     private String linkSubmission;
 
     @OneToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "assignment_id", foreignKey = @ForeignKey(name = "FK_assignment_submission_assignment"))
+    @JoinColumn(name = "assignment_id", foreignKey = @ForeignKey(name = "FK_assignment_submission_assignment"),
+    insertable = false, updatable = false)
     @JsonIgnore
     private Assignment assignment;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "student_id", foreignKey = @ForeignKey(name = "FK_assignment_submission_account"))
+    @JoinColumn(name = "student_id", foreignKey = @ForeignKey(name = "FK_assignment_submission_account"),
+    insertable = false, updatable = false)
     private User student;
-
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "course_id", foreignKey = @ForeignKey(name = "FK_assignment_submission_course"))
-    private Course course;
-
 }

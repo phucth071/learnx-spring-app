@@ -1,6 +1,8 @@
 package com.hcmute.utezbe.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.hcmute.utezbe.entity.enumClass.Provider;
+import com.hcmute.utezbe.entity.enumClass.Role;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

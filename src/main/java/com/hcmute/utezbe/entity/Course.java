@@ -2,6 +2,7 @@ package com.hcmute.utezbe.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.hcmute.utezbe.entity.enumClass.State;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -32,7 +33,8 @@ public class Course extends Auditable {
     private Date startDate;
 
     @Column(name="state")
-    private int state;
+    @Enumerated(EnumType.STRING)
+    private State state;
 
     @Column(name="thumbnail")
     private String thumbnail;
@@ -52,11 +54,5 @@ public class Course extends Auditable {
     private List<CourseRegistration> courseRegistrations = new ArrayList<>();
 
     @OneToMany(mappedBy = "course", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
-    @JsonIgnore
-    private List<AssignmentSubmission> assignmentSubmissions = new ArrayList<>();
-
-    @OneToMany(mappedBy = "course", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
     private List<Module> modules = new ArrayList<>();
-
-
 }
