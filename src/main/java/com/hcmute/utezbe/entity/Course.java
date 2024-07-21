@@ -1,12 +1,10 @@
 package com.hcmute.utezbe.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.hcmute.utezbe.entity.enumClass.State;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -20,6 +18,7 @@ import java.util.List;
 @Entity
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "category", "lessonPlan", "teacher"})
 @Table(name = "course")
+@Builder
 public class Course extends Auditable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,13 +45,16 @@ public class Course extends Auditable {
     @JoinColumn(name = "category_id", foreignKey = @ForeignKey(name = "FK_course_category"))
     private Category category;
 
+    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "teacher_id", foreignKey = @ForeignKey(name = "FK_course_account"))
     private User teacher;
 
+    @JsonBackReference
     @OneToMany(mappedBy = "course", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
     private List<CourseRegistration> courseRegistrations = new ArrayList<>();
 
+    @JsonBackReference
     @OneToMany(mappedBy = "course", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
     private List<Module> modules = new ArrayList<>();
 }

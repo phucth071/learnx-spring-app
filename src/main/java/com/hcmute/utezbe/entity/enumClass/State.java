@@ -10,5 +10,6 @@ public enum State {
     SUBMITTED,
     NOT_SUBMITTED,
     PASSED,
-    FAILED
+    FAILED,
+    ACCEPTED,
 }
