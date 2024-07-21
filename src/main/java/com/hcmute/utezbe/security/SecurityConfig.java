@@ -36,10 +36,7 @@ public class SecurityConfig {
                         new StaticHeadersWriter("Access-Control-Allow-Origin", "*")
                 );
         http
-                .csrf().csrfTokenRepository(CookieCsrfTokenRepository
-                        .withHttpOnlyFalse())
-                        .ignoringAntMatchers("/api/v1/auth/**", "/api/v1/auth/oauth2/**")
-                .and()
+                .csrf().disable()
                 .cors().and()
                 .authorizeHttpRequests()
                 .antMatchers(AUTH_WHITELIST).permitAll()

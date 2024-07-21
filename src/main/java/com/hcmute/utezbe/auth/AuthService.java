@@ -19,8 +19,11 @@ import com.hcmute.utezbe.response.Response;
 import com.hcmute.utezbe.security.jwt.JWTService;
 import com.hcmute.utezbe.service.RefreshTokenService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -47,15 +50,15 @@ public class AuthService {
         );
         Optional<User> opt = repository.findByEmailIgnoreCase(request.getEmail());
         if(opt.isEmpty()) {
-            return Response.builder().error(true).message("Email or Password wrong!").success(false).build();
+            return Response.builder().code(HttpStatus.FORBIDDEN.value()).message("Email or Password wrong!").success(false).build();
         }
         User user = opt.get();
         if(user.getProvider() == Provider.GOOGLE.GOOGLE) {
-            return Response.builder().error(true).message("Email or Password wrong!").success(false).build();
+            return Response.builder().code(HttpStatus.FORBIDDEN.value()).message("Email or Password wrong!").success(false).build();
         }
         if(!user.isEnabled()) {
             return Response.builder()
-                    .error(true)
+                    .code(HttpStatus.FORBIDDEN.value())
                     .success(false)
                     .data(user.getEmail())
                     .message("Account Not Confirm!")
@@ -68,7 +71,7 @@ public class AuthService {
         var jwtToken = jwtService.generateAccessToken(user);
         var jwtRefreshToken = refreshTokenService.createRefreshToken(user.getEmail());
         return Response.builder()
-                .error(false)
+                .code(HttpStatus.OK.value())
                 .success(true)
                 .data(objectMapper.createObjectNode()
                         .putObject("user")
@@ -107,15 +110,15 @@ public class AuthService {
             throw new ApiException("Invalid id token");
         }
         user = createOrUpdateUser(user);
+        RequestContext.setUserId(user.getId());
         String accessToken = jwtService.generateAccessToken(user);
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getEmail());
         return Response.builder()
-                .error(false)
+                .code(HttpStatus.OK.value())
                 .success(true)
                 .message("Login successfully!")
                 .data(objectMapper.createObjectNode()
                         .put("access_token", accessToken)
-                        .put("refresh_token", refreshToken.getToken())
                         .put("email", user.getEmail())
                         .put("full_name", user.getFullName())
                         .put("avatar", user.getAvatarUrl())
@@ -182,12 +185,27 @@ public class AuthService {
                             .data(objectMapper.createObjectNode()
                                     .put("accessToken", accessToken)
                                     .put("refreshToken", refreshTokenRequest.getToken()))
-                            .error(false)
+                            .code(HttpStatus.OK.value())
                             .success(true)
                             .message("Refresh Token Successfully!")
                             .build();
                 })
                 .orElseThrow(() -> new RuntimeException(
                         "Refresh Token not in database!"));
+    }
+
+    public static boolean isUserHaveRole(Role role) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return (authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals(role.name())));
+    }
+
+    public static boolean checkTeacherRole() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return (authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals(Role.TEACHER.name())));
+    }
+
+    public static boolean checkAdminRole() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return (authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals(Role.ADMIN.name())));
     }
 }

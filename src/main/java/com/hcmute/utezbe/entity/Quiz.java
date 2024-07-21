@@ -1,11 +1,9 @@
 package com.hcmute.utezbe.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.hcmute.utezbe.entity.embeddedId.QuizId;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -19,6 +17,7 @@ import java.util.List;
 @Entity
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "modules"})
 @Table(name = "quiz")
+@Builder
 public class Quiz extends Auditable {
     @EmbeddedId
     private QuizId id;
@@ -47,6 +46,7 @@ public class Quiz extends Auditable {
     private int totalQuestions;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JsonBackReference
     @JoinColumn(name = "module_id",
             referencedColumnName = "id", insertable = false,  updatable = false,
             foreignKey = @ForeignKey(name = "FK_module_quizzes"))

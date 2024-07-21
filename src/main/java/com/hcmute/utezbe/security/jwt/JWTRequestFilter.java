@@ -1,5 +1,6 @@
 package com.hcmute.utezbe.security.jwt;
 
+import com.hcmute.utezbe.domain.RequestContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -31,9 +32,12 @@ public class JWTRequestFilter extends OncePerRequestFilter {
 
         String header = request.getHeader("Authorization");
         UsernamePasswordAuthenticationToken authentication = null;
-        System.out.println("Header: " + header);
         if (header == null) {
-            filterChain.doFilter(request, response);
+            try {
+                filterChain.doFilter(request, response);
+            } finally {
+                RequestContext.start();
+            }
             return;
         }
         final String jwt = header.substring(7);
@@ -53,6 +57,10 @@ public class JWTRequestFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         }
-        filterChain.doFilter(request, response);
+        try {
+            filterChain.doFilter(request, response);
+        } finally {
+            RequestContext.start();
+        }
     }
 }
