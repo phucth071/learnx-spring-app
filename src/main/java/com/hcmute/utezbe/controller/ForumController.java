@@ -1,8 +1,6 @@
 package com.hcmute.utezbe.controller;
 
-import com.hcmute.utezbe.dto.CourseDto;
 import com.hcmute.utezbe.dto.ForumDto;
-import com.hcmute.utezbe.entity.Course;
 import com.hcmute.utezbe.entity.Forum;
 import com.hcmute.utezbe.response.Response;
 import com.hcmute.utezbe.service.CourseService;
@@ -34,9 +32,9 @@ public class ForumController {
     @GetMapping("/{forumId}")
     public Response getForumById(@PathVariable("forumId") Long forumId) {
         try {
-            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get forum by id " + forumId + " successfully!").data(forumService.getForumById(forumId)).build();
+            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get forum with id " + forumId + " successfully!").data(forumService.getForumById(forumId)).build();
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Get course by " + forumId + " failed!").data(null).build();
+            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Get forum with id " + forumId + " failed!").data(null).build();
         }
     }
 
@@ -59,27 +57,27 @@ public class ForumController {
         try{
             Optional<Forum> optionalForum = forumService.getForumById(forumId);
             if (!optionalForum.isPresent()) {
-                return Response.builder().code(HttpStatus.OK.value()).success(false).message("Forum not found!").data(null).build();
+                return Response.builder().code(HttpStatus.OK.value()).success(false).message("Forum with id " + forumId + " not found!").data(null).build();
             }
             Forum forum = optionalForum.get();
             if(forum != null) {
                 forum = convertForumDTO(forumDto, optionalForum);
-                return Response.builder().code(HttpStatus.OK.value()).success(true).message("Edit forum successfully!").data(forumService.saveForum(forum)).build();
+                return Response.builder().code(HttpStatus.OK.value()).success(true).message("Edit forum with id " + forumId + " successfully!").data(forumService.saveForum(forum)).build();
             } else {
-                return Response.builder().code(HttpStatus.OK.value()).success(false).message("Forum not found!").data(null).build();
+                return Response.builder().code(HttpStatus.OK.value()).success(false).message("Forum with id " + forumId + " not found!").data(null).build();
             }
         } catch (Exception e) {
             e.printStackTrace();
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Edit forum failed!").data(null).build();
+            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Edit forum with id " + forumId + " failed!").data(null).build();
         }
     }
 
     @DeleteMapping("/{forumId}")
     public Response deleteForum(@PathVariable("forumId") Long forumId) {
         try {
-            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Delete forum successfully!").data(forumService.deleteForum(forumId)).build();
+            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Delete forum with id " + forumId + " successfully!").data(forumService.deleteForum(forumId)).build();
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Delete forum failed!").data(null).build();
+            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Delete forum with id " + forumId + " failed!").data(null).build();
         }
     }
 
