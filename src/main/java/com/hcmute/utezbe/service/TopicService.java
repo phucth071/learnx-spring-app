@@ -1,0 +1,35 @@
+package com.hcmute.utezbe.service;
+
+import com.hcmute.utezbe.entity.Topic;
+import com.hcmute.utezbe.repository.TopicRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+
+@Service
+@RequiredArgsConstructor
+public class TopicService {
+
+    private final TopicRepository topicRepository;
+
+    public Optional<Topic> getTopicById(Long id) {
+        return topicRepository.findById(id);
+    }
+
+    public List<Topic> getAllTopics() {
+        return topicRepository.findAll();
+    }
+
+    public Topic saveTopic(Topic topic) {
+        return topicRepository.save(topic);
+    }
+
+    public Topic deleteTopic(Long id) {
+        Optional<Topic> topic = topicRepository.findById(id);
+        topic.ifPresent(topicRepository::delete);
+        return topic.orElse(null);
+    }
+
+}
