@@ -85,6 +85,7 @@ public class ForumController {
         Forum forum = optionalForum.get();
         if (forumDto.getDescription() != null) forum.setDescription(forumDto.getDescription());
         if(forumDto.getTitle() != null) forum.setTitle(forumDto.getTitle());
+        if(forumDto.getCourseId() != null) forum.setCourse(courseService.getCourseById(forumDto.getCourseId()).get());
         return forum;
     }
 
