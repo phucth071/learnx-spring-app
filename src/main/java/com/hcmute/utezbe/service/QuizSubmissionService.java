@@ -1,4 +1,4 @@
-Rpackage com.hcmute.utezbe.service;
+package com.hcmute.utezbe.service;
 
 import com.hcmute.utezbe.entity.QuizAnswer;
 import com.hcmute.utezbe.entity.QuizSubmission;
