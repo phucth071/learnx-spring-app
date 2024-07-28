@@ -17,7 +17,6 @@ import java.util.Optional;
 public class ResourcesController {
 
     private final ResourcesService resourcesService;
-
     private final ModuleService moduleService;
 
     @GetMapping("")
@@ -42,7 +41,7 @@ public class ResourcesController {
     public Response createResources(@RequestBody ResourcesDto resourcesDto) {
         try{
             Resources resources = Resources.builder()
-                    .module(moduleService.findById(resourcesDto.getModuleId()).get())
+                    .module(moduleService.getModuleById(resourcesDto.getModuleId()).get())
                     .title(resourcesDto.getTitle())
                     .urlDocument(resourcesDto.getUrlDocument())
                     .build();
@@ -85,7 +84,7 @@ public class ResourcesController {
         Resources resources = optionalResources.get();
         if (resourcesDto.getTitle() != null) resources.setTitle(resourcesDto.getTitle());
         if (resourcesDto.getUrlDocument() != null) resources.setUrlDocument(resourcesDto.getUrlDocument());
-        if(resourcesDto.getModuleId() != null) resources.setModule(moduleService.findById(resourcesDto.getModuleId()).get());
+        if(resourcesDto.getModuleId() != null) resources.setModule(moduleService.getModuleById(resourcesDto.getModuleId()).get());
         return resources;
     }
 

@@ -17,6 +17,7 @@ import java.util.List;
 @Table(name = "topic")
 @Builder
 public class Topic extends Auditable {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(updatable = false)

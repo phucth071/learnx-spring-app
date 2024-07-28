@@ -15,10 +15,11 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "modules"})
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "module"})
 @Table(name = "quiz")
 @Builder
 public class Quiz extends Auditable {
+
     @EmbeddedId
     private QuizId id;
 
@@ -54,4 +55,5 @@ public class Quiz extends Auditable {
 
     @OneToMany(mappedBy = "quiz", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
     private List<Question> questions = new ArrayList<>();
+
 }

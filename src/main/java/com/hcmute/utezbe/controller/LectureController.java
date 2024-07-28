@@ -17,7 +17,6 @@ import java.util.Optional;
 public class LectureController {
 
     private final LectureService lectureService;
-
     private final ModuleService moduleService;
 
     @GetMapping("")
@@ -42,7 +41,7 @@ public class LectureController {
     public Response createLecture(@RequestBody LectureDto lectureDto) {
         try{
             Lecture lecture = Lecture.builder()
-                    .module(moduleService.findById(lectureDto.getModuleId()).get())
+                    .module(moduleService.getModuleById(lectureDto.getModuleId()).get())
                     .content(lectureDto.getContent())
                     .name(lectureDto.getName())
                     .build();
@@ -85,7 +84,7 @@ public class LectureController {
         Lecture lecture = optionalLecture.get();
         if (lectureDto.getContent() != null) lecture.setContent(lectureDto.getContent());
         if(lectureDto.getName() != null) lecture.setName(lectureDto.getName());
-        if (lectureDto.getModuleId() != null) lecture.setModule(moduleService.findById(lectureDto.getModuleId()).get());
+        if (lectureDto.getModuleId() != null) lecture.setModule(moduleService.getModuleById(lectureDto.getModuleId()).get());
         return lecture;
     }
 
