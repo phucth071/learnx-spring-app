@@ -1,16 +1,14 @@
 package com.hcmute.utezbe.repository;
 
-import com.hcmute.utezbe.entity.Forum;
+import com.hcmute.utezbe.entity.QuizSubmission;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
 @Repository
-public interface ForumRepository extends JpaRepository<Forum, Long> {
+public interface QuizSubmissionRepository extends JpaRepository<QuizSubmission, Long> {
 
-    Optional<Forum> findById(Long id);
-
-    Forum findByCourseId(Long courseId);
+    Optional<QuizSubmission> findById(Long id);
 
 }

@@ -2,10 +2,7 @@ package com.hcmute.utezbe.controller;
 
 import com.hcmute.utezbe.domain.RequestContext;
 import com.hcmute.utezbe.dto.CourseDto;
-import com.hcmute.utezbe.dto.QuizDto;
-import com.hcmute.utezbe.entity.Category;
 import com.hcmute.utezbe.entity.Course;
-import com.hcmute.utezbe.entity.Quiz;
 import com.hcmute.utezbe.response.Response;
 import com.hcmute.utezbe.service.CategoryService;
 import com.hcmute.utezbe.service.CourseService;
@@ -23,11 +20,8 @@ import java.util.Optional;
 public class CourseController {
 
     private final CourseService courseService;
-
     private final CategoryService categoryService;
-
     private final UserService userService;
-
 
     @GetMapping("")
     public Response getAllCourse() {
@@ -113,5 +107,6 @@ public class CourseController {
         if (courseDto.getCategoryId() != null) course.setCategory(categoryService.getCategoryById(courseDto.getCategoryId()).get());
         return course;
     }
+
 }
 

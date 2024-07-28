@@ -7,21 +7,16 @@ import com.hcmute.utezbe.service.ModuleService;
 import com.hcmute.utezbe.service.QuizService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.context.request.RequestContextHolder;
 
 import java.io.IOException;
-import java.util.Date;
-import java.util.Map;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/quizzes")
 @RequiredArgsConstructor
 public class QuizController {
+
     private final QuizService quizService;
     private final ModuleService moduleService;
 
@@ -48,7 +43,7 @@ public class QuizController {
     public Response createQuiz(@RequestBody QuizDto quizDto) throws IOException {
         try {
             Quiz quiz = Quiz.builder()
-                    .module(moduleService.findById(quizDto.getModuleId()).get())
+                    .module(moduleService.getModuleById(quizDto.getModuleId()).get())
                     .title(quizDto.getTitle())
                     .startDate(quizDto.getStartDate())
                     .endDate(quizDto.getEndDate())
@@ -88,4 +83,5 @@ public class QuizController {
         if (quizDto.getDescription() != null) quiz.setDescription(quizDto.getDescription());
         return quiz;
     }
+
 }

@@ -1,6 +1,6 @@
 package com.hcmute.utezbe.repository;
 
-import com.hcmute.utezbe.entity.Course;
+import com.hcmute.utezbe.entity.Assignment;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,11 +11,13 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface CourseRepository extends JpaRepository<Course, Long> {
-    Optional<Course> findById(Long id);
+public interface AssignmentRepository extends JpaRepository<Assignment, Long> {
 
-    @Query("SELECT c FROM Course c WHERE c.state = 'OPEN'")
-    Page<Course> findAllPageable(Pageable pageable);
+    Optional<Assignment> findById(Long id);
 
-    List<Course> findByCategoryId(Long categoryId);
+    List<Assignment> findAllByModuleId(Long moduleId);
+
+    @Query("SELECT a FROM Course a WHERE a.state = 'OPEN'")
+    Page<Assignment> findAllPageable(Pageable pageable);
+
 }

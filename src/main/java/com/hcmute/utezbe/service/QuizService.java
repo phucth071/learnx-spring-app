@@ -18,6 +18,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class QuizService {
+
     final private QuizRepository quizRepository;
     public List<Quiz> findAll() {
         return quizRepository.findAll();
@@ -27,8 +28,8 @@ public class QuizService {
         return quizRepository.findById(id, moduleId);
     }
 
-    public List<Quiz> findByModuleId(Long moduleId) {
-        return quizRepository.findByModuleId(moduleId);
+    public List<Quiz> findAllByModuleId(Long moduleId) {
+        return quizRepository.findAllByModuleId(moduleId);
     }
 
     public Quiz saveQuiz(Quiz quiz) {

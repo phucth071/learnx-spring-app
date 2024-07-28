@@ -2,10 +2,7 @@ package com.hcmute.utezbe.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.hcmute.utezbe.entity.enumClass.State;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -15,9 +12,11 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "modules"})
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "module"})
 @Table(name = "assignment")
+@Builder
 public class Assignment extends Auditable{
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(updatable = false)
@@ -40,10 +39,10 @@ public class Assignment extends Auditable{
     private String title;
 
     @Column(name="url_document")
-    private String url_document;
+    private String urlDocument;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "modules_id", foreignKey = @ForeignKey(name = "FK_assignment_modules"))
+    @JoinColumn(name = "module_id", foreignKey = @ForeignKey(name = "FK_assignment_module"))
     private Module module;
 
 }
