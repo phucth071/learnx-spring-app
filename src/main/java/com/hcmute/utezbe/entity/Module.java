@@ -1,11 +1,7 @@
 package com.hcmute.utezbe.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -16,9 +12,10 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "lessonPlan"})
 @Table(name = "module")
-public class Module extends Auditable{
+@Builder
+public class Module extends Auditable {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(updatable = false)
@@ -43,9 +40,10 @@ public class Module extends Auditable{
     private List<Lecture> lectures = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "course_id", foreignKey = @ForeignKey(name = "FK_course_modules"))
+    @JoinColumn(name = "course_id", foreignKey = @ForeignKey(name = "FK_course_module"))
     private Course course;
 
     @OneToMany(mappedBy = "module", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
     private List<Quiz> quizzes = new ArrayList<>();
+
 }

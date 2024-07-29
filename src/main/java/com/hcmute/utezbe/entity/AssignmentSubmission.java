@@ -3,10 +3,7 @@ package com.hcmute.utezbe.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.hcmute.utezbe.entity.embeddedId.AssignmentSubmissionId;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 
@@ -15,9 +12,11 @@ import javax.persistence.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "student", "course"})
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "student", "assignment"})
 @Table(name = "assignment_submission")
+@Builder
 public class AssignmentSubmission extends Auditable {
+
     @EmbeddedId
     private AssignmentSubmissionId id;
 
@@ -43,4 +42,5 @@ public class AssignmentSubmission extends Auditable {
     @JoinColumn(name = "student_id", foreignKey = @ForeignKey(name = "FK_assignment_submission_account"),
     insertable = false, updatable = false)
     private User student;
+
 }

@@ -1,7 +1,6 @@
 package com.hcmute.utezbe.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.hcmute.utezbe.entity.enumClass.State;
 import lombok.*;
@@ -16,16 +15,17 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "category", "lessonPlan", "teacher"})
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "category", "teacher"})
 @Table(name = "course")
 @Builder
 public class Course extends Auditable {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(updatable = false)
     private Long id;
 
-    @Column(name="name")
+    @Column(name="name", unique = true)
     private String name;
 
     @Column(name="start_date")
@@ -57,4 +57,5 @@ public class Course extends Auditable {
     @JsonBackReference
     @OneToMany(mappedBy = "course", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
     private List<Module> modules = new ArrayList<>();
+
 }

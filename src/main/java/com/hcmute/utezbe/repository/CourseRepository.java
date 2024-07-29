@@ -16,4 +16,6 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
 
     @Query("SELECT c FROM Course c WHERE c.state = 'OPEN'")
     Page<Course> findAllPageable(Pageable pageable);
+
+    List<Course> findByCategoryId(Long categoryId);
 }

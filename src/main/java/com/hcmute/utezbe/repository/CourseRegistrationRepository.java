@@ -10,7 +10,13 @@ import java.util.Optional;
 
 @Repository
 public interface CourseRegistrationRepository extends JpaRepository<CourseRegistration, Long> {
+
     Optional<CourseRegistration> findByStudentIdAndCourseId(Long studentId, Long courseId);
+
     Page<CourseRegistration> findByStudentId(Long studentId, Pageable pageable);
+
     Page<CourseRegistration> findByCourseId(Long courseId, Pageable pageable);
+
+    void deleteAllByCourseId(Long courseId);
+
 }
