@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -23,6 +24,9 @@ public class CourseRegistrationService {
     }
 
     public CourseRegistration save(CourseRegistration courseRegistration) {
+        if (courseRegistration.getState() == null) {
+            courseRegistration.setState(State.PENDING);
+        }
         return repository.save(courseRegistration);
     }
 
@@ -38,6 +42,14 @@ public class CourseRegistrationService {
         return repository.findByCourseId(courseId, pageable);
     }
 
+
+
+    public List<CourseRegistration> getAllCourseRegistrations() {
+        if (!AuthService.isUserHaveRole(Role.TEACHER) && !AuthService.isUserHaveRole(Role.ADMIN)) {
+            throw new AccessDeniedException("You do not have permission to do this action!");
+        }
+        return repository.findAll();
+    }
     public Page<CourseRegistration> getAllCourseRegistrations(Pageable pageable) {
         if (!AuthService.isUserHaveRole(Role.TEACHER) && !AuthService.isUserHaveRole(Role.ADMIN)) {
             throw new AccessDeniedException("You do not have permission to do this action!");

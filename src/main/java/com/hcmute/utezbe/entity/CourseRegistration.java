@@ -3,10 +3,7 @@ package com.hcmute.utezbe.entity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.hcmute.utezbe.entity.embeddedId.CourseRegistrationId;
 import com.hcmute.utezbe.entity.enumClass.State;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 
@@ -15,6 +12,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Builder
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "course", "student"})
 @Table(name = "course_registration")
 public class CourseRegistration extends Auditable {

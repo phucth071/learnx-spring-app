@@ -14,7 +14,7 @@ public class CourseDto {
     private String name;
     private Date startDate;
     private State state;
-    private String thumbnail;
+//    private String thumbnail;
     private String description;
     private Long categoryId;
 }
