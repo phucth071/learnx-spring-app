@@ -100,7 +100,6 @@ public class AuthService {
             if (Objects.isNull(token)) {
                 throw new ApiException("Invalid id token");
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -180,6 +179,7 @@ public class AuthService {
                 .map(refreshTokenService::verifyExpiration)
                 .map(RefreshToken::getUser)
                 .map(user -> {
+                    RequestContext.setUserId(user.getId());
                     String accessToken = jwtService.generateAccessToken(user);
                     return Response.builder()
                             .data(objectMapper.createObjectNode()

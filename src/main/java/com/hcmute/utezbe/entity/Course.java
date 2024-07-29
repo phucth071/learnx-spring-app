@@ -33,7 +33,7 @@ public class Course extends Auditable {
 
     @Column(name="state")
     @Enumerated(EnumType.STRING)
-    private State state;
+    private State state = State.OPEN;
 
     @Column(name="thumbnail")
     private String thumbnail;

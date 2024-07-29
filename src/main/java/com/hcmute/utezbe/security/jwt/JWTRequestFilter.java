@@ -1,6 +1,7 @@
 package com.hcmute.utezbe.security.jwt;
 
 import com.hcmute.utezbe.domain.RequestContext;
+import com.hcmute.utezbe.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -25,7 +26,7 @@ public class JWTRequestFilter extends OncePerRequestFilter {
 
     private final JWTService jwtService;
     private final UserDetailsService userDetailsService;
-
+    private final UserService userService;
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
@@ -46,6 +47,8 @@ public class JWTRequestFilter extends OncePerRequestFilter {
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
             if (jwtService.isTokenValid(jwt, userDetails, response)) {
+                Long userId = userService.getUserByEmail(userEmail).getId();
+                RequestContext.setUserId(userId);
                 authentication = new UsernamePasswordAuthenticationToken(
                         userDetails,
                         null,
