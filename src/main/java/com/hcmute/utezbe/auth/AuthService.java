@@ -7,6 +7,7 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.hcmute.utezbe.auth.request.AuthenticationRequest;
 import com.hcmute.utezbe.auth.request.RefreshTokenRequest;
+import com.hcmute.utezbe.auth.request.RegisterRequest;
 import com.hcmute.utezbe.domain.RequestContext;
 import com.hcmute.utezbe.auth.request.IdTokenRequest;
 import com.hcmute.utezbe.entity.enumClass.Provider;
@@ -28,9 +29,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.text.DecimalFormat;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -40,7 +43,80 @@ public class AuthService {
     private final JWTService jwtService;
     private final AuthenticationManager authenticationManager;
     private final RefreshTokenService refreshTokenService;
+    private final EmailValidator emailValidator;
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    public Response register(RegisterRequest request) {
+        boolean isValidEmail = emailValidator.test(request.getEmail());
+        if (!isValidEmail) {
+            return Response.builder().code(HttpStatus.BAD_REQUEST.value()).message("Email is not valid!").success(false).build();
+        }
+        Optional<User> opt = repository.findByEmailIgnoreCase(request.getEmail());
+        if (opt.isPresent()) {
+            return Response.builder().code(HttpStatus.BAD_REQUEST.value()).message("Email already exists!").success(false).build();
+        }
+        User user = User.builder()
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .fullName(request.getFullName())
+                .role(Role.STUDENT)
+                .provider(Provider.DATABASE)
+                .isEnabled(false)
+                .avatarUrl("https://res.cloudinary.com/dnarlcqth/image/upload/v1719906429/samples/landscapes/architecture-signs.jpg")
+                .build();
+
+        repository.save(user);
+
+        return Response.builder().code(HttpStatus.OK.value()).message("Register Successfully!").success(true).build();
+    }
+
+    private String generateOTP() {
+        return new DecimalFormat("000000")
+                .format(new Random().nextInt(999999));
+    }
+
+    private String buildEmailOTP(String name, String otp) {
+        return "<html>\n" +
+                "  <head>\n" +
+                "    <style>\n" +
+                "      body {\n" +
+                "        font-family: Arial, sans-serif;\n" +
+                "        background-color: #f4f4f4;\n" +
+                "        margin: 0;\n" +
+                "        padding: 0;\n" +
+                "      }\n" +
+                "      .container {\n" +
+                "        max-width: 600px;\n" +
+                "        margin: 50px auto;\n" +
+                "        padding: 20px;\n" +
+                "        background-color: #fff;\n" +
+                "        border-radius: 10px;\n" +
+                "        box-shadow: 0 0 10px rgba(0,0,0,0.1);\n" +
+                "      }\n" +
+                "      h1 {\n" +
+                "        color: #333;\n" +
+                "      }\n" +
+                "      h2 {\n" +
+                "        color: #555;\n" +
+                "      }\n" +
+                "      span {\n" +
+                "        color: #ff0000;\n" +
+                "        font-weight: bold;\n" +
+                "        letter-spacing: 2px;\n" +
+                "        font-size: 24px;\n" +
+                "      }\n" +
+                "    </style>\n" +
+                "  </head>\n" +
+                "  <body>\n" +
+                "    <div class=\"container\">\n" +
+                "      <h1>Xin Chào, " + name + "!</h1>\n" +
+                "      <h2>Mã OTP để xác nhận tài khoản của bạn là: <span>" + otp + "</span></h2>\n" +
+                "      <h3>Trân trọng!</h3>\n" +
+                "    </div>\n" +
+                "  </body>\n" +
+                "</html>";
+    }
+
     public Response authenticate(AuthenticationRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -76,13 +152,11 @@ public class AuthService {
                 .data(objectMapper.createObjectNode()
                         .putObject("user")
                         .put("accessToken", jwtToken)
-                        .put("refreshToken", jwtRefreshToken.getToken())
-                        .put("id", user.getId())
                         .put("fullName", user.getFullName())
                         .put("email", user.getEmail())
                         .put("avatar", user.getAvatarUrl())
                         .put("role", user.getRole().name())
-                        .put("provider", user.getProvider().name()))
+                )
                 .message("Login Successfully!")
                 .build();
     }
@@ -170,6 +244,7 @@ public class AuthService {
         existedUser.setFullName(user.getFullName());
         existedUser.setAvatarUrl(user.getAvatarUrl());
         existedUser.setProvider(user.getProvider());
+        existedUser.setEnabled(true);
         existedUser = repository.save(existedUser);
         return existedUser == null ? user : existedUser;
     }

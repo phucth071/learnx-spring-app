@@ -3,6 +3,7 @@ package com.hcmute.utezbe.auth;
 import com.hcmute.utezbe.auth.request.AuthenticationRequest;
 import com.hcmute.utezbe.auth.request.IdTokenRequest;
 import com.hcmute.utezbe.auth.request.RefreshTokenRequest;
+import com.hcmute.utezbe.auth.request.RegisterRequest;
 import com.hcmute.utezbe.response.Response;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -38,6 +39,12 @@ public class AuthController {
     public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequest refreshTokenRequest) {
         return ResponseEntity.ok(service.refreshToken(refreshTokenRequest));
     }
+
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
+        return ResponseEntity.ok(service.register(request));
+    }
+
 
     @GetMapping("/user/info")
     public ResponseEntity<?> getUserInfo(Principal principal) {
