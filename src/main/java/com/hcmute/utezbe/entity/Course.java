@@ -15,7 +15,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "category", "teacher"})
 @Table(name = "course")
 @Builder
 public class Course extends Auditable {
@@ -41,6 +40,7 @@ public class Course extends Auditable {
     @Column(name="description", columnDefinition = "LONGTEXT")
     private String description;
 
+    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "category_id", foreignKey = @ForeignKey(name = "FK_course_category"))
     private Category category;
