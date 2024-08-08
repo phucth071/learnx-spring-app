@@ -45,6 +45,16 @@ public class AuthController {
         return ResponseEntity.ok(service.register(request));
     }
 
+    @GetMapping("/register/confirm")
+    public ResponseEntity<?> confirm(@RequestParam("token") String token) {
+        return ResponseEntity.ok(service.confirmOTP(token));
+    }
+
+    @PostMapping("/resend-otp")
+    public ResponseEntity<?> resendOTP(@RequestParam String email) {
+        return ResponseEntity.ok(service.resendOTP(email));
+    }
+
 
     @GetMapping("/user/info")
     public ResponseEntity<?> getUserInfo(Principal principal) {

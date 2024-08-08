@@ -29,7 +29,7 @@ public class Forum extends Auditable {
 
     @MapsId
     @OneToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "course_id", foreignKey = @ForeignKey(name = "FK_forum_course"))
+    @JoinColumn(name = "course_id", foreignKey = @ForeignKey(name = "FK_forum_course"), referencedColumnName = "id")
     @JsonIgnore
     private Course course;
 

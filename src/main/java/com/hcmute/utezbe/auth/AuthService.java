@@ -10,6 +10,7 @@ import com.hcmute.utezbe.auth.request.RefreshTokenRequest;
 import com.hcmute.utezbe.auth.request.RegisterRequest;
 import com.hcmute.utezbe.domain.RequestContext;
 import com.hcmute.utezbe.auth.request.IdTokenRequest;
+import com.hcmute.utezbe.entity.ConfirmToken;
 import com.hcmute.utezbe.entity.enumClass.Provider;
 import com.hcmute.utezbe.entity.RefreshToken;
 import com.hcmute.utezbe.entity.enumClass.Role;
@@ -18,7 +19,10 @@ import com.hcmute.utezbe.exception.ApiException;
 import com.hcmute.utezbe.repository.UserRepository;
 import com.hcmute.utezbe.response.Response;
 import com.hcmute.utezbe.security.jwt.JWTService;
+import com.hcmute.utezbe.service.ConfirmTokenService;
+import com.hcmute.utezbe.service.JavaMailService;
 import com.hcmute.utezbe.service.RefreshTokenService;
+import com.hcmute.utezbe.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -28,8 +32,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.swing.text.html.Option;
 import javax.transaction.Transactional;
 import java.text.DecimalFormat;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
@@ -38,12 +44,14 @@ import java.util.Random;
 @Service
 @RequiredArgsConstructor
 public class AuthService {
-    private final UserRepository repository;
+    private final UserService userService;
     private final PasswordEncoder passwordEncoder;
     private final JWTService jwtService;
     private final AuthenticationManager authenticationManager;
     private final RefreshTokenService refreshTokenService;
     private final EmailValidator emailValidator;
+    private final ConfirmTokenService confirmTokenService;
+    private final JavaMailService emailService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public Response register(RegisterRequest request) {
@@ -51,7 +59,7 @@ public class AuthService {
         if (!isValidEmail) {
             return Response.builder().code(HttpStatus.BAD_REQUEST.value()).message("Email is not valid!").success(false).build();
         }
-        Optional<User> opt = repository.findByEmailIgnoreCase(request.getEmail());
+        Optional<User> opt = userService.findByEmailIgnoreCase(request.getEmail());
         if (opt.isPresent()) {
             return Response.builder().code(HttpStatus.BAD_REQUEST.value()).message("Email already exists!").success(false).build();
         }
@@ -65,9 +73,54 @@ public class AuthService {
                 .avatarUrl("https://res.cloudinary.com/dnarlcqth/image/upload/v1719906429/samples/landscapes/architecture-signs.jpg")
                 .build();
 
-        repository.save(user);
+        userService.save(user);
 
-        return Response.builder().code(HttpStatus.OK.value()).message("Register Successfully!").success(true).build();
+        String token = generateOTP();
+
+        ConfirmToken confirmToken = ConfirmToken.builder()
+                .token(token)
+                .user(user)
+                .createdAt(LocalDateTime.now())
+                .expiredAt(LocalDateTime.now().plusMinutes(15))
+                .build();
+
+        confirmTokenService.saveConfirmationToken(confirmToken);
+        emailService.send(request.getEmail(), buildEmailOTP(request.getFullName(), token));
+        return Response.builder().code(HttpStatus.OK.value()).message("Register Successfully! Please check your email").success(true).build();
+    }
+
+    public Response confirmOTP(String token) {
+        Optional<ConfirmToken> otpConfirmToken = confirmTokenService.getToken(token);
+        if (otpConfirmToken.isEmpty()) {
+            return Response.builder().code(HttpStatus.BAD_REQUEST.value()).message("Invalid OTP!").success(false).build();
+        }
+        ConfirmToken confirmToken = otpConfirmToken.get();
+        if (confirmToken.getConfirmedAt() != null) {
+            return Response.builder().code(HttpStatus.BAD_REQUEST.value()).message("Account already confirmed!").success(false).build();
+        }
+        if (confirmToken.getExpiredAt().isBefore(LocalDateTime.now())) {
+            return Response.builder().code(HttpStatus.BAD_REQUEST.value()).message("OTP is expired! Please request another OTP").success(false).build();
+        }
+        confirmTokenService.setConfirmedAt(token);
+        userService.enableUser(confirmToken.getUser().getEmail());
+        return Response.builder().code(HttpStatus.OK.value()).message("Account confirmed successfully!").success(true).build();
+    }
+
+    public Response resendOTP(String email) {
+        User user = userService.findByEmailIgnoreCase(email).orElseThrow(() -> new ApiException("User not found"));
+        if (user.isEnabled()) {
+            return Response.builder().code(HttpStatus.BAD_REQUEST.value()).message("Account already confirmed!").success(false).build();
+        }
+        String newOtp = generateOTP();
+        ConfirmToken confirmToken = ConfirmToken.builder()
+                .token(newOtp)
+                .user(user)
+                .createdAt(LocalDateTime.now())
+                .expiredAt(LocalDateTime.now().plusMinutes(15))
+                .build();
+        confirmTokenService.saveConfirmationToken(confirmToken);
+        emailService.send(email, buildEmailOTP(user.getFullName(), newOtp));
+        return Response.builder().code(HttpStatus.OK.value()).message("OTP sent successfully! Please check your email").success(true).build();
     }
 
     private String generateOTP() {
@@ -124,7 +177,7 @@ public class AuthService {
                         request.getPassword()
                 )
         );
-        Optional<User> opt = repository.findByEmailIgnoreCase(request.getEmail());
+        Optional<User> opt = userService.findByEmailIgnoreCase(request.getEmail());
         if(opt.isEmpty()) {
             return Response.builder().code(HttpStatus.FORBIDDEN.value()).message("Email or Password wrong!").success(false).build();
         }
@@ -231,10 +284,10 @@ public class AuthService {
 
     @Transactional
     public User createOrUpdateUser(User user) {
-        User existedUser = repository.findByEmailIgnoreCase(user.getEmail()).orElse(null);
+        User existedUser = userService.findByEmailIgnoreCase(user.getEmail()).orElse(null);
         if (existedUser == null) {
             System.out.println("Create new user");
-            repository.save(user);
+            userService.save(user);
             return user;
         }
         if (existedUser.getProvider() != Provider.GOOGLE) {
@@ -245,7 +298,7 @@ public class AuthService {
         existedUser.setAvatarUrl(user.getAvatarUrl());
         existedUser.setProvider(user.getProvider());
         existedUser.setEnabled(true);
-        existedUser = repository.save(existedUser);
+        existedUser = userService.save(existedUser);
         return existedUser == null ? user : existedUser;
     }
 
