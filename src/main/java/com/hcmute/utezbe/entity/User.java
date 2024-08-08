@@ -12,6 +12,7 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 @Getter
 @Setter
@@ -73,5 +74,18 @@ public class User extends Auditable implements UserDetails {
         return isEnabled;
     }
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<ConfirmToken> confirmTokens;
 
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Topic> topics;
+
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<CourseRegistration> courseRegistrations;
+
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<QuizSubmission> quizSubmissions;
+
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<AssignmentSubmission> assignmentSubmissions;
 }
