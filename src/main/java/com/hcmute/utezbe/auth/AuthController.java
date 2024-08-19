@@ -45,7 +45,7 @@ public class AuthController {
         return ResponseEntity.ok(service.register(request));
     }
 
-    @GetMapping("/register/confirm")
+    @PostMapping("/register/confirm")
     public ResponseEntity<?> confirm(@RequestParam("token") String token) {
         return ResponseEntity.ok(service.confirmOTP(token));
     }

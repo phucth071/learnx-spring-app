@@ -97,7 +97,6 @@ public class CourseController {
                 .map(registration -> {
                     User student = registration.getStudent();
                     UserDto studentDto = new UserDto();
-                    studentDto.setId(student.getId());
                     studentDto.setFullName(student.getFullName());
                     studentDto.setEmail(student.getEmail());
                     return studentDto;

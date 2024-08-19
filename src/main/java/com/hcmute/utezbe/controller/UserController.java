@@ -1,5 +1,6 @@
 package com.hcmute.utezbe.controller;
 
+import com.hcmute.utezbe.dto.UserDto;
 import com.hcmute.utezbe.response.Response;
 import com.hcmute.utezbe.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -18,11 +19,16 @@ public class UserController {
 
     @GetMapping("/info")
     public Response getUserInfo(Principal principal) {
-        System.out.println("Principal: " + principal.getName());
-        var currentUser = userService.findByEmailIgnoreCase(principal.getName());
-        if(currentUser == null) {
+        if(principal == null) {
             return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("User not found!").build();
         }
-        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get user info successfully!").data(principal).build();
+        var currentUser = userService.findByEmailIgnoreCase(principal.getName());
+        System.out.println("Principal: " + principal.getName());
+        UserDto userDto = UserDto.builder()
+                .fullName(currentUser.get().getFullName())
+                .email(currentUser.get().getEmail())
+                .build();
+
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get user info successfully!").data(userDto).build();
     }
 }
