@@ -1,0 +1,48 @@
+spring:
+  application:
+    name: utez-be
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/utez_db
+    # username: root
+    # password:
+    username: utez-admin
+    password: "@Aa123456"
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    show-sql: true
+    generate-ddl: true
+    hibernate:
+      ddl-auto: validate
+      properties:
+        hibernate:
+          dialect: org.hibernate.dialect.MySQL8Dialect
+          format_sql: true
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: utezauth@gmail.com
+    password: gyiuqpfjxzhywaui
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 660554863773-c5na5d9dvnogok0i23ekgnpr15to3rvn.apps.googleusercontent.com
+            client-secret: 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
+            scope: openid,email,profile
+
+app:
+  jwtSecret: WJCHZdb4R1p+qpHJ9/bwVLaiBWxz1wFbUDiZvWpDNLvXROOzueEqj5o/6x2s2v71
+
+server:
+  port: 9191
