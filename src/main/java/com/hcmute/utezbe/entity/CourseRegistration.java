@@ -5,7 +5,7 @@ import com.hcmute.utezbe.entity.embeddedId.CourseRegistrationId;
 import com.hcmute.utezbe.entity.enumClass.State;
 import lombok.*;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Getter
 @Setter
