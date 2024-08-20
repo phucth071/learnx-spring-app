@@ -5,6 +5,7 @@ import com.hcmute.utezbe.entity.CourseRegistration;
 import com.hcmute.utezbe.entity.enumClass.Role;
 import com.hcmute.utezbe.entity.enumClass.State;
 import com.hcmute.utezbe.exception.AccessDeniedException;
+import com.hcmute.utezbe.exception.ResourceNotFoundException;
 import com.hcmute.utezbe.repository.CourseRegistrationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -35,11 +36,19 @@ public class CourseRegistrationService {
     }
 
     public Page<CourseRegistration> getCourseRegistrationsByStudentId(Long studentId, Pageable pageable) {
-        return repository.findByStudentId(studentId, pageable);
+        Page<CourseRegistration> courseRegistrations = repository.findByStudentId(studentId, pageable);
+        if (courseRegistrations.isEmpty()) {
+            throw new ResourceNotFoundException();
+        }
+        return courseRegistrations;
     }
 
     public Page<CourseRegistration> getCourseRegistrationsByCourseId(Long courseId, Pageable pageable) {
-        return repository.findByCourseId(courseId, pageable);
+        Page<CourseRegistration> courseRegistrations = repository.findByCourseId(courseId, pageable);
+        if (courseRegistrations.isEmpty()) {
+            throw new ResourceNotFoundException();
+        }
+        return courseRegistrations;
     }
 
 

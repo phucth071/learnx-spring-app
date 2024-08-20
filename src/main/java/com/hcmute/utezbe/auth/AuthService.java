@@ -15,8 +15,7 @@ import com.hcmute.utezbe.entity.enumClass.Provider;
 import com.hcmute.utezbe.entity.RefreshToken;
 import com.hcmute.utezbe.entity.enumClass.Role;
 import com.hcmute.utezbe.entity.User;
-import com.hcmute.utezbe.exception.ApiException;
-import com.hcmute.utezbe.repository.UserRepository;
+import com.hcmute.utezbe.exception.AuthenticationException;
 import com.hcmute.utezbe.response.Response;
 import com.hcmute.utezbe.security.jwt.JWTService;
 import com.hcmute.utezbe.service.ConfirmTokenService;
@@ -106,7 +105,7 @@ public class AuthService {
     }
 
     public Response resendOTP(String email) {
-        User user = userService.findByEmailIgnoreCase(email).orElseThrow(() -> new ApiException("User not found"));
+        User user = userService.findByEmailIgnoreCase(email).orElseThrow(() -> new AuthenticationException("User not found"));
         if (user.isEnabled()) {
             return Response.builder().code(HttpStatus.BAD_REQUEST.value()).message("Account already confirmed!").success(false).build();
         }
@@ -178,19 +177,14 @@ public class AuthService {
         );
         Optional<User> opt = userService.findByEmailIgnoreCase(request.getEmail());
         if(opt.isEmpty()) {
-            return Response.builder().code(HttpStatus.FORBIDDEN.value()).message("Email or Password wrong!").success(false).build();
+            throw new AuthenticationException("User not found!");
         }
         User user = opt.get();
-        if(user.getProvider() == Provider.GOOGLE.GOOGLE) {
-            return Response.builder().code(HttpStatus.FORBIDDEN.value()).message("Email or Password wrong!").success(false).build();
+        if(user.getProvider() == Provider.GOOGLE) {
+            throw new AuthenticationException("Email already registered by another method!");
         }
         if(!user.isEnabled()) {
-            return Response.builder()
-                    .code(HttpStatus.FORBIDDEN.value())
-                    .success(false)
-                    .data(user.getEmail())
-                    .message("Account Not Confirm!")
-                    .build();
+            throw new AuthenticationException("Account is not confirmed yet!");
         }
 //        if(user.getRole() != request.getRole()) {
 //            return Response.builder().error(true).success(false).message("You Do Not Have Authorize").build();
@@ -224,7 +218,7 @@ public class AuthService {
         try {
             token = verifier.verify(idTokenRequest.getIdToken());
             if (Objects.isNull(token)) {
-                throw new ApiException("Invalid id token");
+                throw new AuthenticationException("Invalid id token");
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -232,7 +226,7 @@ public class AuthService {
 
         User user = verifyGoogleIdToken(idTokenRequest.getIdToken());
         if (user == null) {
-            throw new ApiException("Invalid id token");
+            throw new AuthenticationException("Invalid id token");
         }
         user = createOrUpdateUser(user);
         RequestContext.setUserId(user.getId());
@@ -260,7 +254,7 @@ public class AuthService {
         try {
             var token = verifier.verify(idToken);
             if (Objects.isNull(token)) {
-                throw new ApiException("Token verification failed!");
+                throw new AuthenticationException("Token verification failed!");
             }
             var payload = token.getPayload();
             String email = payload.getEmail();
@@ -290,7 +284,7 @@ public class AuthService {
             return user;
         }
         if (existedUser.getProvider() != Provider.GOOGLE) {
-            throw new ApiException("Email already registered by another method!");
+            throw new AuthenticationException("Email already registered by another method!");
         }
         System.out.println("Update existed user");
         existedUser.setFullName(user.getFullName());

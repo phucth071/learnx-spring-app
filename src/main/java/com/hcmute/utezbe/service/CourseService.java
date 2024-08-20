@@ -5,6 +5,7 @@ import com.hcmute.utezbe.entity.*;
 import com.hcmute.utezbe.entity.Module;
 import com.hcmute.utezbe.entity.enumClass.Role;
 import com.hcmute.utezbe.exception.AccessDeniedException;
+import com.hcmute.utezbe.exception.ResourceNotFoundException;
 import com.hcmute.utezbe.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -29,6 +30,10 @@ public class CourseService {
     private final ResourcesRepository resourcesRepository;
 
     public Optional<Course> getCourseById(Long id) {
+        Course course = courseRepository.findById(id).orElse(null);
+        if (course == null) {
+            throw new ResourceNotFoundException("Course with id " + id + " not found!");
+        }
         return courseRepository.findById(id);
     }
 

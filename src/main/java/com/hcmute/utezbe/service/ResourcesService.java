@@ -4,6 +4,7 @@ import com.hcmute.utezbe.auth.AuthService;
 import com.hcmute.utezbe.entity.Resources;
 import com.hcmute.utezbe.entity.enumClass.Role;
 import com.hcmute.utezbe.exception.AccessDeniedException;
+import com.hcmute.utezbe.exception.ResourceNotFoundException;
 import com.hcmute.utezbe.repository.ResourcesRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,7 +19,11 @@ public class ResourcesService {
     private final ResourcesRepository resourcesRepository;
 
     public Optional<Resources> getResourcesById(Long id) {
-        return resourcesRepository.findById(id);
+        Optional<Resources> resources = resourcesRepository.findById(id);
+        if (resources.isEmpty()) {
+            throw new ResourceNotFoundException();
+        }
+        return resources;
     }
 
     public List<Resources> getAllResources() {

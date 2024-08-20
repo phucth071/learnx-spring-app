@@ -1,6 +1,7 @@
 package com.hcmute.utezbe.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.hcmute.utezbe.entity.enumClass.State;
 import lombok.*;
@@ -54,6 +55,7 @@ public class Course extends Auditable {
     @OneToMany(mappedBy = "course", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
     private List<CourseRegistration> courseRegistrations = new ArrayList<>();
 
+    @JsonIgnore
     @JsonBackReference
     @OneToMany(mappedBy = "course", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
     private List<Module> modules = new ArrayList<>();

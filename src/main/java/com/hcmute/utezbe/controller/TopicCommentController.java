@@ -28,7 +28,7 @@ public class TopicCommentController {
         try {
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get all topic comment successfully!").data(topicCommentService.getAllTopicComments()).build();
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Get all topic comment failed!").data(null).build();
+            throw e;
         }
     }
 
@@ -37,7 +37,7 @@ public class TopicCommentController {
         try {
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get toppic comment by id " + topicCommentId + " successfully!").data(topicCommentService.getTopicCommentById(topicCommentId)).build();
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Get toppic comment by " + topicCommentId + " failed!").data(null).build();
+            throw e;
         }
     }
 
@@ -51,8 +51,7 @@ public class TopicCommentController {
                     .build();
             return Response.builder().code(HttpStatus.CREATED.value()).success(true).message("Create topic comment successfully!").data(topicCommentService.saveTopicComment(topicComment)).build();
         } catch (Exception e) {
-            System.out.println("ERROR: " + e.getMessage());
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Create topic comment failed!").data(null).build();
+            throw e;
         }
     }
 
@@ -60,19 +59,11 @@ public class TopicCommentController {
     public Response editTopicComment(@PathVariable Long topicCommentId, @RequestBody TopicCommentDto topicCommentDto){
         try {
             Optional<TopicComment> optionalTopicComment = topicCommentService.getTopicCommentById(topicCommentId);
-            if (!optionalTopicComment.isPresent()) {
-                return Response.builder().code(HttpStatus.OK.value()).success(false).message("Topic comment with id " + topicCommentId + " not found!").data(null).build();
-            }
             TopicComment topicComment = optionalTopicComment.get();
-            if(topicComment != null) {
-                topicComment = convertTopicCommentDTO(topicCommentDto, optionalTopicComment);
-                return Response.builder().code(HttpStatus.OK.value()).success(true).message("Edit topic comment with id " + topicCommentId + " successfully!").data(topicCommentService.saveTopicComment(topicComment)).build();
-            } else {
-                return Response.builder().code(HttpStatus.OK.value()).success(false).message("Topic comment with id " + topicCommentId + " not found!").data(null).build();
-            }
+            topicComment = convertTopicCommentDTO(topicCommentDto, optionalTopicComment);
+            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Edit topic comment with id " + topicCommentId + " successfully!").data(topicCommentService.saveTopicComment(topicComment)).build();
         } catch (Exception e) {
-            e.printStackTrace();
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Edit topic comment with id " + topicCommentId + " failed!").data(null).build();
+            throw e;
         }
     }
 
@@ -81,7 +72,7 @@ public class TopicCommentController {
         try {
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Delete topic comment with id " + topicCommentId + " successfully!").data(topicCommentService.deleteTopicComment(topicCommentId)).build();
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Delete topic comment with id " + topicCommentId + " failed!").data(null).build();
+            throw e;
         }
     }
 

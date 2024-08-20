@@ -1,5 +1,6 @@
 package com.hcmute.utezbe.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 
@@ -25,6 +26,7 @@ public class Resources extends Auditable{
     @Column(name="url_document")
     private String urlDocument;
 
+    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "module_id", foreignKey = @ForeignKey(name = "FK_resources_modules"))
     private Module module;

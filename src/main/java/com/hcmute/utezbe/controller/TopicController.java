@@ -28,7 +28,7 @@ public class TopicController {
         try {
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get all topic successfully!").data(topicService.getAllTopics()).build();
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Get all topic failed!").data(null).build();
+            throw e;
         }
     }
 
@@ -37,7 +37,7 @@ public class TopicController {
         try {
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get topic by id " + topicId + " successfully!").data(topicService.getTopicById(topicId)).build();
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Get toppic by " + topicId + " failed!").data(null).build();
+            throw e;
         }
     }
 
@@ -51,7 +51,7 @@ public class TopicController {
                     .build();
             return Response.builder().code(HttpStatus.CREATED.value()).success(true).message("Create topic successfully!").data(topicService.saveTopic(topic)).build();
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Create topic failed!").data(null).build();
+            throw e;
         }
     }
 
@@ -59,19 +59,10 @@ public class TopicController {
     public Response editTopic(@PathVariable Long topicId, @RequestBody TopicDto topicDto){
         try {
             Optional<Topic> optionalTopic = topicService.getTopicById(topicId);
-            if (!optionalTopic.isPresent()) {
-                return Response.builder().code(HttpStatus.OK.value()).success(false).message("Topic with id " + topicId + " not found!").data(null).build();
-            }
-            Topic topic = optionalTopic.get();
-            if(topic != null) {
-                topic = convertTopicDTO(topicDto, optionalTopic);
-                return Response.builder().code(HttpStatus.OK.value()).success(true).message("Edit topic with id " + topicId + " successfully!").data(topicService.saveTopic(topic)).build();
-            } else {
-                return Response.builder().code(HttpStatus.OK.value()).success(false).message("Topic with id " + topicId + " not found!").data(null).build();
-            }
+            Topic topic = convertTopicDTO(topicDto, optionalTopic);
+            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Edit topic with id " + topicId + " successfully!").data(topicService.saveTopic(topic)).build();
         } catch (Exception e) {
-            e.printStackTrace();
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Edit topic with id " + topicId + " failed!").data(null).build();
+            throw e;
         }
     }
 
@@ -80,7 +71,7 @@ public class TopicController {
         try {
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Delete topic with id " + topicId + " successfully!").data(topicService.deleteTopic(topicId)).build();
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Delete topic with id " + topicId + " failed!").data(null).build();
+            throw e;
         }
     }
 

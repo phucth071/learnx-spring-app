@@ -26,8 +26,7 @@ public class CourseRegistrationController {
         try {
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get all course registration successfully!").data(courseRegistrationService.getAllCourseRegistrations()).build();
         } catch (Exception e) {
-            e.printStackTrace();
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Get all course registration failed!").data(null).build();
+            throw e;
         }
     }
 
@@ -36,8 +35,7 @@ public class CourseRegistrationController {
         try {
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get all course registration successfully!").data(courseRegistrationService.getAllCourseRegistrations(pageable)).build();
         } catch (Exception e) {
-            e.printStackTrace();
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Get all course registration failed!").data(null).build();
+            throw e;
         }
     }
 
@@ -50,8 +48,7 @@ public class CourseRegistrationController {
                     .build();
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Create course registration successfully!").data(courseRegistrationService.save(courseRegistration)).build();
         } catch (Exception e) {
-            e.printStackTrace();
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Create course registration failed!").data(null).build();
+            throw e;
         }
     }
 
@@ -60,8 +57,7 @@ public class CourseRegistrationController {
         try {
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get course registration by student id successfully!").data(courseRegistrationService.getCourseRegistrationsByStudentId(studentId, pageable)).build();
         } catch (Exception e) {
-            e.printStackTrace();
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Get course registration by student id failed!").data(null).build();
+            throw e;
         }
     }
 
@@ -70,8 +66,7 @@ public class CourseRegistrationController {
         try {
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get course registration by student id successfully!").data(courseRegistrationService.getCourseRegistrationsByCourseId(courseId, pageable)).build();
         } catch (Exception e) {
-            e.printStackTrace();
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Get course registration by student id failed!").data(null).build();
+            throw e;
         }
     }
 }

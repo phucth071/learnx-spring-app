@@ -10,10 +10,10 @@ import org.springframework.http.HttpStatus;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Response {
+public class Response<T> {
     private boolean success;
     private int code;
     private String message;
-    private Object data;
+    private T data;
 }
 

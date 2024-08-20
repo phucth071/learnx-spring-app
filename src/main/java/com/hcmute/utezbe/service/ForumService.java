@@ -3,6 +3,7 @@ package com.hcmute.utezbe.service;
 import com.hcmute.utezbe.entity.Forum;
 import com.hcmute.utezbe.entity.Topic;
 import com.hcmute.utezbe.entity.TopicComment;
+import com.hcmute.utezbe.exception.ResourceNotFoundException;
 import com.hcmute.utezbe.repository.ForumRepository;
 import com.hcmute.utezbe.repository.TopicCommentRepository;
 import com.hcmute.utezbe.repository.TopicRepository;
@@ -22,7 +23,11 @@ public class ForumService {
     private final TopicCommentRepository topicCommentRepository;
 
     public Optional<Forum> getForumById(Long id) {
-        return forumRepository.findById(id);
+        Optional<Forum> forum = forumRepository.findById(id);
+        if (forum.isEmpty()) {
+            throw new ResourceNotFoundException("Forum with id " + id + " not found!");
+        }
+        return forum;
     }
 
     public List<Forum> getAllForums() {

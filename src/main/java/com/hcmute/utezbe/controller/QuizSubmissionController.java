@@ -24,7 +24,7 @@ public class QuizSubmissionController {
         try {
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get all quiz submission successfully!").data(quizSubmissionService.getAllQuizSubmissions()).build();
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Get all quiz submission failed!").data(null).build();
+            throw e;
         }
     }
 
@@ -33,7 +33,7 @@ public class QuizSubmissionController {
         try {
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get quiz submission with id " + quizSubmissionId + " successfully!").data(quizSubmissionService.getQuizSubmissionById(quizSubmissionId)).build();
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Get quiz submission with id " + quizSubmissionId + " failed!").data(null).build();
+            throw e;
         }
     }
 
@@ -48,7 +48,7 @@ public class QuizSubmissionController {
                     .build();
             return Response.builder().code(HttpStatus.CREATED.value()).success(true).message("Create quiz submission successfully!").data(quizSubmissionService.saveQuizSubmission(quizSubmission)).build();
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Create quiz submission failed!").data(null).build();
+            throw e;
         }
     }
 
@@ -56,19 +56,10 @@ public class QuizSubmissionController {
     public Response editQuizSubmission(@PathVariable("quizSubmissionId") Long quizSubmissionId, @RequestBody QuizSubmissionDto quizSubmissionDto) {
         try {
             Optional<QuizSubmission> quizSubmissionOptional = quizSubmissionService.getQuizSubmissionById(quizSubmissionId);
-            if (!quizSubmissionOptional.isPresent()) {
-                return Response.builder().code(HttpStatus.OK.value()).success(false).message("Quiz submission with id " + quizSubmissionId + " not found!").data(null).build();
-            }
-            QuizSubmission quizSubmission = quizSubmissionOptional.get();
-            if (quizSubmissionDto != null) {
-                quizSubmission = convertQuizSubmissionDTO(quizSubmissionDto, quizSubmissionOptional);
-                return Response.builder().code(HttpStatus.OK.value()).success(true).message("Edit quiz submission with id " + quizSubmissionId + " successfully!").data(quizSubmissionService.saveQuizSubmission(quizSubmission)).build();
-            } else {
-                return Response.builder().code(HttpStatus.OK.value()).success(false).message("Quiz submission with id " + quizSubmissionId + " not found!").data(null).build();
-            }
+            QuizSubmission quizSubmission = convertQuizSubmissionDTO(quizSubmissionDto, quizSubmissionOptional);
+            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Edit quiz submission with id " + quizSubmissionId + " successfully!").data(quizSubmissionService.saveQuizSubmission(quizSubmission)).build();
         } catch (Exception e) {
-            e.printStackTrace();
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Edit quiz submission with id " + quizSubmissionId + " failed!").data(null).build();
+            throw e;
         }
     }
 
@@ -77,7 +68,7 @@ public class QuizSubmissionController {
         try {
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Delete quiz submission with id " + quizSubmissionId + " successfully!").data(quizSubmissionService.deleteQuizSubmission(quizSubmissionId)).build();
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Delete quiz submission with id " + quizSubmissionId + " failed!").data(null).build();
+            throw e;
         }
     }
 

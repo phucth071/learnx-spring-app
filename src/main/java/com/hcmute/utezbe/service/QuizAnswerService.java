@@ -1,6 +1,7 @@
 package com.hcmute.utezbe.service;
 
 import com.hcmute.utezbe.entity.QuizAnswer;
+import com.hcmute.utezbe.exception.ResourceNotFoundException;
 import com.hcmute.utezbe.repository.QuizAnswerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,7 +16,11 @@ public class QuizAnswerService {
     private final QuizAnswerRepository quizAnswerRepository;
 
     public Optional<QuizAnswer> getQuizAnswerById(Long Id) {
-        return quizAnswerRepository.findById(Id);
+        Optional<QuizAnswer> quizAnswer = quizAnswerRepository.findById(Id);
+        if (quizAnswer.isEmpty()) {
+            throw new ResourceNotFoundException("QuizAnswer with id " + Id + " not found!");
+        }
+        return quizAnswer;
     }
 
     public List<QuizAnswer> getAllQuizAnswers() {

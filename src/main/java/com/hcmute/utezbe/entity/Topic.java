@@ -30,6 +30,7 @@ public class Topic extends Auditable {
     @JoinColumn(name = "account_id", foreignKey = @ForeignKey(name = "FK_topic_account"))
     private User account;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "forum_id", foreignKey = @ForeignKey(name = "FK_topic_forum"))
     private Forum forum;

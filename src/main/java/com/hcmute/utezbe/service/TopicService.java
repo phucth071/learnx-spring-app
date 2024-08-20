@@ -1,6 +1,7 @@
 package com.hcmute.utezbe.service;
 
 import com.hcmute.utezbe.entity.Topic;
+import com.hcmute.utezbe.exception.ResourceNotFoundException;
 import com.hcmute.utezbe.repository.TopicCommentRepository;
 import com.hcmute.utezbe.repository.TopicRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +19,11 @@ public class TopicService {
     private final TopicCommentRepository topicCommentRepository;
 
     public Optional<Topic> getTopicById(Long id) {
-        return topicRepository.findById(id);
+        Optional<Topic> topic = topicRepository.findById(id);
+        if (topic.isEmpty()) {
+            throw new ResourceNotFoundException();
+        }
+        return topic;
     }
 
     public List<Topic> getAllTopics() {

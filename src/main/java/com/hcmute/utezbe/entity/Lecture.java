@@ -1,5 +1,6 @@
 package com.hcmute.utezbe.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 
@@ -25,6 +26,7 @@ public class Lecture extends Auditable{
     @Column(name="name")
     private String name;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "module_id", foreignKey = @ForeignKey(name = "FK_lecture_modules"))
     private Module module;

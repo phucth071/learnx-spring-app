@@ -40,7 +40,7 @@ public class Question extends Auditable {
     @JoinColumns({
             @JoinColumn(name = "quiz_id", foreignKey = @ForeignKey(name = "FK_quiz_question")),
             @JoinColumn(name = "module_id", foreignKey = @ForeignKey(name = "FK_module_question"))
-    }
+        }
     )
     private Quiz quiz;
 

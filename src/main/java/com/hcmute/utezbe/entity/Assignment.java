@@ -1,5 +1,6 @@
 package com.hcmute.utezbe.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.hcmute.utezbe.entity.enumClass.State;
 import lombok.*;
@@ -41,6 +42,7 @@ public class Assignment extends Auditable{
     @Column(name="url_document")
     private String urlDocument;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "module_id", foreignKey = @ForeignKey(name = "FK_assignment_module"))
     private Module module;

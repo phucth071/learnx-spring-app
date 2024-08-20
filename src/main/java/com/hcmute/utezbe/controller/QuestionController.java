@@ -25,7 +25,7 @@ public class QuestionController {
         try {
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get all quiz question successfully!").data(questionService.getAllQuestions()).build();
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Get all quiz question failed!").data(null).build();
+            throw e;
         }
     }
 
@@ -34,7 +34,7 @@ public class QuestionController {
         try {
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get question with id " + questionId + " successfully!").data(questionService.getQuestionById(questionId)).build();
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Get question with id " + questionId + " failed!").data(null).build();
+            throw e;
         }
     }
 
@@ -42,22 +42,18 @@ public class QuestionController {
     public Response createQuestion(@RequestBody QuestionDto questionDto) {
         try {
             Optional<Quiz> optionalQuiz = quizService.findById(questionDto.getQuizId(), questionDto.getModuleId());
-            if (optionalQuiz.isPresent()) {
-                Quiz quiz = optionalQuiz.get();
-                Question question = Question.builder()
-                        .content(questionDto.getContent())
-                        .questionType(questionDto.getQuestionType())
-                        .options(questionDto.getOptions())
-                        .answers(questionDto.getAnswers())
-                        .score(questionDto.getScore())
-                        .quiz(quiz)
-                        .build();
-                return Response.builder().code(HttpStatus.CREATED.value()).success(true).message("Create question successfully!").data(questionService.saveQuestion(question)).build();
-            } else {
-                return Response.builder().code(HttpStatus.NOT_FOUND.value()).success(false).message("Quiz not found!").data(null).build();
-            }
+            Quiz quiz = optionalQuiz.get();
+            Question question = Question.builder()
+                    .content(questionDto.getContent())
+                    .questionType(questionDto.getQuestionType())
+                    .options(questionDto.getOptions())
+                    .answers(questionDto.getAnswers())
+                    .score(questionDto.getScore())
+                    .quiz(quiz)
+                    .build();
+            return Response.builder().code(HttpStatus.CREATED.value()).success(true).message("Create question successfully!").data(questionService.saveQuestion(question)).build();
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Create question failed!").data(null).build();
+            throw e;
         }
     }
 
@@ -65,18 +61,11 @@ public class QuestionController {
     public Response editQuestion(@PathVariable("questionId") Long questionId, @RequestBody QuestionDto questionDto) {
         try {
             Optional<Question> questionOptional = questionService.getQuestionById(questionId);
-            if (!questionOptional.isPresent()) {
-                return Response.builder().code(HttpStatus.OK.value()).success(false).message("Question with id " + questionId + " not found!").data(null).build();
-            }
             Question question = questionOptional.get();
-            if (question != null) {
-                question = convertQuestionDTO(questionDto, questionOptional);
-                return Response.builder().code(HttpStatus.OK.value()).success(true).message("Edit question with id " + questionId + " successfully!").data(questionService.saveQuestion(question)).build();
-            } else {
-                return Response.builder().code(HttpStatus.OK.value()).success(false).message("Question with id " + questionId + " not found!").data(null).build();
-            }
+            question = convertQuestionDTO(questionDto, questionOptional);
+            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Edit question with id " + questionId + " successfully!").data(questionService.saveQuestion(question)).build();
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Edit question with id " + questionId + " failed!").data(null).build();
+            throw e;
         }
     }
 
@@ -85,7 +74,7 @@ public class QuestionController {
         try {
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Delete question with id " + questionId + " successfully!").data(questionService.deleteQuestion(questionId)).build();
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Delete question with id " + questionId + " failed!").data(null).build();
+           throw e;
         }
     }
 

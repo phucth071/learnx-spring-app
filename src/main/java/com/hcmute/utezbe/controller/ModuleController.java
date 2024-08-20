@@ -24,7 +24,7 @@ public class ModuleController {
         try {
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get all module successfully!").data(moduleService.getAllModules()).build();
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Get all module failed!").data(null).build();
+            throw e;
         }
     }
 
@@ -33,7 +33,7 @@ public class ModuleController {
         try {
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get module with id " + moduleId + " successfully!").data(moduleService.getModuleById(moduleId)).build();
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Get module with id " + moduleId + " failed!").data(null).build();
+            throw e;
         }
     }
 
@@ -47,7 +47,7 @@ public class ModuleController {
                     .build();
             return Response.builder().code(HttpStatus.CREATED.value()).success(true).message("Create module successfully!").data(moduleService.saveModule(module)).build();
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Create module failed!").data(null).build();
+            throw e;
         }
     }
 
@@ -55,19 +55,11 @@ public class ModuleController {
     public Response editModule(@PathVariable("moduleId") Long moduleId, @RequestBody ModuleDto moduleDto) {
         try {
             Optional<Module> moduleOptional = moduleService.getModuleById(moduleId);
-            if (!moduleOptional.isPresent()) {
-                return Response.builder().code(HttpStatus.OK.value()).success(false).message("Module with id " + moduleId + " not found!").data(null).build();
-            }
             Module module = moduleOptional.get();
-            if (module != null) {
-                module = convertModuleDTO(moduleDto, moduleOptional);
-                return Response.builder().code(HttpStatus.OK.value()).success(true).message("Edit module with id " + moduleId + " successfully!").data(moduleService.saveModule(module)).build();
-            } else {
-                return Response.builder().code(HttpStatus.OK.value()).success(false).message("Module with id " + moduleId + " not found!").data(null).build();
-            }
+            module = convertModuleDTO(moduleDto, moduleOptional);
+            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Edit module with id " + moduleId + " successfully!").data(moduleService.saveModule(module)).build();
         } catch (Exception e) {
-            e.printStackTrace();
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Edit module with id " + moduleId + " failed!").data(null).build();
+           throw e;
         }
     }
 
@@ -76,7 +68,7 @@ public class ModuleController {
         try {
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Delete module with id " + moduleId + " successfully!").data(moduleService.deleteModule(moduleId)).build();
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Delete module with id " + moduleId + " failed!").data(null).build();
+            throw e;
         }
     }
 

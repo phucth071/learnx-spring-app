@@ -35,9 +35,10 @@ public class AssignmentService {
         return assignmentRepository.findAllPageable(pageable);
     }
 
+    @Transactional
     public Assignment saveAssignment(Assignment assignment) {
         if (!AuthService.isUserHaveRole(Role.TEACHER) && !AuthService.isUserHaveRole(Role.ADMIN)) {
-            throw new AccessDeniedException("You do not have permission to do this action!");
+            throw new AccessDeniedException();
         }
         return assignmentRepository.save(assignment);
     }
@@ -45,7 +46,7 @@ public class AssignmentService {
     @Transactional
     public Assignment deleteAssignment(Long id) {
         if (!AuthService.isUserHaveRole(Role.TEACHER) && !AuthService.isUserHaveRole(Role.ADMIN)) {
-            throw new AccessDeniedException("You do not have permission to do this action!");
+            throw new AccessDeniedException();
         }
         Optional<Assignment> assignments = assignmentRepository.findById(id);
         assignments.ifPresent(a -> {

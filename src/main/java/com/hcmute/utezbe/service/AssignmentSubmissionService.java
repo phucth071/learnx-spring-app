@@ -46,7 +46,7 @@ public class AssignmentSubmissionService {
     @Transactional
     public void deleteAssignmentSubmission(Long assignmentId, Long studentId) {
         AssignmentSubmissionId id = new AssignmentSubmissionId(assignmentId, studentId);
-        assignmentSubmissionRepository.deleteById(id);
+         assignmentSubmissionRepository.deleteById(id);
     }
 
 }

@@ -4,6 +4,7 @@ import com.hcmute.utezbe.auth.AuthService;
 import com.hcmute.utezbe.entity.Lecture;
 import com.hcmute.utezbe.entity.enumClass.Role;
 import com.hcmute.utezbe.exception.AccessDeniedException;
+import com.hcmute.utezbe.exception.ResourceNotFoundException;
 import com.hcmute.utezbe.repository.LectureRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,7 +19,11 @@ public class LectureService {
     private final LectureRepository lectureRepository;
 
     public Optional<Lecture> getLectureById(Long id) {
-        return lectureRepository.findById(id);
+        Optional<Lecture> lecture = lectureRepository.findById(id);
+        if (lecture.isEmpty()) {
+            throw new ResourceNotFoundException("Lecture with id " + id + " not found!");
+        }
+        return lecture;
     }
 
     public List<Lecture> getAllLectures() {

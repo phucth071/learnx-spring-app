@@ -28,7 +28,6 @@ public class UserController {
                 .fullName(currentUser.get().getFullName())
                 .email(currentUser.get().getEmail())
                 .build();
-
         return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get user info successfully!").data(userDto).build();
     }
 }

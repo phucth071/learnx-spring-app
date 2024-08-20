@@ -24,7 +24,7 @@ public class LectureController {
         try {
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get all lecture successfully!").data(lectureService.getAllLectures()).build();
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Get all lecture failed!").data(null).build();
+            throw e;
         }
     }
 
@@ -33,7 +33,7 @@ public class LectureController {
         try {
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get lecture with id " + lectureId + " successfully!").data(lectureService.getLectureById(lectureId)).build();
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Get lecture with id " + lectureId + " failed!").data(null).build();
+            throw e;
         }
     }
 
@@ -47,7 +47,7 @@ public class LectureController {
                     .build();
             return Response.builder().code(HttpStatus.CREATED.value()).success(true).message("Create lecture successfully!").data(lectureService.saveLecture(lecture)).build();
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Create lecture failed!").data(null).build();
+            throw e;
         }
     }
 
@@ -55,19 +55,11 @@ public class LectureController {
     public Response editLecture(@PathVariable("lectureId") Long lectureId, @RequestBody LectureDto lectureDto) {
         try{
             Optional<Lecture> optionalLecture = lectureService.getLectureById(lectureId);
-            if (!optionalLecture.isPresent()) {
-                return Response.builder().code(HttpStatus.OK.value()).success(false).message("Lecture with id " + lectureId + " not found!").data(null).build();
-            }
             Lecture lecture = optionalLecture.get();
-            if(lecture != null) {
-                lecture = convertLectureDTO(lectureDto, optionalLecture);
-                return Response.builder().code(HttpStatus.OK.value()).success(true).message("Edit lecture with id " + lectureId + " successfully!").data(lectureService.saveLecture(lecture)).build();
-            } else {
-                return Response.builder().code(HttpStatus.OK.value()).success(false).message("Lecture with id " + lectureId + " not found!").data(null).build();
-            }
+            lecture = convertLectureDTO(lectureDto, optionalLecture);
+            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Edit lecture with id " + lectureId + " successfully!").data(lectureService.saveLecture(lecture)).build();
         } catch (Exception e) {
-            e.printStackTrace();
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Edit lecture with id " + lectureId + " failed!").data(null).build();
+            throw e;
         }
     }
 
@@ -76,7 +68,7 @@ public class LectureController {
         try {
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Delete lecture with id " + lectureId + " successfully!").data(lectureService.deleteLecture(lectureId)).build();
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Delete lecture with id " + lectureId + " failed!").data(null).build();
+            throw e;
         }
     }
 

@@ -4,6 +4,7 @@ import com.hcmute.utezbe.auth.AuthService;
 import com.hcmute.utezbe.entity.Question;
 import com.hcmute.utezbe.entity.enumClass.Role;
 import com.hcmute.utezbe.exception.AccessDeniedException;
+import com.hcmute.utezbe.exception.ResourceNotFoundException;
 import com.hcmute.utezbe.repository.QuestionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,7 +19,11 @@ public class QuestionService {
     private final QuestionRepository quizQuestionRepository;
 
     public Optional<Question> getQuestionById(Long id) {
-        return quizQuestionRepository.findById(id);
+        Optional<Question> question = quizQuestionRepository.findById(id);
+        if (question.isEmpty()) {
+            throw new ResourceNotFoundException("Question with id " + id + " not found!");
+        }
+        return question;
     }
 
     public List<Question> getAllQuestions() {

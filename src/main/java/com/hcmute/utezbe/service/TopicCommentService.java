@@ -2,6 +2,7 @@ package com.hcmute.utezbe.service;
 
 import com.hcmute.utezbe.entity.Topic;
 import com.hcmute.utezbe.entity.TopicComment;
+import com.hcmute.utezbe.exception.ResourceNotFoundException;
 import com.hcmute.utezbe.repository.TopicCommentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,7 +17,11 @@ public class TopicCommentService {
     private final TopicCommentRepository topicCommentRepository;
 
     public Optional<TopicComment> getTopicCommentById(Long id) {
-        return topicCommentRepository.findById(id);
+        Optional<TopicComment> topicComment = topicCommentRepository.findById(id);
+        if (topicComment.isEmpty()) {
+            throw new ResourceNotFoundException();
+        }
+        return topicComment;
     }
 
     public List<TopicComment> getAllTopicComments() {

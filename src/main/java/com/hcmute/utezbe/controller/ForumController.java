@@ -25,7 +25,7 @@ public class ForumController {
         try {
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get all forum successfully!").data(forumService.getAllForums()).build();
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Get all forum failed!").data(null).build();
+            throw e;
         }
     }
 
@@ -34,7 +34,7 @@ public class ForumController {
         try {
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get forum with id " + forumId + " successfully!").data(forumService.getForumById(forumId)).build();
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Get forum with id " + forumId + " failed!").data(null).build();
+            throw e;
         }
     }
 
@@ -48,7 +48,7 @@ public class ForumController {
                     .build();
             return Response.builder().code(HttpStatus.CREATED.value()).success(true).message("Create forum successfully!").data(forumService.saveForum(forum)).build();
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Create forum failed!").data(null).build();
+            throw e;
         }
     }
 
@@ -56,19 +56,11 @@ public class ForumController {
     public Response editForum(@PathVariable("forumId") Long forumId, @RequestBody ForumDto forumDto) {
         try{
             Optional<Forum> optionalForum = forumService.getForumById(forumId);
-            if (!optionalForum.isPresent()) {
-                return Response.builder().code(HttpStatus.OK.value()).success(false).message("Forum with id " + forumId + " not found!").data(null).build();
-            }
             Forum forum = optionalForum.get();
-            if(forum != null) {
-                forum = convertForumDTO(forumDto, optionalForum);
-                return Response.builder().code(HttpStatus.OK.value()).success(true).message("Edit forum with id " + forumId + " successfully!").data(forumService.saveForum(forum)).build();
-            } else {
-                return Response.builder().code(HttpStatus.OK.value()).success(false).message("Forum with id " + forumId + " not found!").data(null).build();
-            }
+            forum = convertForumDTO(forumDto, optionalForum);
+            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Edit forum with id " + forumId + " successfully!").data(forumService.saveForum(forum)).build();
         } catch (Exception e) {
-            e.printStackTrace();
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Edit forum with id " + forumId + " failed!").data(null).build();
+            throw e;
         }
     }
 
@@ -77,7 +69,7 @@ public class ForumController {
         try {
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Delete forum with id " + forumId + " successfully!").data(forumService.deleteForum(forumId)).build();
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Delete forum with id " + forumId + " failed!").data(null).build();
+            throw e;
         }
     }
 

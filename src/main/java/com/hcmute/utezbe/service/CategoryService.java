@@ -5,6 +5,7 @@ import com.hcmute.utezbe.entity.*;
 import com.hcmute.utezbe.entity.Module;
 import com.hcmute.utezbe.entity.enumClass.Role;
 import com.hcmute.utezbe.exception.AccessDeniedException;
+import com.hcmute.utezbe.exception.ResourceNotFoundException;
 import com.hcmute.utezbe.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,10 @@ public class CategoryService {
     private final CourseRegistrationRepository courseRegistrationRepository;
 
     public Optional<Category> getCategoryById(Long id) {
+        Category category = categoryRepository.findById(id).orElse(null);
+        if (category == null) {
+            throw new ResourceNotFoundException("Category with id " + id + " not found!");
+        }
         return categoryRepository.findById(id);
     }
 

@@ -25,17 +25,7 @@ public class QuizController {
         try {
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get all quiz successfully!").data(quizService.findAll()).build();
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message(e.getMessage()).build();
-        }
-    }
-
-//    SAI QUY TAC, NHUNG DE DAY DE TEST
-    @GetMapping("/{quizId}/{moduleId}")
-    public Response getQuizById(@PathVariable("quizId") Long quizId, @PathVariable ("moduleId") Long moduleId) {
-        try {
-            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get quiz by id successfully!").data(quizService.findById(quizId, moduleId)).build();
-        } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message(e.getMessage()).build();
+            throw e;
         }
     }
 
@@ -54,7 +44,7 @@ public class QuizController {
                     .build();
             return Response.builder().code(HttpStatus.CREATED.value()).success(true).message("Create quiz successfully!").data(quizService.saveQuiz(quiz)).build();
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message(e.getMessage()).build();
+            throw e;
         }
     }
 
@@ -62,14 +52,10 @@ public class QuizController {
     public Response editQuiz(@PathVariable("quizId") Long quizId, @PathVariable("moduleId") Long moduleId, @RequestBody QuizDto quizDto) {
         try {
             Optional<Quiz> quizOtp = quizService.findById(quizId, moduleId);
-            if (quizOtp.isPresent()) {
-                Quiz quiz = convertQuizDTO(quizDto, quizOtp);
-                return Response.builder().code(HttpStatus.OK.value()).success(true).message("Edit quiz successfully!").data(quizService.saveQuiz(quiz)).build();
-            } else {
-                return Response.builder().code(HttpStatus.OK.value()).success(false).message("Quiz not found!").build();
-            }
+            Quiz quiz = convertQuizDTO(quizDto, quizOtp);
+            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Edit quiz successfully!").data(quizService.saveQuiz(quiz)).build();
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message(e.getMessage()).build();
+            throw e;
         }
     }
 

@@ -5,6 +5,7 @@ import com.hcmute.utezbe.entity.*;
 import com.hcmute.utezbe.entity.Module;
 import com.hcmute.utezbe.entity.enumClass.Role;
 import com.hcmute.utezbe.exception.AccessDeniedException;
+import com.hcmute.utezbe.exception.ResourceNotFoundException;
 import com.hcmute.utezbe.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,7 +28,11 @@ public class ModuleService {
     }
 
     public Optional<Module> getModuleById(Long id) {
-        return moduleRepository.findById(id);
+        Optional<Module> module = moduleRepository.findById(id);
+        if (module.isEmpty()) {
+            throw new ResourceNotFoundException("Module with id " + id + " not found!");
+        }
+        return module;
     }
 
     public Module saveModule(Module module) {

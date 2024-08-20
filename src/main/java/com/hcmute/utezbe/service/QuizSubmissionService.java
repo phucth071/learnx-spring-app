@@ -2,6 +2,7 @@ package com.hcmute.utezbe.service;
 
 import com.hcmute.utezbe.entity.QuizAnswer;
 import com.hcmute.utezbe.entity.QuizSubmission;
+import com.hcmute.utezbe.exception.ResourceNotFoundException;
 import com.hcmute.utezbe.repository.QuizAnswerRepository;
 import com.hcmute.utezbe.repository.QuizSubmissionRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +19,11 @@ public class QuizSubmissionService {
     private final QuizAnswerRepository quizAnswerRepository;
 
     public Optional<QuizSubmission> getQuizSubmissionById(Long Id) {
-        return quizSubmissionRepository.findById(Id);
+        Optional<QuizSubmission> quizSubmission = quizSubmissionRepository.findById(Id);
+        if (quizSubmission.isEmpty()) {
+            throw new ResourceNotFoundException("QuizSubmission with id " + Id + " not found!");
+        }
+        return quizSubmission;
     }
 
     public List<QuizSubmission> getAllQuizSubmissions() {

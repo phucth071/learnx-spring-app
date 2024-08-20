@@ -23,6 +23,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -53,7 +54,7 @@ public class CourseController {
                     .collect(Collectors.toList());
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get all courses successfully!").data(courseDtos).build();
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Get all course failed!").data(null).build();
+            throw e;
         }
     }
 
@@ -62,7 +63,7 @@ public class CourseController {
         try {
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get all course pageable successfully!").data(courseService.getAllCoursesPageable(pageable)).build();
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Get all course pageable failed!").data(null).build();
+            throw e;
         }
     }
 
@@ -70,13 +71,9 @@ public class CourseController {
     public Response getCourseById(@PathVariable("courseId") Long courseId) {
         try {
             Optional<Course> courseOtp = courseService.getCourseById(courseId);
-            if (courseOtp.isPresent()) {
-                return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get course by id successfully!").data(convertToDto(courseOtp.get())).build();
-            } else {
-                return Response.builder().code(HttpStatus.NOT_FOUND.value()).success(false).message("Course not found!").data(null).build();
-            }
+            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get course by id successfully!").data(convertToDto(courseOtp.get())).build();
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Get course by id failed!").data(null).build();
+            throw e;
         }
     }
 
@@ -132,7 +129,7 @@ public class CourseController {
                                  @RequestParam("categoryId") Long categoryId,
                                  @RequestParam("startDate") String startDate,
                                  @RequestParam("state") @Nullable String state,
-                                 @RequestPart("thumbnail") @Nullable MultipartFile thumbnail) {
+                                 @RequestPart("thumbnail") @Nullable MultipartFile thumbnail) throws ParseException {
         try {
             String thumbnailUrl;
             SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
@@ -152,8 +149,7 @@ public class CourseController {
                     .build();
             return Response.builder().code(HttpStatus.CREATED.value()).success(true).message("Create course successfully!").data(courseService.saveCourse(course)).build();
         } catch (Exception e) {
-            e.printStackTrace();
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Create course failed!").data(null).build();
+            throw e;
         }
     }
 
@@ -161,19 +157,11 @@ public class CourseController {
     public Response editCourse(@PathVariable("courseId") Long courseId, @RequestBody CourseDto courseDto) {
         try {
             Optional<Course> courseOtp = courseService.getCourseById(courseId);
-            if (!courseOtp.isPresent()) {
-                return Response.builder().code(HttpStatus.OK.value()).success(false).message("Course not found!").data(null).build();
-            }
             Course course = courseOtp.get();
-            if (course != null) {
-                course = convertCourseDTO(courseDto, courseOtp);
-                return Response.builder().code(HttpStatus.OK.value()).success(true).message("Edit course successfully!").data(courseService.saveCourse(course)).build();
-            } else {
-                return Response.builder().code(HttpStatus.OK.value()).success(false).message("Course not found!").data(null).build();
-            }
+            course = convertCourseDTO(courseDto, courseOtp);
+            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Edit course successfully!").data(courseService.saveCourse(course)).build();
         } catch (Exception e) {
-            e.printStackTrace();
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Edit course failed!").data(null).build();
+            throw e;
         }
     }
 
@@ -182,7 +170,7 @@ public class CourseController {
         try {
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Delete course successfully!").data(courseService.deleteCourse(courseId)).build();
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Delete course failed!").data(null).build();
+            throw e;
         }
     }
 

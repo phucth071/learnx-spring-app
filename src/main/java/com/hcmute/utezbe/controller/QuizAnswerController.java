@@ -26,7 +26,7 @@ public class QuizAnswerController {
         try {
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get all quiz answer successfully!").data(quizAnswerService.getAllQuizAnswers()).build();
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Get all quiz answer failed!").data(null).build();
+            throw e;
         }
     }
 
@@ -35,7 +35,7 @@ public class QuizAnswerController {
         try {
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get quiz answer with id " + quizAnswerId + " successfully!").data(quizAnswerService.getQuizAnswerById(quizAnswerId)).build();
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Get quiz answer with id " + quizAnswerId + " failed!").data(null).build();
+            throw e;
         }
     }
 
@@ -49,7 +49,7 @@ public class QuizAnswerController {
                     .build();
             return Response.builder().code(HttpStatus.CREATED.value()).success(true).message("Create quiz answer successfully!").data(quizAnswerService.saveQuizAnswer(quizAnswer)).build();
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Create quiz answer failed!").data(null).build();
+            throw e;
         }
     }
 
@@ -57,19 +57,11 @@ public class QuizAnswerController {
     public Response editQuizAnswer(@PathVariable("quizAnswerId") Long quizAnswerId, @RequestBody QuizAnswerDto quizAnswerDto) {
         try {
             Optional<QuizAnswer> quizAnswerOptional = quizAnswerService.getQuizAnswerById(quizAnswerId);
-            if (!quizAnswerOptional.isPresent()) {
-                return Response.builder().code(HttpStatus.OK.value()).success(false).message("Quiz answer with id " + quizAnswerId + " not found!").data(null).build();
-            }
             QuizAnswer quizAnswer = quizAnswerOptional.get();
-            if (quizAnswer != null) {
-                quizAnswer = convertQuizAnswerDTO(quizAnswerDto, quizAnswerOptional);
-                return Response.builder().code(HttpStatus.OK.value()).success(true).message("Edit quiz answer with id " + quizAnswerId + " successfully!").data(quizAnswerService.saveQuizAnswer(quizAnswer)).build();
-            } else {
-                return Response.builder().code(HttpStatus.OK.value()).success(false).message("Quiz answer with id " + quizAnswerId + " not found!").data(null).build();
-            }
+            quizAnswer = convertQuizAnswerDTO(quizAnswerDto, quizAnswerOptional);
+            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Edit quiz answer with id " + quizAnswerId + " successfully!").data(quizAnswerService.saveQuizAnswer(quizAnswer)).build();
         } catch (Exception e) {
-            e.printStackTrace();
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Edit quiz answer with id " + quizAnswerId + " failed!").data(null).build();
+            throw e;
         }
     }
 
@@ -78,7 +70,7 @@ public class QuizAnswerController {
         try {
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Delete quiz answer with id " + quizAnswerId + " successfully!").data(quizAnswerService.deleteQuizAnswer(quizAnswerId)).build();
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Delete quiz answer with id " + quizAnswerId + " failed!").data(null).build();
+            throw e;
         }
     }
 

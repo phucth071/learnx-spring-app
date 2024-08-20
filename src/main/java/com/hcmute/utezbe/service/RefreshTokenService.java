@@ -2,7 +2,7 @@ package com.hcmute.utezbe.service;
 
 import com.hcmute.utezbe.entity.RefreshToken;
 import com.hcmute.utezbe.entity.User;
-import com.hcmute.utezbe.exception.ApiException;
+import com.hcmute.utezbe.exception.AuthenticationException;
 import com.hcmute.utezbe.repository.RefreshTokenRepository;
 import com.hcmute.utezbe.repository.UserRepository;
 import lombok.AllArgsConstructor;
@@ -41,7 +41,7 @@ public class RefreshTokenService {
     public RefreshToken verifyExpiration(RefreshToken token) {
         if(token.getExpiryDate().compareTo(Instant.now()) < 0) {
             refreshTokenRepository.delete(token);
-            throw new ApiException("Refresh token was expired. Please make a new signin request");
+            throw new AuthenticationException("Refresh token was expired. Please make a new signin request");
         }
         return token;
     }

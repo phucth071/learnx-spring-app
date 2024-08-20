@@ -2,12 +2,14 @@ package com.hcmute.utezbe.controller;
 
 import com.hcmute.utezbe.dto.AssignmentDto;
 import com.hcmute.utezbe.entity.Assignment;
+import com.hcmute.utezbe.exception.ResourceNotFoundException;
 import com.hcmute.utezbe.response.Response;
 import com.hcmute.utezbe.service.AssignmentService;
 import com.hcmute.utezbe.service.ModuleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
@@ -21,29 +23,33 @@ public class AssignmentController {
     private final ModuleService moduleService;
 
     @GetMapping("")
-    public Response getAllAssignment() {
+    public ResponseEntity<?> getAllAssignment() {
         try {
-            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get all assignment successfully!").data(assignmentService.getAllAssignments()).build();
+            return ResponseEntity.ok(Response.builder().code(HttpStatus.OK.value()).success(true).message("Get all assignment successfully!").data(assignmentService.getAllAssignments()).build());
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Get all assignment failed!").data(null).build();
+            throw e;
         }
     }
 
     @GetMapping("/pageable")
-    public Response getAllAssignmentsPageable(Pageable pageable) {
+    public ResponseEntity<?> getAllAssignmentsPageable(Pageable pageable) {
         try {
-            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get all assignment pageable successfully!").data(assignmentService.getAllAssignmentsPageable(pageable)).build();
+            return ResponseEntity.ok(Response.builder().code(HttpStatus.OK.value()).success(true).message("Get all assignment pageable successfully!").data(assignmentService.getAllAssignmentsPageable(pageable)).build());
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Get all assignment pageable failed!").data(null).build();
+            throw e;
         }
     }
 
     @GetMapping("/{assignmentId}")
-    public Response getAssignmentById(@PathVariable("assignmentId") Long assignmentId) {
+    public ResponseEntity<?> getAssignmentById(@PathVariable("assignmentId") Long assignmentId) {
         try {
-            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get assignment with id " + assignmentId + " successfully!").data(assignmentService.getAssignmentById(assignmentId)).build();
+            Assignment assignment = assignmentService.getAssignmentById(assignmentId).orElse(null);
+            if (assignment == null) {
+                throw new ResourceNotFoundException("Assignment with id " + assignmentId + " not found!");
+            }
+            return ResponseEntity.ok(Response.builder().code(HttpStatus.OK.value()).success(true).message("Get assignment with id " + assignmentId + " successfully!").data(assignmentService.getAssignmentById(assignmentId)).build());
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Get assignment with id " + assignmentId + " failed!").data(null).build();
+            throw e;
         }
     }
 
@@ -61,7 +67,7 @@ public class AssignmentController {
                     .build();
             return Response.builder().code(HttpStatus.CREATED.value()).success(true).message("Create assignment successfully!").data(assignmentService.saveAssignment(assignment)).build();
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Create assignment failed!").data(null).build();
+            throw e;
         }
     }
 
@@ -70,18 +76,17 @@ public class AssignmentController {
         try {
             Optional<Assignment> assignmentOptional = assignmentService.getAssignmentById(assignmentId);
             if (!assignmentOptional.isPresent()) {
-                return Response.builder().code(HttpStatus.OK.value()).success(false).message("Assignment with id " + assignmentId + " not found!").data(null).build();
+                throw new ResourceNotFoundException("Assignment with id " + assignmentId + " not found!");
             }
             Assignment assignment = assignmentOptional.get();
             if (assignment != null) {
                 assignment = convertAssignmentDTO(assignmentDto, assignmentOptional);
                 return Response.builder().code(HttpStatus.OK.value()).success(true).message("Edit assignment with id " + assignmentId + " successfully!").data(assignmentService.saveAssignment(assignment)).build();
             } else {
-                return Response.builder().code(HttpStatus.OK.value()).success(false).message("Assignment with id " + assignmentId + " not found!").data(null).build();
+                throw new ResourceNotFoundException("Assignment with id " + assignmentId + " not found!");
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Edit assignment with id " + assignmentId + " failed!").data(null).build();
+            throw e;
         }
     }
 
@@ -90,7 +95,7 @@ public class AssignmentController {
         try {
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Delete assignment with id " + assignmentId + " successfully!").data(assignmentService.deleteAssignment(assignmentId)).build();
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Delete assignment with id " + assignmentId + " failed!").data(null).build();
+            throw e;
         }
     }
 

@@ -6,6 +6,6 @@ public class AccessDeniedException extends RuntimeException {
     }
 
     public AccessDeniedException() {
-        super("Access denied");
+        super("You do not have permission to do this action!");
     }
 }

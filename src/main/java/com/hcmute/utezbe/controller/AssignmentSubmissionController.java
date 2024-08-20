@@ -2,6 +2,7 @@ package com.hcmute.utezbe.controller;
 
 import com.hcmute.utezbe.dto.AssignmentSubmissionDto;
 import com.hcmute.utezbe.entity.AssignmentSubmission;
+import com.hcmute.utezbe.exception.ResourceNotFoundException;
 import com.hcmute.utezbe.response.Response;
 import com.hcmute.utezbe.service.AssignmentService;
 import com.hcmute.utezbe.service.AssignmentSubmissionService;
@@ -27,7 +28,7 @@ public class AssignmentSubmissionController {
         try {
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get all assignment submission successfully!").data(assignmentSubmissionService.getAllAssignmentSubmissions()).build();
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Get all assignment submission failed!").data(null).build();
+            throw e;
         }
     }
 
@@ -36,7 +37,7 @@ public class AssignmentSubmissionController {
         try {
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get all assignment submission pageable successfully!").data(assignmentSubmissionService.getAllAssignmentSubmissionsPageable(pageable)).build();
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Get all assignment submission pageable failed!").data(null).build();
+            throw e;
         }
     }
 
@@ -47,10 +48,10 @@ public class AssignmentSubmissionController {
             if (assignmentSubmission.isPresent()) {
                 return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get assignment submission successfully!").data(assignmentSubmission.get()).build();
             } else {
-                return Response.builder().code(HttpStatus.NOT_FOUND.value()).success(false).message("Assignment submission not found!").data(null).build();
+                throw new ResourceNotFoundException();
             }
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Get assignment submission failed!").data(null).build();
+            throw e;
         }
     }
 
@@ -67,7 +68,7 @@ public class AssignmentSubmissionController {
                     .build();
             return Response.builder().code(HttpStatus.CREATED.value()).success(true).message("Create assignment submission successfully!").data(assignmentSubmissionService.saveAssignmentSubmission(assignmentSubmission)).build();
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Create assignment submission failed!").data(null).build();
+            throw e;
         }
     }
 
@@ -81,10 +82,10 @@ public class AssignmentSubmissionController {
                 AssignmentSubmission savedSubmission = assignmentSubmissionService.updateAssignmentSubmission(existingSubmission, updatedSubmission);
                 return Response.builder().code(HttpStatus.OK.value()).success(true).message("Assignment submission updated successfully!").data(savedSubmission).build();
             } else {
-                return Response.builder().code(HttpStatus.NOT_FOUND.value()).success(false).message("Assignment submission not found!").data(null).build();
+                throw new ResourceNotFoundException();
             }
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Update assignment submission failed!").data(null).build();
+            throw e;
         }
     }
 
@@ -94,8 +95,7 @@ public class AssignmentSubmissionController {
             assignmentSubmissionService.deleteAssignmentSubmission(assignmentId, studentId);
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Assignment submission deleted successfully!").data(null).build();
         } catch (Exception e) {
-            System.out.println("Assignment submission deletion failed!" + e.getMessage());
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Delete assignment submission failed!").data(null).build();
+            throw e;
         }
     }
 

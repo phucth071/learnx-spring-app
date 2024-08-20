@@ -38,6 +38,7 @@ public class AssignmentSubmission extends Auditable {
     @JsonIgnore
     private Assignment assignment;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "student_id", foreignKey = @ForeignKey(name = "FK_assignment_submission_account"),
     insertable = false, updatable = false)

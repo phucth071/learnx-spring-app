@@ -24,7 +24,7 @@ public class ResourcesController {
         try {
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get all resources successfully!").data(resourcesService.getAllResources()).build();
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Get all resources failed!").data(null).build();
+            throw e;
         }
     }
 
@@ -33,7 +33,7 @@ public class ResourcesController {
         try {
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get resources with id " + resourcesId + " successfully!").data(resourcesService.getResourcesById(resourcesId)).build();
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Get resources with id " + resourcesId + " failed!").data(null).build();
+            throw e;
         }
     }
 
@@ -47,7 +47,7 @@ public class ResourcesController {
                     .build();
             return Response.builder().code(HttpStatus.CREATED.value()).success(true).message("Create resources successfully!").data(resourcesService.saveResources(resources)).build();
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Create lecture failed!").data(null).build();
+            throw e;
         }
     }
 
@@ -55,19 +55,11 @@ public class ResourcesController {
     public Response editResources(@PathVariable("resourcesId") Long resourcesId, @RequestBody ResourcesDto resourcesDto) {
         try{
             Optional<Resources> optionalResources = resourcesService.getResourcesById(resourcesId);
-            if (!optionalResources.isPresent()) {
-                return Response.builder().code(HttpStatus.OK.value()).success(false).message("Resources with id " + resourcesId + " not found!").data(null).build();
-            }
             Resources resources = optionalResources.get();
-            if(resources != null) {
-                resources = convertResourcesDTO(resourcesDto, optionalResources);
-                return Response.builder().code(HttpStatus.OK.value()).success(true).message("Edit resources with id " + resourcesId + " successfully!").data(resourcesService.saveResources(resources)).build();
-            } else {
-                return Response.builder().code(HttpStatus.OK.value()).success(false).message("Resources with id " + resourcesId + " not found!").data(null).build();
-            }
+            resources = convertResourcesDTO(resourcesDto, optionalResources);
+            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Edit resources with id " + resourcesId + " successfully!").data(resourcesService.saveResources(resources)).build();
         } catch (Exception e) {
-            e.printStackTrace();
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Edit resources with id " + resourcesId + " failed!").data(null).build();
+            throw e;
         }
     }
 
@@ -76,7 +68,7 @@ public class ResourcesController {
         try {
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Delete resources with id " + resourcesId + " successfully!").data(resourcesService.deleteResources(resourcesId)).build();
         } catch (Exception e) {
-            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Delete resources with id " + resourcesId + " failed!").data(null).build();
+            throw e;
         }
     }
 
