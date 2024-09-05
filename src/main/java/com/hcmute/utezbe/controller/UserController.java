@@ -1,5 +1,6 @@
 package com.hcmute.utezbe.controller;
 
+import com.hcmute.utezbe.auth.AuthService;
 import com.hcmute.utezbe.dto.AuthUserDto;
 import com.hcmute.utezbe.dto.UserDto;
 import com.hcmute.utezbe.entity.User;
@@ -21,6 +22,7 @@ import java.util.Optional;
 public class UserController {
     private final UserService userService;
     private final CloudinaryService cloudinary;
+    private final AuthService authService;
     @GetMapping("/info")
     public Response getUserInfo(Principal principal) {
         if(principal == null) {

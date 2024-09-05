@@ -2,8 +2,10 @@ package com.hcmute.utezbe.auth;
 
 import com.hcmute.utezbe.auth.request.*;
 import com.hcmute.utezbe.response.Response;
+import com.hcmute.utezbe.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +22,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AuthController {
     private final AuthService service;
+    private final UserService userService;
 
     @PostMapping("/authenticate")
     public ResponseEntity<?> authenticate(
@@ -52,6 +55,19 @@ public class AuthController {
     @PostMapping("/resend-otp")
     public ResponseEntity<?> resendOTP(@RequestParam String email) {
         return ResponseEntity.ok(service.resendOTP(email));
+    }
+
+    @PostMapping("logout/{userId}")
+    public Response logout(Principal principal, @PathVariable("userId") Long userId) {
+        var currentUser = userService.findByEmailIgnoreCase(principal.getName());
+        if(principal == null || currentUser.isEmpty()) {
+            throw new RuntimeException("User not found!");
+        }
+        if (currentUser.get().getId() != userId) {
+            throw new RuntimeException("User not found!");
+        }
+        service.logout(userId);
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Logout successfully!").build();
     }
 
 

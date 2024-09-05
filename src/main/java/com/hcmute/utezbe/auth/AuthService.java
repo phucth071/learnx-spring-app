@@ -224,8 +224,15 @@ public class AuthService {
                 .build();
     }
 
-    public Response logout(RefreshTokenRequest request) {
-        refreshTokenService.deleteByToken(request.getToken());
+    public Response logout(Long userId) {
+        if (userId == null) {
+            throw new RuntimeException("User not found!");
+        }
+        RefreshToken refreshToken = refreshTokenService.findByUserId(userId);
+        if (refreshToken == null) {
+            throw new RuntimeException("User not found!");
+        }
+        refreshTokenService.deleteByToken(refreshToken.getToken());
         return Response.builder()
                 .code(HttpStatus.OK.value())
                 .success(true)

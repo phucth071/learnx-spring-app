@@ -45,4 +45,12 @@ public class RefreshTokenService {
         }
         return token;
     }
+
+    public RefreshToken findByUserId(Long userId) {
+        return refreshTokenRepository.findByUserId(userId).orElse(null);
+    }
+
+    public void deleteByToken(String token) {
+        refreshTokenRepository.deleteByToken(token);
+    }
 }
