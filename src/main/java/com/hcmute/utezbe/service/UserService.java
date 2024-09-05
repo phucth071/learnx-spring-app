@@ -1,5 +1,7 @@
 package com.hcmute.utezbe.service;
 
+import com.hcmute.utezbe.auth.AuthService;
+import com.hcmute.utezbe.dto.UserDto;
 import com.hcmute.utezbe.entity.User;
 import com.hcmute.utezbe.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -31,5 +33,27 @@ public class UserService {
     }
     public int enableUser(String email) {
         return userRepository.enableUser(email);
+    }
+
+    public User saveUser(User user) {
+        User dbUser = userRepository.findByEmailIgnoreCase(user.getEmail()).orElse(null);
+        if (dbUser != null) {
+            throw new RuntimeException("User with email " + user.getEmail() + " already exists!");
+        }
+        return userRepository.save(user);
+    }
+
+    public User patchUser(UserDto user) {
+        User dbUser = userRepository.findByEmailIgnoreCase(user.getEmail()).orElse(null);
+        if (dbUser == null) {
+            throw new RuntimeException("User with email " + user.getEmail() + " not found!");
+        }
+        if (AuthService.getCurrentUser().getId() != dbUser.getId()) {
+            throw new RuntimeException("You do not have permission to do this action!");
+        }
+        dbUser.setFullName(user.getFullName());
+        dbUser.setAvatarUrl(user.getAvatar());
+        dbUser.setRole(user.getRole());
+        return userRepository.save(dbUser);
     }
 }

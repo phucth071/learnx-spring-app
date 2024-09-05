@@ -19,6 +19,6 @@ public class CourseDto {
     private String description;
     private Long categoryId;
 
-    private List<UserDto> students;
+    private List<AuthUserDto> students;
     private List<ModuleDto> modules;
 }

@@ -23,11 +23,11 @@ public class TopicComment extends Auditable{
     private String content;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "account_id", foreignKey = @ForeignKey(name = "FK_topic_comment_account"))
+    @JoinColumn(name = "account_id")
     private User account;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "topic_id", foreignKey = @ForeignKey(name = "FK_topic_comment_topic"))
+    @JoinColumn(name = "topic_id")
     private Topic topic;
 
 }

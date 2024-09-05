@@ -1,9 +1,6 @@
 package com.hcmute.utezbe.auth;
 
-import com.hcmute.utezbe.auth.request.AuthenticationRequest;
-import com.hcmute.utezbe.auth.request.IdTokenRequest;
-import com.hcmute.utezbe.auth.request.RefreshTokenRequest;
-import com.hcmute.utezbe.auth.request.RegisterRequest;
+import com.hcmute.utezbe.auth.request.*;
 import com.hcmute.utezbe.response.Response;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -12,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
 import java.security.Principal;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,9 +29,9 @@ public class AuthController {
     }
 
     @PostMapping("/oauth2/google")
-    public ResponseEntity<?> oauthAuthenticate(@RequestBody IdTokenRequest idTokenRequest, HttpServletResponse response) {
-        System.out.println("TOKEN REQUEST:::" + idTokenRequest.getIdToken());
-        return ResponseEntity.ok(service.loginWithGoogle(idTokenRequest));
+    public ResponseEntity<?> oauthAuthenticate(@RequestBody IdTokenRequest IdTokenRequest, HttpServletResponse response) throws IOException {
+        System.out.println("TOKEN REQUEST:::" + IdTokenRequest.getIdToken());
+        return ResponseEntity.ok(service.loginWithGoogle(IdTokenRequest));
     }
 
     @PostMapping("/refresh-token")

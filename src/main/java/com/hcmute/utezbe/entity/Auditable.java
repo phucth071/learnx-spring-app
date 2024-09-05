@@ -21,17 +21,17 @@ import java.time.LocalDateTime;
         allowGetters = true)
 public abstract class Auditable {
 
-    @NotNull
-//    Tham chiếu đến Id của Account
-//    (tránh trường hợp ID create hoặc modified không tồn tại trong bảng Account)
-//    @ManyToOne
-//    @JoinColumn(name = "created_by", referencedColumnName = "id")
-//    private User createdBy;
-    private Long createdBy;
-//    @ManyToOne
-//    @JoinColumn(name = "created_by", referencedColumnName = "id")
-//    private User createdBy;
-    private Long updatedBy;
+//    @NotNull
+////    Tham chiếu đến Id của Account
+////    (tránh trường hợp ID create hoặc modified không tồn tại trong bảng Account)
+////    @ManyToOne
+////    @JoinColumn(name = "created_by", referencedColumnName = "id")
+////    private User createdBy;
+//    private Long createdBy;
+////    @ManyToOne
+////    @JoinColumn(name = "created_by", referencedColumnName = "id")
+////    private User createdBy;
+//    private Long updatedBy;
     @NotNull
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -48,9 +48,9 @@ public abstract class Auditable {
             userId = 0L;
         }
         setCreatedAt(LocalDateTime.now());
-        setCreatedBy(userId);
+//        setCreatedBy(userId);
         setUpdatedAt(LocalDateTime.now());
-        setUpdatedBy(userId);
+//        setUpdatedBy(userId);
     }
 
     @PreUpdate
@@ -61,6 +61,6 @@ public abstract class Auditable {
             userId = 0L;
         };
         setUpdatedAt(LocalDateTime.now());
-        setUpdatedBy(userId);
+//        setUpdatedBy(userId);
     }
 }

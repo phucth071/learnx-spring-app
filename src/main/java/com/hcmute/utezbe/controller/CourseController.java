@@ -3,7 +3,7 @@ package com.hcmute.utezbe.controller;
 import com.hcmute.utezbe.domain.RequestContext;
 import com.hcmute.utezbe.dto.CourseDto;
 import com.hcmute.utezbe.dto.ModuleDto;
-import com.hcmute.utezbe.dto.UserDto;
+import com.hcmute.utezbe.dto.AuthUserDto;
 import com.hcmute.utezbe.entity.Course;
 import com.hcmute.utezbe.entity.Module;
 
@@ -89,11 +89,11 @@ public class CourseController {
             courseDto.setCategoryId(course.getCategory().getId());
         }
 
-        List<UserDto> studentDtos = course.getCourseRegistrations().stream()
+        List<AuthUserDto> studentDtos = course.getCourseRegistrations().stream()
                 .filter(registration -> registration.getStudent().getRole() == Role.STUDENT)
                 .map(registration -> {
                     User student = registration.getStudent();
-                    UserDto studentDto = new UserDto();
+                    AuthUserDto studentDto = new AuthUserDto();
                     studentDto.setFullName(student.getFullName());
                     studentDto.setEmail(student.getEmail());
                     return studentDto;
@@ -154,12 +154,26 @@ public class CourseController {
     }
 
     @PatchMapping("/{courseId}")
-    public Response editCourse(@PathVariable("courseId") Long courseId, @RequestBody CourseDto courseDto) {
+    public Response editCourse(@PathVariable("courseId") Long courseId,
+                               @RequestParam("name") String name,
+                               @RequestParam("description") String description,
+                               @RequestParam("categoryId") Long categoryId,
+                               @RequestParam("startDate") String startDate,
+                               @RequestParam("state") @Nullable String state,
+                               @RequestPart("thumbnail") @Nullable MultipartFile thumbnail) throws ParseException {
         try {
             Optional<Course> courseOtp = courseService.getCourseById(courseId);
             Course course = courseOtp.get();
-            course = convertCourseDTO(courseDto, courseOtp);
-            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Edit course successfully!").data(courseService.saveCourse(course)).build();
+            course.setName(name);
+            course.setDescription(description);
+            course.setCategory(categoryService.getCategoryById(categoryId).get());
+            course.setStartDate(new SimpleDateFormat("yyyy-MM-dd").parse(startDate));
+            course.setState(state != null ? State.valueOf(state) : State.OPEN);
+            if (thumbnail != null) {
+                course.setThumbnail(cloudinaryService.upload(thumbnail));
+            }
+            CourseDto courseDto = convertToDto(courseService.saveCourse(course));
+            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Edit course successfully!").data(courseDto).build();
         } catch (Exception e) {
             throw e;
         }

@@ -1,20 +1,22 @@
 package com.hcmute.utezbe.auth;
 
+import com.cloudinary.api.exceptions.ApiException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
-import com.hcmute.utezbe.auth.request.AuthenticationRequest;
-import com.hcmute.utezbe.auth.request.RefreshTokenRequest;
-import com.hcmute.utezbe.auth.request.RegisterRequest;
+import com.hcmute.utezbe.auth.request.*;
 import com.hcmute.utezbe.domain.RequestContext;
-import com.hcmute.utezbe.auth.request.IdTokenRequest;
+import com.hcmute.utezbe.dto.UserDto;
 import com.hcmute.utezbe.entity.ConfirmToken;
 import com.hcmute.utezbe.entity.enumClass.Provider;
 import com.hcmute.utezbe.entity.RefreshToken;
 import com.hcmute.utezbe.entity.enumClass.Role;
 import com.hcmute.utezbe.entity.User;
+import com.hcmute.utezbe.exception.AccessDeniedException;
 import com.hcmute.utezbe.exception.AuthenticationException;
 import com.hcmute.utezbe.response.Response;
 import com.hcmute.utezbe.security.jwt.JWTService;
@@ -22,6 +24,7 @@ import com.hcmute.utezbe.service.ConfirmTokenService;
 import com.hcmute.utezbe.service.JavaMailService;
 import com.hcmute.utezbe.service.RefreshTokenService;
 import com.hcmute.utezbe.service.UserService;
+import com.nimbusds.openid.connect.sdk.LogoutRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -32,6 +35,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
+
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -50,16 +55,20 @@ public class AuthService {
     private final EmailValidator emailValidator;
     private final ConfirmTokenService confirmTokenService;
     private final JavaMailService emailService;
+
+    private static final String CLIENT_ID = "660554863773-c5na5d9dvnogok0i23ekgnpr15to3rvn.apps.googleusercontent.com";
+    private static final String CLIENT_SECRET = "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";
+    private static final String REDIRECT_URI = "http://localhost:3000";
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public Response register(RegisterRequest request) {
+    public UserDto register(RegisterRequest request) {
         boolean isValidEmail = emailValidator.test(request.getEmail());
         if (!isValidEmail) {
-            return Response.builder().code(HttpStatus.BAD_REQUEST.value()).message("Email is not valid!").success(false).build();
+            throw new RuntimeException("Email is not valid!");
         }
         Optional<User> opt = userService.findByEmailIgnoreCase(request.getEmail());
         if (opt.isPresent()) {
-            return Response.builder().code(HttpStatus.BAD_REQUEST.value()).message("Email already exists!").success(false).build();
+            throw new RuntimeException("Email already exists!");
         }
         User user = User.builder()
                 .email(request.getEmail())
@@ -84,20 +93,20 @@ public class AuthService {
 
         confirmTokenService.saveConfirmationToken(confirmToken);
         emailService.send(request.getEmail(), buildEmailOTP(request.getFullName(), token));
-        return Response.builder().code(HttpStatus.OK.value()).message("Register Successfully! Please check your email").success(true).build();
+        return UserDto.convertToDto(user);
     }
 
     public Response confirmOTP(String token) {
         Optional<ConfirmToken> otpConfirmToken = confirmTokenService.getToken(token);
         if (otpConfirmToken.isEmpty()) {
-            return Response.builder().code(HttpStatus.BAD_REQUEST.value()).message("Invalid OTP!").success(false).build();
+            throw new RuntimeException("Invalid OTP!");
         }
         ConfirmToken confirmToken = otpConfirmToken.get();
         if (confirmToken.getConfirmedAt() != null) {
-            return Response.builder().code(HttpStatus.BAD_REQUEST.value()).message("Account already confirmed!").success(false).build();
+            throw new RuntimeException("OTP already confirmed!");
         }
         if (confirmToken.getExpiredAt().isBefore(LocalDateTime.now())) {
-            return Response.builder().code(HttpStatus.BAD_REQUEST.value()).message("OTP is expired! Please request another OTP").success(false).build();
+            throw new RuntimeException("OTP expired!");
         }
         confirmTokenService.setConfirmedAt(token);
         userService.enableUser(confirmToken.getUser().getEmail());
@@ -106,8 +115,14 @@ public class AuthService {
 
     public Response resendOTP(String email) {
         User user = userService.findByEmailIgnoreCase(email).orElseThrow(() -> new AuthenticationException("User not found"));
+        if (user == null) {
+            throw new AuthenticationException("User not found!");
+        }
+        if (user.getProvider() == Provider.GOOGLE) {
+            throw new AuthenticationException("Email already registered by another method!");
+        }
         if (user.isEnabled()) {
-            return Response.builder().code(HttpStatus.BAD_REQUEST.value()).message("Account already confirmed!").success(false).build();
+            throw new RuntimeException("Account already confirmed!");
         }
         String newOtp = generateOTP();
         ConfirmToken confirmToken = ConfirmToken.builder()
@@ -120,6 +135,7 @@ public class AuthService {
         emailService.send(email, buildEmailOTP(user.getFullName(), newOtp));
         return Response.builder().code(HttpStatus.OK.value()).message("OTP sent successfully! Please check your email").success(true).build();
     }
+
 
     private String generateOTP() {
         return new DecimalFormat("000000")
@@ -198,6 +214,7 @@ public class AuthService {
                 .data(objectMapper.createObjectNode()
                         .putObject("user")
                         .put("accessToken", jwtToken)
+                        .put("refreshToken", jwtRefreshToken.getToken())
                         .put("fullName", user.getFullName())
                         .put("email", user.getEmail())
                         .put("avatar", user.getAvatarUrl())
@@ -207,23 +224,49 @@ public class AuthService {
                 .build();
     }
 
+    public Response logout(RefreshTokenRequest request) {
+        refreshTokenService.deleteByToken(request.getToken());
+        return Response.builder()
+                .code(HttpStatus.OK.value())
+                .success(true)
+                .message("Logout Successfully!")
+                .build();
+    }
+
+    public Response changePassword(ChangePasswordRequest request) {
+        User user = userService.findByEmailIgnoreCase(request.getEmail()).orElseThrow(() -> new RuntimeException("User not found"));
+        if (user.getEmail() != AuthService.getCurrentUser().getEmail()) {
+            throw new AccessDeniedException("You do not have permission to change password!");
+        }
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            throw new RuntimeException("Old password is incorrect!");
+        }
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userService.save(user);
+        return Response.builder()
+                .code(HttpStatus.OK.value())
+                .success(true)
+                .message("Change password successfully!")
+                .build();
+    }
+
+//   TODO: reset USER password using link (token = uuid)
+
+    public GoogleTokenResponse exchangeCode(String authCode) throws IOException {
+        return new GoogleAuthorizationCodeTokenRequest(
+                new NetHttpTransport(),
+                JacksonFactory.getDefaultInstance(),
+                "https://oauth2.googleapis.com/token",
+                CLIENT_ID,
+                CLIENT_SECRET,
+                authCode,
+                REDIRECT_URI)
+                .execute();
+    }
 
     @Transactional
-    public Response loginWithGoogle(IdTokenRequest idTokenRequest) {
-        String googleClientId = "660554863773-c5na5d9dvnogok0i23ekgnpr15to3rvn.apps.googleusercontent.com";
-        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new JacksonFactory())
-                .setAudience(Collections.singleton(googleClientId))
-                .build();
-        GoogleIdToken token;
-        try {
-            token = verifier.verify(idTokenRequest.getIdToken());
-            if (Objects.isNull(token)) {
-                throw new AuthenticationException("Invalid id token");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
+    public Response loginWithGoogle(IdTokenRequest idTokenRequest) throws IOException {
+//        GoogleTokenResponse tokenResponse = exchangeCode(authCode.getAuthCode());
         User user = verifyGoogleIdToken(idTokenRequest.getIdToken());
         if (user == null) {
             throw new AuthenticationException("Invalid id token");
@@ -238,6 +281,7 @@ public class AuthService {
                 .message("Login successfully!")
                 .data(objectMapper.createObjectNode()
                         .put("access_token", accessToken)
+                        .put("refreshToken", refreshToken.getToken())
                         .put("email", user.getEmail())
                         .put("full_name", user.getFullName())
                         .put("avatar", user.getAvatarUrl())
@@ -247,9 +291,10 @@ public class AuthService {
     }
 
     private User verifyGoogleIdToken(String idToken) {
-        String googleClientId = "660554863773-c5na5d9dvnogok0i23ekgnpr15to3rvn.apps.googleusercontent.com";
-        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new JacksonFactory())
-                .setAudience(Collections.singleton(googleClientId))
+        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(
+                new NetHttpTransport(),
+                JacksonFactory.getDefaultInstance())
+                .setAudience(Collections.singletonList(CLIENT_ID))
                 .build();
         try {
             var token = verifier.verify(idToken);
@@ -308,16 +353,21 @@ public class AuthService {
                                     .put("refreshToken", refreshTokenRequest.getToken()))
                             .code(HttpStatus.OK.value())
                             .success(true)
-                            .message("Refresh Token Successfully!")
+                            .message("Get new token Successfully!")
                             .build();
                 })
                 .orElseThrow(() -> new RuntimeException(
-                        "Refresh Token not in database!"));
+                        "Invalid refresh token"));
     }
 
     public static boolean isUserHaveRole(Role role) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return (authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals(role.name())));
+    }
+
+    public static User getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return (User) authentication.getPrincipal();
     }
 
     public static boolean checkTeacherRole() {

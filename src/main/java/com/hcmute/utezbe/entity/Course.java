@@ -48,7 +48,7 @@ public class Course extends Auditable {
 
     @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "teacher_id", foreignKey = @ForeignKey(name = "FK_course_account"))
+    @JoinColumn(name = "teacher_id")
     private User teacher;
 
     @JsonBackReference
