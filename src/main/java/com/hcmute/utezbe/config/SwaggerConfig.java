@@ -30,15 +30,21 @@ public class SwaggerConfig  {
                 .type(SecurityScheme.Type.HTTP)
                 .scheme("bearer")
                 .bearerFormat("JWT")
-                .in(SecurityScheme.In.HEADER)
-                .name("Authorization");
+                .in(SecurityScheme.In.COOKIE)
+                .name("access_token");
     }
     @Bean
     public OpenAPI myOpenAPI() {
         return new OpenAPI()
-                .addSecurityItem(new SecurityRequirement()
-                        .addList("bearer-jwt"))
-                .components(new Components().addSecuritySchemes("bearer-jwt", securityScheme()))
+//                .addSecurityItem(new SecurityRequirement()
+//                        .addList("jwt"))
+//                .components(new Components().addSecuritySchemes("jwt", securityScheme()))
+                .components(new Components()
+                        .addSecuritySchemes("cookieAuth", new SecurityScheme()
+                                .type(SecurityScheme.Type.APIKEY)
+                                .in(SecurityScheme.In.COOKIE)
+                                .name("access_token")))
+                .addSecurityItem(new SecurityRequirement().addList("cookieAuth"))
                 .info(new Info().title("UTEZBE API").version("1.0.0"));
 
     }

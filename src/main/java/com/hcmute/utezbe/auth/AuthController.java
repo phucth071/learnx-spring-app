@@ -1,5 +1,6 @@
 package com.hcmute.utezbe.auth;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.hcmute.utezbe.auth.request.*;
 import com.hcmute.utezbe.response.Response;
 import com.hcmute.utezbe.service.UserService;
@@ -26,9 +27,28 @@ public class AuthController {
 
     @PostMapping("/authenticate")
     public ResponseEntity<?> authenticate(
-            @RequestBody AuthenticationRequest request
+            @RequestBody AuthenticationRequest request, HttpServletResponse response
     ) {
-        return ResponseEntity.ok(service.authenticate(request));
+        var authResponse = service.authenticate(request);
+
+        // Set cookie
+        if (authResponse.isSuccess()) {
+            ObjectNode data = (ObjectNode) authResponse.getData();
+            var accessToken = data.get("accessToken").asText();
+            var refreshToken = data.get("refreshToken").asText();
+
+            response.addHeader(HttpHeaders.SET_COOKIE, ResponseCookie.from("access_token", accessToken)
+                    .httpOnly(true)
+                    .maxAge(60 * 60 * 24 * 7)
+                    .path("/")
+                    .build().toString());
+            response.addHeader(HttpHeaders.SET_COOKIE, ResponseCookie.from("refresh_token", refreshToken)
+                    .httpOnly(true)
+                    .maxAge(60 * 60 * 24 * 7)
+                    .path("/")
+                    .build().toString());
+        }
+        return ResponseEntity.ok(authResponse);
     }
 
     @PostMapping("/oauth2/google")
