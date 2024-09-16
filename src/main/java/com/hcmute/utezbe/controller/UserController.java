@@ -1,6 +1,7 @@
 package com.hcmute.utezbe.controller;
 
 import com.hcmute.utezbe.auth.AuthService;
+import com.hcmute.utezbe.auth.request.ChangePasswordRequest;
 import com.hcmute.utezbe.dto.AuthUserDto;
 import com.hcmute.utezbe.dto.UserDto;
 import com.hcmute.utezbe.entity.User;
@@ -9,6 +10,7 @@ import com.hcmute.utezbe.service.CloudinaryService;
 import com.hcmute.utezbe.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -65,7 +67,9 @@ public class UserController {
         }
     }
 
-//    TODO: Implement USER change password (request = ChangePasswordRequest
+    @PostMapping("/user/change-password")
+    public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest request) {
+        return ResponseEntity.ok(authService.changePassword(request));
+    }
 
-//    TODO: Implement USER forgot password
 }

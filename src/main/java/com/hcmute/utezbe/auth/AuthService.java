@@ -12,6 +12,7 @@ import com.hcmute.utezbe.auth.request.*;
 import com.hcmute.utezbe.domain.RequestContext;
 import com.hcmute.utezbe.dto.UserDto;
 import com.hcmute.utezbe.entity.ConfirmToken;
+import com.hcmute.utezbe.entity.ForgotPasswordToken;
 import com.hcmute.utezbe.entity.enumClass.Provider;
 import com.hcmute.utezbe.entity.RefreshToken;
 import com.hcmute.utezbe.entity.enumClass.Role;
@@ -20,10 +21,7 @@ import com.hcmute.utezbe.exception.AccessDeniedException;
 import com.hcmute.utezbe.exception.AuthenticationException;
 import com.hcmute.utezbe.response.Response;
 import com.hcmute.utezbe.security.jwt.JWTService;
-import com.hcmute.utezbe.service.ConfirmTokenService;
-import com.hcmute.utezbe.service.JavaMailService;
-import com.hcmute.utezbe.service.RefreshTokenService;
-import com.hcmute.utezbe.service.UserService;
+import com.hcmute.utezbe.service.*;
 import com.nimbusds.openid.connect.sdk.LogoutRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -39,10 +37,7 @@ import jakarta.transaction.Transactional;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -55,6 +50,7 @@ public class AuthService {
     private final EmailValidator emailValidator;
     private final ConfirmTokenService confirmTokenService;
     private final JavaMailService emailService;
+    private final ForgotPasswordService forgotPasswordService;
 
     private static final String CLIENT_ID = "660554863773-c5na5d9dvnogok0i23ekgnpr15to3rvn.apps.googleusercontent.com";
     private static final String CLIENT_SECRET = "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";
@@ -92,11 +88,12 @@ public class AuthService {
                 .build();
 
         confirmTokenService.saveConfirmationToken(confirmToken);
-        emailService.send(request.getEmail(), buildEmailOTP(request.getFullName(), token));
+        String message = "Mã OTP để xác nhận tài khoản của bạn là: <span>" + token + "</span>";
+        emailService.send(request.getEmail(), buildEmailOTP(request.getFullName(), message));
         return UserDto.convertToDto(user);
     }
 
-    public Response confirmOTP(String token) {
+    public Response confirmOTP(String token, String email) {
         Optional<ConfirmToken> otpConfirmToken = confirmTokenService.getToken(token);
         if (otpConfirmToken.isEmpty()) {
             throw new RuntimeException("Invalid OTP!");
@@ -108,16 +105,18 @@ public class AuthService {
         if (confirmToken.getExpiredAt().isBefore(LocalDateTime.now())) {
             throw new RuntimeException("OTP expired!");
         }
+        if (!confirmToken.getUser().getEmail().equals(email)) {
+            throw new RuntimeException("Invalid OTP!");
+        }
         confirmTokenService.setConfirmedAt(token);
         userService.enableUser(confirmToken.getUser().getEmail());
         return Response.builder().code(HttpStatus.OK.value()).message("Account confirmed successfully!").success(true).build();
     }
 
+
     public Response resendOTP(String email) {
+        System.out.println("EMAIL:" + email);
         User user = userService.findByEmailIgnoreCase(email).orElseThrow(() -> new AuthenticationException("User not found"));
-        if (user == null) {
-            throw new AuthenticationException("User not found!");
-        }
         if (user.getProvider() == Provider.GOOGLE) {
             throw new AuthenticationException("Email already registered by another method!");
         }
@@ -132,7 +131,8 @@ public class AuthService {
                 .expiredAt(LocalDateTime.now().plusMinutes(15))
                 .build();
         confirmTokenService.saveConfirmationToken(confirmToken);
-        emailService.send(email, buildEmailOTP(user.getFullName(), newOtp));
+        String message = "Mã OTP để xác nhận tài khoản của bạn là: <span>" + newOtp + "</span>";
+        emailService.send(email, buildEmailOTP(user.getFullName(), message));
         return Response.builder().code(HttpStatus.OK.value()).message("OTP sent successfully! Please check your email").success(true).build();
     }
 
@@ -142,7 +142,7 @@ public class AuthService {
                 .format(new Random().nextInt(999999));
     }
 
-    private String buildEmailOTP(String name, String otp) {
+    private String buildEmailOTP(String name, String message) {
         return "<html>\n" +
                 "  <head>\n" +
                 "    <style>\n" +
@@ -177,7 +177,7 @@ public class AuthService {
                 "  <body>\n" +
                 "    <div class=\"container\">\n" +
                 "      <h1>Xin Chào, " + name + "!</h1>\n" +
-                "      <h2>Mã OTP để xác nhận tài khoản của bạn là: <span>" + otp + "</span></h2>\n" +
+                "      <h2> " + message + "</h2>\n" +
                 "      <h3>Trân trọng!</h3>\n" +
                 "    </div>\n" +
                 "  </body>\n" +
@@ -257,8 +257,42 @@ public class AuthService {
                 .build();
     }
 
-//   TODO: reset USER password using link (token = uuid)
+    public Response sendForgotPasswordToken(String email) {
+        User user = userService.findByEmailIgnoreCase(email).orElseThrow(() -> new RuntimeException("User not found"));
+        String token = UUID.randomUUID().toString();
+        ForgotPasswordToken forgotPasswordToken = ForgotPasswordToken.builder()
+                .token(token)
+                .user(user)
+                .expiredAt(LocalDateTime.now().plusMinutes(15))
+                .build();
+        forgotPasswordService.saveForgotPasswordToken(forgotPasswordToken);
+        String message = "Ấn vào liên kết sau để reset mật khẩu của bạn: <a href='http://localhost:3000/reset-password?token=" + token + "'>Reset Password</a>";
+        emailService.send(email, buildEmailOTP(user.getFullName(), message));
+        return Response.builder()
+                .code(HttpStatus.OK.value())
+                .success(true)
+                .message("Reset password link sent successfully! Please check your email")
+                .build();
+    }
 
+    public Response resetPassword(ForgotPasswordRequest request) {
+        ForgotPasswordToken forgotPasswordToken = forgotPasswordService.findByToken(request.getToken());
+        if (forgotPasswordToken == null) {
+            throw new RuntimeException("Invalid token!");
+        }
+        if (forgotPasswordToken.getExpiredAt().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("Token expired!");
+        }
+        User user = forgotPasswordToken.getUser();
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        userService.save(user);
+        forgotPasswordService.delete(forgotPasswordToken);
+        return Response.builder()
+                .code(HttpStatus.OK.value())
+                .success(true)
+                .message("Reset password successfully!")
+                .build();
+    }
     public GoogleTokenResponse exchangeCode(String authCode) throws IOException {
         return new GoogleAuthorizationCodeTokenRequest(
                 new NetHttpTransport(),
@@ -354,10 +388,13 @@ public class AuthService {
                 .map(user -> {
                     RequestContext.setUserId(user.getId());
                     String accessToken = jwtService.generateAccessToken(user);
+                    String oldToken = refreshTokenRequest.getToken();
+                    RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getEmail());
+                    refreshTokenService.deleteByToken(oldToken);
                     return Response.builder()
                             .data(objectMapper.createObjectNode()
                                     .put("accessToken", accessToken)
-                                    .put("refreshToken", refreshTokenRequest.getToken()))
+                                    .put("refreshToken", refreshToken.getToken()))
                             .code(HttpStatus.OK.value())
                             .success(true)
                             .message("Get new token Successfully!")

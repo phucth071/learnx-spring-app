@@ -54,10 +54,27 @@ public class AuthController {
     @PostMapping("/oauth2/google")
     public ResponseEntity<?> oauthAuthenticate(@RequestBody IdTokenRequest IdTokenRequest, HttpServletResponse response) throws IOException {
         System.out.println("TOKEN REQUEST:::" + IdTokenRequest.getIdToken());
-        return ResponseEntity.ok(service.loginWithGoogle(IdTokenRequest));
+        var authResponse = service.loginWithGoogle(IdTokenRequest);
+        if (authResponse.isSuccess()) {
+            ObjectNode data = (ObjectNode) authResponse.getData();
+            var accessToken = data.get("accessToken").asText();
+            var refreshToken = data.get("refreshToken").asText();
+
+            response.addHeader(HttpHeaders.SET_COOKIE, ResponseCookie.from("access_token", accessToken)
+                    .httpOnly(true)
+                    .maxAge(60 * 60 * 24 * 7)
+                    .path("/")
+                    .build().toString());
+            response.addHeader(HttpHeaders.SET_COOKIE, ResponseCookie.from("refresh_token", refreshToken)
+                    .httpOnly(true)
+                    .maxAge(60 * 60 * 24 * 7)
+                    .path("/")
+                    .build().toString());
+        }
+        return ResponseEntity.ok(authResponse);
     }
 
-    @PostMapping("/refresh-token")
+    @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequest refreshTokenRequest) {
         return ResponseEntity.ok(service.refreshToken(refreshTokenRequest));
     }
@@ -68,13 +85,14 @@ public class AuthController {
     }
 
     @PostMapping("/register/confirm")
-    public ResponseEntity<?> confirm(@RequestParam("token") String token) {
-        return ResponseEntity.ok(service.confirmOTP(token));
+    public ResponseEntity<?> confirm(@RequestBody ConfirmRequest confirmRequest) {
+        System.out.println("OTP: " + confirmRequest.getOtp() + " Email: " + confirmRequest.getEmail());
+        return ResponseEntity.ok(service.confirmOTP(confirmRequest.getOtp(), confirmRequest.getEmail()));
     }
 
     @PostMapping("/resend-otp")
-    public ResponseEntity<?> resendOTP(@RequestParam String email) {
-        return ResponseEntity.ok(service.resendOTP(email));
+    public ResponseEntity<?> resendOTP(@RequestBody ResendOTPRequest request) {
+        return ResponseEntity.ok(service.resendOTP(request.getEmail()));
     }
 
     @PostMapping("logout/{userId}")
@@ -90,10 +108,13 @@ public class AuthController {
         return Response.builder().code(HttpStatus.OK.value()).success(true).message("Logout successfully!").build();
     }
 
-
-    @GetMapping("/user/info")
-    public ResponseEntity<?> getUserInfo(Principal principal) {
-        return ResponseEntity.ok(principal);
+    @PostMapping("/forgot-password/{email}")
+    public ResponseEntity<?> forgotPassword(@PathVariable("email") String email) {
+        return ResponseEntity.ok(service.sendForgotPasswordToken(email));
     }
 
+    @PostMapping("/forgot-password/confirm")
+    public ResponseEntity<?> confirmForgotPassword(@RequestBody ForgotPasswordRequest request) {
+        return ResponseEntity.ok(service.resetPassword(request));
+    }
 }
