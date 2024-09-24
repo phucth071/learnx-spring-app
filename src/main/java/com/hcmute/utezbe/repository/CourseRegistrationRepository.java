@@ -19,4 +19,6 @@ public interface CourseRegistrationRepository extends JpaRepository<CourseRegist
 
     void deleteAllByCourseId(Long courseId);
 
+    Page<CourseRegistration> findAllByStudentEmail(String email, Pageable pageable);
+
 }

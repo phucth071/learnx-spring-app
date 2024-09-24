@@ -43,6 +43,14 @@ public class CourseRegistrationService {
         return courseRegistrations;
     }
 
+    public Page<CourseRegistration> getCoursesRegistrationsByStudentEmail(String email, Pageable pageable) {
+        Page<CourseRegistration> courseRegistrations = repository.findAllByStudentEmail(email, pageable);
+        if (courseRegistrations.isEmpty()) {
+            throw new ResourceNotFoundException();
+        }
+        return courseRegistrations;
+    }
+
     public Page<CourseRegistration> getCourseRegistrationsByCourseId(Long courseId, Pageable pageable) {
         Page<CourseRegistration> courseRegistrations = repository.findByCourseId(courseId, pageable);
         if (courseRegistrations.isEmpty()) {

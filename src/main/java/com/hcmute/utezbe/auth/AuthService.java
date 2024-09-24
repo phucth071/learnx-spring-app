@@ -123,6 +123,8 @@ public class AuthService {
         if (user.isEnabled()) {
             throw new RuntimeException("Account already confirmed!");
         }
+        ConfirmToken oldToken = confirmTokenService.getTokenByUser(user.getId()).get();
+        confirmTokenService.delete(oldToken);
         String newOtp = generateOTP();
         ConfirmToken confirmToken = ConfirmToken.builder()
                 .token(newOtp)
@@ -224,6 +226,31 @@ public class AuthService {
                 .build();
     }
 
+    public Response loginWithGoogle(IdTokenRequest idTokenRequest) throws IOException {
+//        GoogleTokenResponse tokenResponse = exchangeCode(authCode.getAuthCode());
+        User user = verifyGoogleIdToken(idTokenRequest.getIdToken());
+        if (user == null) {
+            throw new AuthenticationException("Invalid id token");
+        }
+        user = createOrUpdateUser(user);
+        RequestContext.setUserId(user.getId());
+        String accessToken = jwtService.generateAccessToken(user);
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getEmail());
+        return Response.builder()
+                .code(HttpStatus.OK.value())
+                .success(true)
+                .message("Login successfully!")
+                .data(objectMapper.createObjectNode()
+                        .put("accessToken", accessToken)
+                        .put("refreshToken", refreshToken.getToken())
+                        .put("email", user.getEmail())
+                        .put("fullName", user.getFullName())
+                        .put("avatar", user.getAvatarUrl())
+                        .put("role", user.getRole().name())
+                )
+                .build();
+    }
+
     public Response logout(Long userId) {
         if (userId == null) {
             throw new RuntimeException("User not found!");
@@ -259,6 +286,9 @@ public class AuthService {
 
     public Response sendForgotPasswordToken(String email) {
         User user = userService.findByEmailIgnoreCase(email).orElseThrow(() -> new RuntimeException("User not found"));
+        if (user.getProvider() != Provider.DATABASE) {
+            throw new RuntimeException("Email already registered by " + user.getProvider().name() + " method");
+        }
         String token = UUID.randomUUID().toString();
         ForgotPasswordToken forgotPasswordToken = ForgotPasswordToken.builder()
                 .token(token)
@@ -305,31 +335,7 @@ public class AuthService {
                 .execute();
     }
 
-    @Transactional
-    public Response loginWithGoogle(IdTokenRequest idTokenRequest) throws IOException {
-//        GoogleTokenResponse tokenResponse = exchangeCode(authCode.getAuthCode());
-        User user = verifyGoogleIdToken(idTokenRequest.getIdToken());
-        if (user == null) {
-            throw new AuthenticationException("Invalid id token");
-        }
-        user = createOrUpdateUser(user);
-        RequestContext.setUserId(user.getId());
-        String accessToken = jwtService.generateAccessToken(user);
-        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getEmail());
-        return Response.builder()
-                .code(HttpStatus.OK.value())
-                .success(true)
-                .message("Login successfully!")
-                .data(objectMapper.createObjectNode()
-                        .put("access_token", accessToken)
-                        .put("refreshToken", refreshToken.getToken())
-                        .put("email", user.getEmail())
-                        .put("full_name", user.getFullName())
-                        .put("avatar", user.getAvatarUrl())
-                        .put("role", user.getRole().name())
-                )
-                .build();
-    }
+
 
     private User verifyGoogleIdToken(String idToken) {
         GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(

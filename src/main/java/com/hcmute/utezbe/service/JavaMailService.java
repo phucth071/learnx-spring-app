@@ -18,7 +18,7 @@ public class JavaMailService {
 
     private final JavaMailSender mailSender;
 
-    @Async
+    @Async("taskExecutor")
     public void send(String to, String body) {
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();

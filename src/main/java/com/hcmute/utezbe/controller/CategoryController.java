@@ -1,5 +1,6 @@
 package com.hcmute.utezbe.controller;
 
+import com.hcmute.utezbe.domain.RequestContext;
 import com.hcmute.utezbe.dto.CategoryDto;
 import com.hcmute.utezbe.entity.Category;
 import com.hcmute.utezbe.exception.ResourceNotFoundException;
@@ -21,6 +22,8 @@ public class CategoryController {
     @GetMapping("")
     public Response getAllCategory() {
         try {
+            Long id = RequestContext.getUserId();
+            System.out.println("CURRENT USER ID: " + id);
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get all category successfully!").data(categoryService.getAllCategories()).build();
         } catch (Exception e) {
             throw e;

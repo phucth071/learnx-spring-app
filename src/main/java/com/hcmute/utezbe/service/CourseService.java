@@ -84,4 +84,8 @@ public class CourseService {
         return course.orElse(null);
     }
 
+    public List<Course> getCourseByListId(List<Long> ids) {
+        return courseRepository.findAllById(ids);
+    }
+
 }

@@ -108,9 +108,9 @@ public class AuthController {
         return Response.builder().code(HttpStatus.OK.value()).success(true).message("Logout successfully!").build();
     }
 
-    @PostMapping("/forgot-password/{email}")
-    public ResponseEntity<?> forgotPassword(@PathVariable("email") String email) {
-        return ResponseEntity.ok(service.sendForgotPasswordToken(email));
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody ResendOTPRequest req) {
+        return ResponseEntity.ok(service.sendForgotPasswordToken(req.getEmail()));
     }
 
     @PostMapping("/forgot-password/confirm")

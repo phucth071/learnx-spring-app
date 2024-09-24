@@ -1,10 +1,12 @@
 package com.hcmute.utezbe.controller;
 
+import com.hcmute.utezbe.auth.request.ResendOTPRequest;
 import com.hcmute.utezbe.domain.RequestContext;
 import com.hcmute.utezbe.dto.CourseDto;
 import com.hcmute.utezbe.dto.ModuleDto;
 import com.hcmute.utezbe.dto.AuthUserDto;
 import com.hcmute.utezbe.entity.Course;
+import com.hcmute.utezbe.entity.CourseRegistration;
 import com.hcmute.utezbe.entity.Module;
 
 import com.hcmute.utezbe.entity.User;
@@ -12,11 +14,9 @@ import com.hcmute.utezbe.entity.enumClass.Role;
 import com.hcmute.utezbe.entity.enumClass.State;
 
 import com.hcmute.utezbe.response.Response;
-import com.hcmute.utezbe.service.CategoryService;
-import com.hcmute.utezbe.service.CloudinaryService;
-import com.hcmute.utezbe.service.CourseService;
-import com.hcmute.utezbe.service.UserService;
+import com.hcmute.utezbe.service.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
@@ -41,6 +41,7 @@ public class CourseController {
     private final CourseService courseService;
     private final CategoryService categoryService;
     private final UserService userService;
+    private final CourseRegistrationService courseRegistrationService;
 
 
     private final CloudinaryService cloudinaryService;
@@ -81,6 +82,7 @@ public class CourseController {
         CourseDto courseDto = new CourseDto();
         courseDto.setId(course.getId());
         courseDto.setName(course.getName());
+        courseDto.setThumbnail(course.getThumbnail());
         courseDto.setDescription(course.getDescription());
         courseDto.setState(course.getState());
         courseDto.setStartDate(course.getStartDate());
@@ -88,25 +90,7 @@ public class CourseController {
         if (course.getCategory() != null) {
             courseDto.setCategoryId(course.getCategory().getId());
         }
-
-        List<AuthUserDto> studentDtos = course.getCourseRegistrations().stream()
-                .filter(registration -> registration.getStudent().getRole() == Role.STUDENT)
-                .map(registration -> {
-                    User student = registration.getStudent();
-                    AuthUserDto studentDto = new AuthUserDto();
-                    studentDto.setFullName(student.getFullName());
-                    studentDto.setEmail(student.getEmail());
-                    return studentDto;
-                }).collect(Collectors.toList());
-
-        courseDto.setStudents(studentDtos);
-
-        List<ModuleDto> moduleDtos = course.getModules().stream()
-                .map(this::convertModuleToDto)
-                .collect(Collectors.toList());
-
-        courseDto.setModules(moduleDtos);
-
+        
         return courseDto;
     }
 
@@ -184,6 +168,22 @@ public class CourseController {
         try {
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Delete course successfully!").data(courseService.deleteCourse(courseId)).build();
         } catch (Exception e) {
+            throw e;
+        }
+    }
+
+    @GetMapping("/email")
+    public Response getCoursesByEmail(@RequestParam String email, Pageable pageable) {
+        try {
+            Page<CourseRegistration> courseRegistrations = courseRegistrationService.getCoursesRegistrationsByStudentEmail(email, pageable);
+            List<Long> ids = courseRegistrations.stream().map(courseRegistration -> courseRegistration.getCourse().getId()).collect(Collectors.toList());
+            List<Course> courses = courseService.getCourseByListId(ids);
+            List<CourseDto> courseDtos = courses.stream()
+                    .map(this::convertToDto)
+                    .collect(Collectors.toList());
+            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get courses by email successfully!").data(courseDtos).build();
+        } catch (Exception e) {
+            e.printStackTrace();
             throw e;
         }
     }

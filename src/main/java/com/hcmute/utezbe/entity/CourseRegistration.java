@@ -23,14 +23,16 @@ public class CourseRegistration extends Auditable {
     private Double totalGPA = 0.0;
 
     @Column(name = "state")
-    private State state = State.PENDING;
+    private State state;
 
+    @JsonIgnoreProperties
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "course_id",
             foreignKey = @ForeignKey(name = "FK_course_registration_course"),
             insertable = false, updatable = false)
     private Course course;
 
+    @JsonIgnoreProperties
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "student_id",
             foreignKey = @ForeignKey(name = "FK_course_registration_account"),

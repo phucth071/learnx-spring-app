@@ -17,8 +17,6 @@ public class CourseDto {
     private Date startDate;
     private State state;
     private String description;
+    private String thumbnail;
     private Long categoryId;
-
-    private List<AuthUserDto> students;
-    private List<ModuleDto> modules;
 }

@@ -43,6 +43,7 @@ public class User extends Auditable implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Provider provider;
 
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         SimpleGrantedAuthority authority = new SimpleGrantedAuthority(role == null ? "STUDENT" : role.name());

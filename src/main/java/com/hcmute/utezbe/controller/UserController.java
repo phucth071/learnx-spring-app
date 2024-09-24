@@ -39,6 +39,16 @@ public class UserController {
         return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get user info successfully!").data(userDto).build();
     }
 
+    @GetMapping("/{email}")
+    public Response getUserByEmail(@PathVariable String email) {
+        Optional<User> user = userService.findByEmailIgnoreCase(email);
+        if (user.isEmpty()) {
+            return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("User not found!").build();
+        }
+        UserDto userDto = UserDto.convertToDto(user.get());
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get user info successfully!").data(userDto).build();
+    }
+
 //    TODO: Implement the HASH REQUEST to check if the request is sent multiple times
     @PatchMapping("/{userId}")
     public Response patchUser(@PathVariable Long userId,
