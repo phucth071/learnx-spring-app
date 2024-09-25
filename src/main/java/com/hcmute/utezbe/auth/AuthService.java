@@ -24,6 +24,7 @@ import com.hcmute.utezbe.security.jwt.JWTService;
 import com.hcmute.utezbe.service.*;
 import com.nimbusds.openid.connect.sdk.LogoutRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -31,8 +32,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -41,6 +41,7 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
@@ -305,6 +306,7 @@ public class AuthService {
                 .build();
     }
 
+    @Transactional
     public Response resetPassword(ForgotPasswordRequest request) {
         ForgotPasswordToken forgotPasswordToken = forgotPasswordService.findByToken(request.getToken());
         if (forgotPasswordToken == null) {
@@ -316,7 +318,10 @@ public class AuthService {
         User user = forgotPasswordToken.getUser();
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         userService.save(user);
+
+        log.info("FORGOT PASSWORD TOKEN: {}", forgotPasswordToken.getId());
         forgotPasswordService.delete(forgotPasswordToken);
+
         return Response.builder()
                 .code(HttpStatus.OK.value())
                 .success(true)

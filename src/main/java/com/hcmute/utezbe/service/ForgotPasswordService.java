@@ -2,6 +2,7 @@ package com.hcmute.utezbe.service;
 
 import com.hcmute.utezbe.entity.ForgotPasswordToken;
 import com.hcmute.utezbe.repository.ForgotPasswordRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +23,9 @@ public class ForgotPasswordService {
         repository.save(token);
     }
 
+    @Transactional
     public void delete(ForgotPasswordToken token) {
         repository.delete(token);
     }
+
 }

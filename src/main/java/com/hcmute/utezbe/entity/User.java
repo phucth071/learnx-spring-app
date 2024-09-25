@@ -95,6 +95,4 @@ public class User extends Auditable implements UserDetails {
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<AssignmentSubmission> assignmentSubmissions;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private ForgotPasswordToken forgotPasswordToken;
 }

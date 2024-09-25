@@ -26,7 +26,7 @@ public class ForgotPasswordToken {
     @Column(name = "expired_at")
     private LocalDateTime expiredAt;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 }
