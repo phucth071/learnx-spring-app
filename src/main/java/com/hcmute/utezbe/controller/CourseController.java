@@ -1,16 +1,13 @@
 package com.hcmute.utezbe.controller;
 
-import com.hcmute.utezbe.auth.request.ResendOTPRequest;
+import com.hcmute.utezbe.auth.request.EmailRequest;
 import com.hcmute.utezbe.domain.RequestContext;
 import com.hcmute.utezbe.dto.CourseDto;
 import com.hcmute.utezbe.dto.ModuleDto;
-import com.hcmute.utezbe.dto.AuthUserDto;
 import com.hcmute.utezbe.entity.Course;
 import com.hcmute.utezbe.entity.CourseRegistration;
 import com.hcmute.utezbe.entity.Module;
 
-import com.hcmute.utezbe.entity.User;
-import com.hcmute.utezbe.entity.enumClass.Role;
 import com.hcmute.utezbe.entity.enumClass.State;
 
 import com.hcmute.utezbe.response.Response;
@@ -172,10 +169,10 @@ public class CourseController {
         }
     }
 
-    @GetMapping("/email")
-    public Response getCoursesByEmail(@RequestParam String email, Pageable pageable) {
+    @PostMapping("/email")
+    public Response getCoursesByEmail(@RequestBody EmailRequest request, Pageable pageable) {
         try {
-            Page<CourseRegistration> courseRegistrations = courseRegistrationService.getCoursesRegistrationsByStudentEmail(email, pageable);
+            Page<CourseRegistration> courseRegistrations = courseRegistrationService.getCoursesRegistrationsByStudentEmail(request.getEmail(), pageable);
             List<Long> ids = courseRegistrations.stream().map(courseRegistration -> courseRegistration.getCourse().getId()).collect(Collectors.toList());
             List<Course> courses = courseService.getCourseByListId(ids);
             List<CourseDto> courseDtos = courses.stream()

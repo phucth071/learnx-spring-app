@@ -15,8 +15,6 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.security.Principal;
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -91,7 +89,7 @@ public class AuthController {
     }
 
     @PostMapping("/resend-otp")
-    public ResponseEntity<?> resendOTP(@RequestBody ResendOTPRequest request) {
+    public ResponseEntity<?> resendOTP(@RequestBody EmailRequest request) {
         return ResponseEntity.ok(service.resendOTP(request.getEmail()));
     }
 
@@ -109,7 +107,7 @@ public class AuthController {
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<?> forgotPassword(@RequestBody ResendOTPRequest req) {
+    public ResponseEntity<?> forgotPassword(@RequestBody EmailRequest req) {
         return ResponseEntity.ok(service.sendForgotPasswordToken(req.getEmail()));
     }
 
