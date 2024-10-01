@@ -31,7 +31,6 @@ public class UserController {
             return Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("User not found!").build();
         }
         var currentUser = userService.findByEmailIgnoreCase(principal.getName());
-        System.out.println("Principal: " + principal.getName());
         AuthUserDto userDto = AuthUserDto.convertToDto(currentUser.get());
         return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get user info successfully!").data(userDto).build();
     }

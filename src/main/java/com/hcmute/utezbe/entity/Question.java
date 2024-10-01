@@ -21,7 +21,7 @@ public class Question extends Auditable {
     @Column(updatable = false)
     private Long id;
 
-    @Column(columnDefinition = "varchar(1000)")
+    @Column(name = "content", columnDefinition = "TEXT")
     private String content;
 
     @Column(name = "question_type")

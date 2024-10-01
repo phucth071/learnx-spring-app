@@ -23,7 +23,7 @@ public class Assignment extends Auditable{
     @Column(updatable = false)
     private Long id;
 
-    @Column(name="content", columnDefinition = "LONGTEXT")
+    @Column(name="content", columnDefinition = "TEXT")
     private String content;
 
     @Column(name="start_date")
@@ -39,7 +39,7 @@ public class Assignment extends Auditable{
     @Column(name="title")
     private String title;
 
-    @Column(name="url_document")
+    @Column(name="url_document", columnDefinition = "TEXT")
     private String urlDocument;
 
     @JsonIgnore

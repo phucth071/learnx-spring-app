@@ -23,13 +23,13 @@ public class AssignmentSubmission extends Auditable {
     @Column(name = "score")
     private Double score;
 
-    @Column(name = "text_submission", columnDefinition = "LONGTEXT")
+    @Column(name = "text_submission", columnDefinition = "TEXT")
     private String textSubmission;
 
-    @Column(name = "file_submission_url")
+    @Column(name = "file_submission_url", columnDefinition = "TEXT")
     private String fileSubmissionUrl;
 
-    @Column(name = "link_submission", columnDefinition = "text")
+    @Column(name = "link_submission", columnDefinition = "TEXT")
     private String linkSubmission;
 
     @OneToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})

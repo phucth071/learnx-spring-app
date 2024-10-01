@@ -25,10 +25,9 @@ public class Quiz extends Auditable {
 
     private boolean status;
 
-    @Column(columnDefinition = "nvarchar(255)")
     private String title;
 
-    @Column(columnDefinition = "nvarchar(1000)")
+    @Column(name="description", columnDefinition = "TEXT")
     private String description;
 
     @Column(name="time_limit")

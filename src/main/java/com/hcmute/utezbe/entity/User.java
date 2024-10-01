@@ -28,13 +28,13 @@ public class User extends Auditable implements UserDetails {
     @Column(updatable = false)
     private Long id;
 
-    @Column(name = "full_name", columnDefinition = "nvarchar(1000)")
+    @Column(name = "full_name")
     private String fullName;
     @Column(unique = true, nullable = false)
     private String email;
     @JsonIgnore
     private String password;
-    @Column(name = "avatar_url", columnDefinition = "varchar(1000)")
+    @Column(name = "avatar_url", columnDefinition = "TEXT")
     private String avatarUrl;
     private LocalDateTime lastLogin;
     private boolean isEnabled;

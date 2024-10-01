@@ -27,7 +27,7 @@ public class QuizAnswer extends Auditable {
     @JoinColumn(name = "quiz_question_id")
     private Question quizQuestion;
 
-    @Column(name = "answer", columnDefinition = "varchar(255)")
+    @Column(name = "answer")
     private String answer;
 
 }

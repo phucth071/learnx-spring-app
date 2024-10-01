@@ -21,10 +21,10 @@ public class Forum extends Auditable {
     @Column(updatable = false)
     private Long id;
 
-    @Column(name="description", columnDefinition = "LONGTEXT")
+    @Column(name="description", columnDefinition = "TEXT")
     private String description;
 
-    @Column(name="title", columnDefinition = "TEXT")
+    @Column(name="title")
     private String title;
 
     @MapsId

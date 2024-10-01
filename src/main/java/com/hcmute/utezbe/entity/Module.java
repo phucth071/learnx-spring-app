@@ -22,7 +22,7 @@ public class Module extends Auditable {
     @Column(updatable = false)
     private Long id;
 
-    @Column(name="description", columnDefinition = "LONGTEXT")
+    @Column(name="description", columnDefinition = "TEXT")
     private String description;
 
     @Column(name="name")

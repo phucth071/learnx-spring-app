@@ -38,7 +38,7 @@ public class Course extends Auditable {
     @Column(name="thumbnail")
     private String thumbnail;
 
-    @Column(name="description", columnDefinition = "LONGTEXT")
+    @Column(name="description", columnDefinition = "TEXT")
     private String description;
 
     @JsonBackReference

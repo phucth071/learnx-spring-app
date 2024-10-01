@@ -23,7 +23,7 @@ public class Topic extends Auditable {
     @Column(updatable = false)
     private Long id;
 
-    @Column(name="content", columnDefinition = "LONGTEXT")
+    @Column(name="content", columnDefinition = "TEXT")
     private String content;
 
     @JsonIgnore

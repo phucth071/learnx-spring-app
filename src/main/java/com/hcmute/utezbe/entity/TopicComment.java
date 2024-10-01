@@ -19,7 +19,7 @@ public class TopicComment extends Auditable{
     @Column(updatable = false)
     private Long id;
 
-    @Column(name="content", columnDefinition = "LONGTEXT")
+    @Column(name="content", columnDefinition = "TEXT")
     private String content;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
