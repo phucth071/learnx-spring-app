@@ -13,10 +13,13 @@ public class AuthUserDto {
 
     private String email;
 
+    private String avatar;
+
     public static final AuthUserDto convertToDto(User user) {
         return AuthUserDto.builder()
                 .fullName(user.getFullName())
                 .email(user.getEmail())
+                .avatar(user.getAvatarUrl())
                 .build();
     }
 }

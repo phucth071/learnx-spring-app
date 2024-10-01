@@ -32,10 +32,7 @@ public class UserController {
         }
         var currentUser = userService.findByEmailIgnoreCase(principal.getName());
         System.out.println("Principal: " + principal.getName());
-        AuthUserDto userDto = AuthUserDto.builder()
-                .fullName(currentUser.get().getFullName())
-                .email(currentUser.get().getEmail())
-                .build();
+        AuthUserDto userDto = AuthUserDto.convertToDto(currentUser.get());
         return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get user info successfully!").data(userDto).build();
     }
 
