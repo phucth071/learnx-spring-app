@@ -10,6 +10,7 @@ import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -41,10 +42,12 @@ public class Course extends Auditable {
     @Column(name="description", columnDefinition = "TEXT")
     private String description;
 
+
     @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "category_id", foreignKey = @ForeignKey(name = "FK_course_category"))
     private Category category;
+
 
     @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
@@ -53,11 +56,10 @@ public class Course extends Auditable {
 
     @JsonBackReference
     @OneToMany(mappedBy = "course", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
-    private List<CourseRegistration> courseRegistrations = new ArrayList<>();
+    private Set<CourseRegistration> courseRegistrations;
 
-    @JsonIgnore
     @JsonBackReference
     @OneToMany(mappedBy = "course", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
-    private List<Module> modules = new ArrayList<>();
+    private List<Module> modules;
 
 }

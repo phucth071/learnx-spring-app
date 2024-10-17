@@ -1,9 +1,11 @@
 package com.hcmute.utezbe.controller;
 
+import com.hcmute.utezbe.auth.AuthService;
 import com.hcmute.utezbe.auth.request.EmailRequest;
 import com.hcmute.utezbe.domain.RequestContext;
 import com.hcmute.utezbe.dto.CourseDto;
 import com.hcmute.utezbe.dto.ModuleDto;
+import com.hcmute.utezbe.entity.Category;
 import com.hcmute.utezbe.entity.Course;
 import com.hcmute.utezbe.entity.CourseRegistration;
 import com.hcmute.utezbe.entity.Module;
@@ -107,26 +109,27 @@ public class CourseController {
     @PostMapping(value = "", consumes = {"multipart/form-data"})
     public Response createCourse(@RequestParam("name") String name,
                                  @RequestParam("description") String description,
-                                 @RequestParam("categoryId") Long categoryId,
+                                 @RequestParam("categoryName") String categoryName,
                                  @RequestParam("startDate") String startDate,
                                  @RequestParam("state") @Nullable String state,
                                  @RequestPart("thumbnail") @Nullable MultipartFile thumbnail) throws ParseException {
         try {
             String thumbnailUrl;
             SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+            Category category = categoryService.getCategoryByName(categoryName).orElseGet(() -> categoryService.saveCategory(Category.builder().name(categoryName).build()));
             if (thumbnail != null) {
                 thumbnailUrl = cloudinaryService.upload(thumbnail);
             } else {
                 thumbnailUrl = "https://res.cloudinary.com/dnarlcqth/image/upload/v1719906429/samples/landscapes/architecture-signs.jpg";
             }
             Course course = Course.builder()
-                    .category(categoryService.getCategoryById(categoryId).get())
+                    .category(category)
                     .name(name)
                     .description(description)
                     .startDate(dateFormatter.parse(startDate))
                     .thumbnail(thumbnailUrl)
                     .state(state != null ? State.valueOf(state) : State.OPEN)
-                    .teacher(userService.getUserById(RequestContext.getUserId()))
+                    .teacher(AuthService.getCurrentUser())
                     .build();
             return Response.builder().code(HttpStatus.CREATED.value()).success(true).message("Create course successfully!").data(courseService.saveCourse(course)).build();
         } catch (Exception e) {
@@ -169,21 +172,42 @@ public class CourseController {
         }
     }
 
-    @PostMapping("/email")
-    public Response getCoursesByEmail(@RequestBody EmailRequest request, Pageable pageable) {
+//    @PostMapping("/email")
+//    public Response getCoursesByEmail(@RequestBody EmailRequest request, Pageable pageable) {
+//        try {
+//            Page<CourseRegistration> courseRegistrations = courseRegistrationService.getCoursesRegistrationsByStudentEmail(request.getEmail(), pageable);
+//            List<Long> ids = courseRegistrations.stream().map(courseRegistration -> courseRegistration.getCourse().getId()).collect(Collectors.toList());
+//            Page<Course> courses = courseService.getCourseByListId(ids, pageable);
+//            List<CourseDto> courseDtos = courses.stream()
+//                    .map(this::convertToDto)
+//                    .collect(Collectors.toList());
+//            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get courses by email successfully!").data(courseDtos).build();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            throw e;
+//        }
+//    }
+
+    @GetMapping("/my-courses")
+    public Response getMyCourses(Pageable pageable) {
         try {
-            Page<CourseRegistration> courseRegistrations = courseRegistrationService.getCoursesRegistrationsByStudentEmail(request.getEmail(), pageable);
-            List<Long> ids = courseRegistrations.stream().map(courseRegistration -> courseRegistration.getCourse().getId()).collect(Collectors.toList());
-            List<Course> courses = courseService.getCourseByListId(ids);
-            List<CourseDto> courseDtos = courses.stream()
-                    .map(this::convertToDto)
-                    .collect(Collectors.toList());
-            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get courses by email successfully!").data(courseDtos).build();
+            Page<Course> course = courseService.getCoursesByStudentId(AuthService.getCurrentUser().getId(), pageable);
+            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get my courses successfully!").data(course.get()).build();
         } catch (Exception e) {
-            e.printStackTrace();
             throw e;
         }
     }
+
+    @GetMapping("/teacher/my-courses")
+    public Response getMyCoursesAsTeacher(Pageable pageable) {
+        try {
+            Page<Course> courses = courseService.getCourseByTeacherId(AuthService.getCurrentUser().getId(), pageable);
+            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get my courses as teacher successfully!").data(courses).build();
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+
 
     private Course convertCourseDTO(CourseDto courseDto, Optional<Course> courseOtp) {
         Course course = courseOtp.get();

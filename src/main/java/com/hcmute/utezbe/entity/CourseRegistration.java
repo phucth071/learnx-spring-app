@@ -1,7 +1,6 @@
 package com.hcmute.utezbe.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.hcmute.utezbe.entity.embeddedId.CourseRegistrationId;
 import com.hcmute.utezbe.entity.enumClass.State;
 import lombok.*;
 
@@ -16,26 +15,23 @@ import jakarta.persistence.*;
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "course", "student"})
 @Table(name = "course_registration")
 public class CourseRegistration extends Auditable {
-    @EmbeddedId
-    private CourseRegistrationId id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(name = "total_gpa")
     private Double totalGPA = 0.0;
 
     @Column(name = "state")
+    @Enumerated(EnumType.STRING)
     private State state;
 
-    @JsonIgnoreProperties
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "course_id",
-            foreignKey = @ForeignKey(name = "FK_course_registration_course"),
-            insertable = false, updatable = false)
+    @ManyToOne
+    @JoinColumn(name = "course_id")
     private Course course;
 
-    @JsonIgnoreProperties
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "student_id",
-            foreignKey = @ForeignKey(name = "FK_course_registration_account"),
-            insertable = false, updatable = false)
+
+    @ManyToOne
+    @JoinColumn(name = "student_id")
     private User student;
 }

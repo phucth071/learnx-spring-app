@@ -21,4 +21,5 @@ public interface CourseRegistrationRepository extends JpaRepository<CourseRegist
 
     Page<CourseRegistration> findAllByStudentEmail(String email, Pageable pageable);
 
+    Page<CourseRegistration> findAllByStudentId(Long studentId, Pageable pageable);
 }

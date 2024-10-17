@@ -2,14 +2,23 @@ package com.hcmute.utezbe.controller;
 
 import com.hcmute.utezbe.auth.AuthService;
 import com.hcmute.utezbe.auth.request.ChangePasswordRequest;
+import com.hcmute.utezbe.auth.request.EmailRequest;
+import com.hcmute.utezbe.domain.RequestContext;
 import com.hcmute.utezbe.dto.AuthUserDto;
 import com.hcmute.utezbe.dto.UserDto;
+import com.hcmute.utezbe.entity.ChangeRoleQueue;
 import com.hcmute.utezbe.entity.User;
+import com.hcmute.utezbe.entity.enumClass.Role;
+import com.hcmute.utezbe.entity.enumClass.State;
+import com.hcmute.utezbe.request.ChangeRoleQueueRequest;
+import com.hcmute.utezbe.request.UserPatchRequest;
 import com.hcmute.utezbe.response.Response;
+import com.hcmute.utezbe.service.ChangeRoleQueueService;
 import com.hcmute.utezbe.service.CloudinaryService;
 import com.hcmute.utezbe.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +34,7 @@ public class UserController {
     private final UserService userService;
     private final CloudinaryService cloudinary;
     private final AuthService authService;
+    private final ChangeRoleQueueService changeRoleQueueService;
     @GetMapping("/info")
     public Response getUserInfo(Principal principal) {
         if(principal == null) {
@@ -46,20 +56,22 @@ public class UserController {
     }
 
 //    TODO: Implement the HASH REQUEST to check if the request is sent multiple times
-    @PatchMapping("/{userId}")
-    public Response patchUser(@PathVariable Long userId,
-                              @RequestParam("fullName") String fullName,
-                              @RequestParam("email") String email,
+    @PatchMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Response patchUser(@RequestPart("user") UserPatchRequest req,
                               @RequestPart("avatar") @Nullable MultipartFile avatar) {
         try {
-            User user = userService.getUserById(userId);
+            User user = userService.findByEmailIgnoreCase(req.getEmail()).orElse(null);
+
             if (user == null) {
                 throw new RuntimeException("User not found!");
             }
-            if (fullName != null) {
-                user.setFullName(fullName);
+            if (user.getId() != AuthService.getCurrentUser().getId()) {
+                throw new RuntimeException("You are not allowed to do this action!");
             }
-            if (email == null || !email.equals(user.getEmail())) {
+            if (req.getFullName() != null) {
+                user.setFullName(req.getFullName());
+            }
+            if (req.getEmail() == null || !req.getEmail().equals(user.getEmail())) {
                 throw new RuntimeException("Email cannot be changed!");
             }
             if (avatar != null) {
@@ -73,9 +85,50 @@ public class UserController {
         }
     }
 
-    @PostMapping("/user/change-password")
+    @PostMapping("/change-password")
     public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest request) {
-        return ResponseEntity.ok(authService.changePassword(request));
+        try {
+            return ResponseEntity.ok(authService.changePassword(request));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ResponseEntity.ok(Response.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).success(false).message("Change password failed!").build());
     }
+
+    @PostMapping("/change-role/request")
+    public ResponseEntity<?> changeRoleRequest(@RequestBody ChangeRoleQueueRequest request) {
+        ChangeRoleQueue changeRoleQueue = ChangeRoleQueue.builder()
+                .newRole(request.getNewRole())
+                .oldRole(request.getOldRole())
+                .status(State.PENDING)
+                .user(userService.findByEmailIgnoreCase(request.getEmail()).orElse(null))
+                .build();
+        return ResponseEntity.ok(changeRoleQueueService.createChangeRoleQueue(changeRoleQueue));
+    }
+
+    @PostMapping("/change-role/accept")
+    public Response changeRoleAccept(@RequestBody EmailRequest req) {
+        ChangeRoleQueue changeRoleQueue = changeRoleQueueService.findByUserEmail(req.getEmail());
+        if (changeRoleQueue == null) {
+            throw new RuntimeException("CHANGE ROLE: Request not found!");
+        }
+        if (changeRoleQueue.getStatus() != State.PENDING) {
+            throw new RuntimeException("CHANGE ROLE: Request has been processed!");
+        }
+
+        if (AuthService.getCurrentUser().getRole() != Role.ADMIN) {
+            System.out.println("Current user " + AuthService.getCurrentUser().getEmail());
+            throw new RuntimeException("CHANGE ROLE: You are not allowed to do this action!");
+        }
+
+        User user = changeRoleQueue.getUser();
+        user.setRole(changeRoleQueue.getNewRole());
+        userService.save(user);
+
+        changeRoleQueue.setStatus(State.ACCEPTED);
+        changeRoleQueueService.save(changeRoleQueue);
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Change role successfully!").build();
+    }
+
 
 }

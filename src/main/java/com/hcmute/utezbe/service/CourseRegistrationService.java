@@ -24,6 +24,7 @@ public class CourseRegistrationService {
         return repository.findByStudentIdAndCourseId(studentId, courseId);
     }
 
+
     public CourseRegistration save(CourseRegistration courseRegistration) {
         if (courseRegistration.getState() == null) {
             courseRegistration.setState(State.PENDING);

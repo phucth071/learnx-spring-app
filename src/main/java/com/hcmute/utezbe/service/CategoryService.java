@@ -47,6 +47,10 @@ public class CategoryService {
         return categoryRepository.save(category);
     }
 
+    public Optional<Category> getCategoryByName(String name) {
+        return categoryRepository.findByName(name);
+    }
+
     @Transactional
     public Category deleteCategory(Long id) {
         if (!AuthService.isUserHaveRole(Role.TEACHER) && !AuthService.isUserHaveRole(Role.ADMIN)) {

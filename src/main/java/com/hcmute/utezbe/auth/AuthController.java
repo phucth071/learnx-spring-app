@@ -93,18 +93,18 @@ public class AuthController {
         return ResponseEntity.ok(service.resendOTP(request.getEmail()));
     }
 
-    @PostMapping("logout/{userId}")
-    public Response logout(Principal principal, @PathVariable("userId") Long userId) {
-        var currentUser = userService.findByEmailIgnoreCase(principal.getName());
-        if(principal == null || currentUser.isEmpty()) {
-            throw new RuntimeException("User not found!");
-        }
-        if (currentUser.get().getId() != userId) {
-            throw new RuntimeException("User not found!");
-        }
-        service.logout(userId);
-        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Logout successfully!").build();
-    }
+//    @PostMapping("logout")
+//    public Response logout(Principal principal, @PathVariable("userId") Long userId) {
+//        var currentUser = userService.findByEmailIgnoreCase(principal.getName());
+//        if(principal == null || currentUser.isEmpty()) {
+//            throw new RuntimeException("User not found!");
+//        }
+//        if (currentUser.get().getId() != userId) {
+//            throw new RuntimeException("User not found!");
+//        }
+//        service.logout(userId);
+//        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Logout successfully!").build();
+//    }
 
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestBody EmailRequest req) {

@@ -1,6 +1,8 @@
 package com.hcmute.utezbe.security.jwt;
 
 import com.hcmute.utezbe.domain.RequestContext;
+import com.hcmute.utezbe.entity.RefreshToken;
+import com.hcmute.utezbe.service.RefreshTokenService;
 import com.hcmute.utezbe.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -27,6 +29,7 @@ public class JWTRequestFilter extends OncePerRequestFilter {
     private final JWTService jwtService;
     private final UserDetailsService userDetailsService;
     private final UserService userService;
+    private final RefreshTokenService refreshTokenService;
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {

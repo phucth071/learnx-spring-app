@@ -256,6 +256,9 @@ public class AuthService {
         if (userId == null) {
             throw new RuntimeException("User not found!");
         }
+        if (userId != AuthService.getCurrentUser().getId()) {
+            throw new RuntimeException("You are not allowed to do this action!");
+        }
         RefreshToken refreshToken = refreshTokenService.findByUserId(userId);
         if (refreshToken == null) {
             throw new RuntimeException("User not found!");
@@ -270,7 +273,7 @@ public class AuthService {
 
     public Response changePassword(ChangePasswordRequest request) {
         User user = userService.findByEmailIgnoreCase(request.getEmail()).orElseThrow(() -> new RuntimeException("User not found"));
-        if (user.getEmail() != AuthService.getCurrentUser().getEmail()) {
+        if (user.getId() != AuthService.getCurrentUser().getId()) {
             throw new AccessDeniedException("You do not have permission to change password!");
         }
         if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {

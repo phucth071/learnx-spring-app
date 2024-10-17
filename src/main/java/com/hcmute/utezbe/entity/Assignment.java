@@ -32,6 +32,8 @@ public class Assignment extends Auditable{
     @Column(name="end_date")
     private Date endDate;
 
+//    TODO: Add submit deadline, out of date
+
     @Column(name="state")
     @Enumerated(EnumType.STRING)
     private State state;

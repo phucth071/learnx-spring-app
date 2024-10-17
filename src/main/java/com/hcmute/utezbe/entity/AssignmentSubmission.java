@@ -32,6 +32,8 @@ public class AssignmentSubmission extends Auditable {
     @Column(name = "link_submission", columnDefinition = "TEXT")
     private String linkSubmission;
 
+//    TODO: Add submit date
+
     @OneToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "assignment_id", foreignKey = @ForeignKey(name = "FK_assignment_submission_assignment"),
     insertable = false, updatable = false)

@@ -3,7 +3,6 @@ package com.hcmute.utezbe.controller;
 import com.hcmute.utezbe.domain.RequestContext;
 import com.hcmute.utezbe.dto.CourseRegistrationDto;
 import com.hcmute.utezbe.entity.CourseRegistration;
-import com.hcmute.utezbe.entity.embeddedId.CourseRegistrationId;
 import com.hcmute.utezbe.response.Response;
 import com.hcmute.utezbe.service.CourseRegistrationService;
 import com.hcmute.utezbe.service.CourseService;
@@ -44,7 +43,8 @@ public class CourseRegistrationController {
         try {
             Long studentId = RequestContext.getUserId();
             CourseRegistration courseRegistration = CourseRegistration.builder()
-                    .id(new CourseRegistrationId(studentId, dto.getCourseId()))
+                    .course(courseService.getCourseById(dto.getCourseId()).get())
+                    .student(userService.getUserById(studentId))
                     .build();
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Create course registration successfully!").data(courseRegistrationService.save(courseRegistration)).build();
         } catch (Exception e) {

@@ -8,6 +8,7 @@ import com.hcmute.utezbe.exception.AccessDeniedException;
 import com.hcmute.utezbe.exception.ResourceNotFoundException;
 import com.hcmute.utezbe.repository.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CourseService {
 
     private final CourseRepository courseRepository;
@@ -84,8 +86,19 @@ public class CourseService {
         return course.orElse(null);
     }
 
-    public List<Course> getCourseByListId(List<Long> ids) {
-        return courseRepository.findAllById(ids);
+    public Page<Course> getCoursesByStudentId(Long studentId, Pageable pageable) {
+        Page<CourseRegistration> courseRegistrations = courseRegistrationRepository.findAllByStudentId(studentId, pageable);
+        List<Long> ids = courseRegistrations.map(courseRegistration -> courseRegistration.getCourse().getId()).getContent();
+        return courseRepository.findByCourseRegistrationsIn(courseRegistrations.getContent(), pageable);
     }
+
+    public Page<Course> getCourseByTeacherId(Long teacherId, Pageable pageable) {
+        if (AuthService.getCurrentUser().getRole() != Role.TEACHER && AuthService.getCurrentUser().getRole() != Role.ADMIN) {
+            throw new AccessDeniedException("You do not have permission to do this action!");
+        }
+        log.info("Pageable: " + pageable);
+        return courseRepository.findByTeacherId(teacherId, pageable);
+    }
+
 
 }
