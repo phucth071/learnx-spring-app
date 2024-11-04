@@ -10,12 +10,14 @@ import com.hcmute.utezbe.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +32,7 @@ public class CourseService {
     private final ModuleRepository moduleRepository;
     private final LectureRepository lectureRepository;
     private final ResourcesRepository resourcesRepository;
+    private final UserService userService;
 
     public Optional<Course> getCourseById(Long id) {
         Course course = courseRepository.findById(id).orElse(null);
@@ -43,6 +46,7 @@ public class CourseService {
         return courseRepository.findAll();
     }
 
+    @Transactional
     public Course saveCourse(Course course) {
         if (!AuthService.isUserHaveRole(Role.TEACHER) && !AuthService.isUserHaveRole(Role.ADMIN)) {
             throw new AccessDeniedException("You do not have permission to do this action!");
@@ -87,9 +91,19 @@ public class CourseService {
     }
 
     public Page<Course> getCoursesByStudentId(Long studentId, Pageable pageable) {
-        Page<CourseRegistration> courseRegistrations = courseRegistrationRepository.findAllByStudentId(studentId, pageable);
-        List<Long> ids = courseRegistrations.map(courseRegistration -> courseRegistration.getCourse().getId()).getContent();
-        return courseRepository.findByCourseRegistrationsIn(courseRegistrations.getContent(), pageable);
+        List<CourseRegistration> courseRegistrations = courseRegistrationRepository.findByEmail(userService.getUserById(studentId).getEmail());
+
+        List<Long> courseIds = courseRegistrations.stream()
+                .map(courseRegistration -> courseRegistration.getCourse().getId())
+                .collect(Collectors.toList());
+
+        List<Course> courses = courseRepository.findByIdIn(courseIds);
+
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), courseRegistrations.size());
+        List<Course> paginatedCourses = courses.subList(start, end);
+
+        return new PageImpl<>(paginatedCourses, pageable, courseRegistrations.size());
     }
 
     public Page<Course> getCourseByTeacherId(Long teacherId, Pageable pageable) {

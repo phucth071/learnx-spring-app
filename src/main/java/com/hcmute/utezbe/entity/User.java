@@ -1,5 +1,6 @@
 package com.hcmute.utezbe.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.hcmute.utezbe.entity.enumClass.Provider;
 import com.hcmute.utezbe.entity.enumClass.Role;
@@ -86,14 +87,10 @@ public class User extends Auditable implements UserDetails {
 
     @JsonIgnore
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Set<CourseRegistration> courseRegistrations;
-
-    @JsonIgnore
-    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<QuizSubmission> quizSubmissions;
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonBackReference
+    @OneToMany(mappedBy = "student", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
     private List<AssignmentSubmission> assignmentSubmissions;
 
 }

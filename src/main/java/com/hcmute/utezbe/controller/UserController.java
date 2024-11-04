@@ -56,7 +56,7 @@ public class UserController {
     }
 
 //    TODO: Implement the HASH REQUEST to check if the request is sent multiple times
-    @PatchMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PatchMapping(value = "", consumes = {"multipart/form-data"})
     public Response patchUser(@RequestPart("user") UserPatchRequest req,
                               @RequestPart("avatar") @Nullable MultipartFile avatar) {
         try {

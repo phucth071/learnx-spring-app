@@ -61,4 +61,8 @@ public class ModuleService {
         return module.orElse(null);
     }
 
+    public List<Module> findAllByCourseId(Long courseId) {
+        return moduleRepository.findAllByCourseId(courseId);
+    }
+
 }

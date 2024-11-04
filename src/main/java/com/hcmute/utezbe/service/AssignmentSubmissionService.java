@@ -31,6 +31,7 @@ public class AssignmentSubmissionService {
         return assignmentSubmissionRepository.findAllPageable(pageable);
     }
 
+    @Transactional
     public AssignmentSubmission saveAssignmentSubmission(AssignmentSubmission assignmentSubmission) {
         return assignmentSubmissionRepository.save(assignmentSubmission);
     }
@@ -39,7 +40,7 @@ public class AssignmentSubmissionService {
         existingSubmission.setScore(updatedAssignmentSubmission.getScore());
         existingSubmission.setTextSubmission(updatedAssignmentSubmission.getTextSubmission());
         existingSubmission.setFileSubmissionUrl(updatedAssignmentSubmission.getFileSubmissionUrl());
-        existingSubmission.setLinkSubmission(updatedAssignmentSubmission.getLinkSubmission());
+//        existingSubmission.setLinkSubmission(updatedAssignmentSubmission.getLinkSubmission());
         return assignmentSubmissionRepository.save(existingSubmission);
     }
 

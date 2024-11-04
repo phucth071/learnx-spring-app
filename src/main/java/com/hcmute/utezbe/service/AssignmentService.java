@@ -57,4 +57,7 @@ public class AssignmentService {
         return assignments.orElse(null);
     }
 
+    public List<Assignment> getAllAssignmentsByModuleId(Long moduleId) {
+        return assignmentRepository.findAllByModuleId(moduleId);
+    }
 }

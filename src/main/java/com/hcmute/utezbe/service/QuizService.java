@@ -25,7 +25,7 @@ public class QuizService {
     }
 
     public Optional<Quiz> findById(Long id, Long moduleId) {
-        return quizRepository.findById(id, moduleId);
+        return quizRepository.findByIdAndModuleId(id, moduleId);
     }
 
     public List<Quiz> findAllByModuleId(Long moduleId) {

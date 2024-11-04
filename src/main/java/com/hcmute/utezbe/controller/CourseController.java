@@ -5,13 +5,12 @@ import com.hcmute.utezbe.auth.request.EmailRequest;
 import com.hcmute.utezbe.domain.RequestContext;
 import com.hcmute.utezbe.dto.CourseDto;
 import com.hcmute.utezbe.dto.ModuleDto;
-import com.hcmute.utezbe.entity.Category;
-import com.hcmute.utezbe.entity.Course;
-import com.hcmute.utezbe.entity.CourseRegistration;
-import com.hcmute.utezbe.entity.Module;
+import com.hcmute.utezbe.entity.*;
 
+import com.hcmute.utezbe.entity.Module;
 import com.hcmute.utezbe.entity.enumClass.State;
 
+import com.hcmute.utezbe.request.CreateCourseRequest;
 import com.hcmute.utezbe.response.Response;
 import com.hcmute.utezbe.service.*;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -41,6 +41,7 @@ public class CourseController {
     private final CategoryService categoryService;
     private final UserService userService;
     private final CourseRegistrationService courseRegistrationService;
+    private final ModuleService moduleService;
 
 
     private final CloudinaryService cloudinaryService;
@@ -106,30 +107,28 @@ public class CourseController {
         };
     }
 
+    @Transactional
     @PostMapping(value = "", consumes = {"multipart/form-data"})
-    public Response createCourse(@RequestParam("name") String name,
-                                 @RequestParam("description") String description,
-                                 @RequestParam("categoryName") String categoryName,
-                                 @RequestParam("startDate") String startDate,
-                                 @RequestParam("state") @Nullable String state,
+    public Response createCourse(@RequestPart("courseInfo") CreateCourseRequest req,
                                  @RequestPart("thumbnail") @Nullable MultipartFile thumbnail) throws ParseException {
         try {
             String thumbnailUrl;
             SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
-            Category category = categoryService.getCategoryByName(categoryName).orElseGet(() -> categoryService.saveCategory(Category.builder().name(categoryName).build()));
+            Category category = categoryService.getCategoryByName(req.getCategoryName()).orElseGet(() -> categoryService.saveCategory(Category.builder().name(req.getCategoryName()).build()));
             if (thumbnail != null) {
                 thumbnailUrl = cloudinaryService.upload(thumbnail);
             } else {
                 thumbnailUrl = "https://res.cloudinary.com/dnarlcqth/image/upload/v1719906429/samples/landscapes/architecture-signs.jpg";
             }
+            User user = AuthService.getCurrentUser();
             Course course = Course.builder()
                     .category(category)
-                    .name(name)
-                    .description(description)
-                    .startDate(dateFormatter.parse(startDate))
+                    .name(req.getName())
+                    .description(req.getDescription())
+                    .startDate(dateFormatter.parse(req.getStartDate()))
                     .thumbnail(thumbnailUrl)
-                    .state(state != null ? State.valueOf(state) : State.OPEN)
-                    .teacher(AuthService.getCurrentUser())
+                    .state(req.getState() != null ? req.getState() : State.OPEN)
+                    .teacher(user)
                     .build();
             return Response.builder().code(HttpStatus.CREATED.value()).success(true).message("Create course successfully!").data(courseService.saveCourse(course)).build();
         } catch (Exception e) {
@@ -192,7 +191,7 @@ public class CourseController {
     public Response getMyCourses(Pageable pageable) {
         try {
             Page<Course> course = courseService.getCoursesByStudentId(AuthService.getCurrentUser().getId(), pageable);
-            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get my courses successfully!").data(course.get()).build();
+            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get my courses successfully!").data(course).build();
         } catch (Exception e) {
             throw e;
         }
@@ -203,6 +202,17 @@ public class CourseController {
         try {
             Page<Course> courses = courseService.getCourseByTeacherId(AuthService.getCurrentUser().getId(), pageable);
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get my courses as teacher successfully!").data(courses).build();
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+
+    @GetMapping("/{coursedId}/modules")
+    public Response getModulesByCourseId(@PathVariable("coursedId") Long id) {
+        try {
+            List<Module> modules = moduleService.findAllByCourseId(id);
+            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get modules by course id successfully!").data(modules).build();
+
         } catch (Exception e) {
             throw e;
         }

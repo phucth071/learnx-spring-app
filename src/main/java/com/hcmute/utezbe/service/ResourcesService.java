@@ -46,4 +46,7 @@ public class ResourcesService {
         return resources.orElse(null);
     }
 
+    public List<Resources> getAllResourcesByModuleId(Long moduleId) {
+        return resourcesRepository.findAllByModuleId(moduleId);
+    }
 }

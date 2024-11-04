@@ -3,8 +3,7 @@ package com.hcmute.utezbe.controller;
 import com.hcmute.utezbe.dto.ModuleDto;
 import com.hcmute.utezbe.entity.Module;
 import com.hcmute.utezbe.response.Response;
-import com.hcmute.utezbe.service.CourseService;
-import com.hcmute.utezbe.service.ModuleService;
+import com.hcmute.utezbe.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +17,9 @@ public class ModuleController {
 
     private final ModuleService moduleService;
     private final CourseService courseService;
+    private final LectureService lectureService;
+    private final ResourcesService resourcesService;
+    private final AssignmentService assignmentService;
 
     @GetMapping("")
     public Response getAllModule() {
@@ -67,6 +69,33 @@ public class ModuleController {
     public Response deleteModule(@PathVariable("moduleId") Long moduleId) {
         try {
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Delete module with id " + moduleId + " successfully!").data(moduleService.deleteModule(moduleId)).build();
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+
+    @GetMapping("/{moduleId}/lectures")
+    public Response getLecturesByModuleId(@PathVariable("moduleId") Long moduleId) {
+        try {
+            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get all lectures of module with id " + moduleId + " successfully!").data(lectureService.getAllLecturesByModuleId(moduleId)).build();
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+
+    @GetMapping("/{moduleId}/resources")
+    public Response getResourcesByModuleId(@PathVariable("moduleId") Long moduleId) {
+        try {
+            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get all resources of module with id " + moduleId + " successfully!").data(resourcesService.getAllResourcesByModuleId(moduleId)).build();
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+
+    @GetMapping("/{moduleId}/assignments")
+    public Response getAssignmentsByModuleId(@PathVariable("moduleId") Long moduleId) {
+        try {
+            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get all assignments of module with id " + moduleId + " successfully!").data(assignmentService.getAllAssignmentsByModuleId(moduleId)).build();
         } catch (Exception e) {
             throw e;
         }

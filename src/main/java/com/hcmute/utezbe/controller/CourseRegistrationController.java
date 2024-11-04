@@ -3,6 +3,7 @@ package com.hcmute.utezbe.controller;
 import com.hcmute.utezbe.domain.RequestContext;
 import com.hcmute.utezbe.dto.CourseRegistrationDto;
 import com.hcmute.utezbe.entity.CourseRegistration;
+import com.hcmute.utezbe.request.ListEmailRequest;
 import com.hcmute.utezbe.response.Response;
 import com.hcmute.utezbe.service.CourseRegistrationService;
 import com.hcmute.utezbe.service.CourseService;
@@ -11,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -29,6 +32,12 @@ public class CourseRegistrationController {
         }
     }
 
+    @PostMapping("/register/{courseId}")
+    public Response registerCourse(@PathVariable("courseId") Long courseId, @RequestBody ListEmailRequest req) {
+        List<CourseRegistration> courseRegistrations = courseRegistrationService.registerCourse(courseId, req.getEmails());
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Register course successfully!").data(courseRegistrations).build();
+    }
+
     @GetMapping("/pageable")
     public Response getAllCourseRegistration(Pageable pageable) {
         try {
@@ -44,7 +53,7 @@ public class CourseRegistrationController {
             Long studentId = RequestContext.getUserId();
             CourseRegistration courseRegistration = CourseRegistration.builder()
                     .course(courseService.getCourseById(dto.getCourseId()).get())
-                    .student(userService.getUserById(studentId))
+                    .email(userService.getUserById(studentId).getEmail())
                     .build();
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Create course registration successfully!").data(courseRegistrationService.save(courseRegistration)).build();
         } catch (Exception e) {
@@ -69,4 +78,6 @@ public class CourseRegistrationController {
             throw e;
         }
     }
+
+
 }

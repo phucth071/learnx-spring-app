@@ -1,16 +1,25 @@
 package com.hcmute.utezbe.controller;
 
+import com.hcmute.utezbe.auth.AuthService;
 import com.hcmute.utezbe.dto.AssignmentSubmissionDto;
+import com.hcmute.utezbe.entity.Assignment;
 import com.hcmute.utezbe.entity.AssignmentSubmission;
+import com.hcmute.utezbe.entity.User;
 import com.hcmute.utezbe.exception.ResourceNotFoundException;
+import com.hcmute.utezbe.request.AssignmentSubmissionRequest;
 import com.hcmute.utezbe.response.Response;
 import com.hcmute.utezbe.service.AssignmentService;
 import com.hcmute.utezbe.service.AssignmentSubmissionService;
+import com.hcmute.utezbe.service.CloudinaryService;
 import com.hcmute.utezbe.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
 
@@ -22,6 +31,7 @@ public class AssignmentSubmissionController {
     private final AssignmentSubmissionService assignmentSubmissionService;
     private final AssignmentService assignmentService;
     private final UserService userService;
+    private final CloudinaryService cloudinaryService;
 
     @GetMapping("")
     public Response getAllAssignmentSubmission() {
@@ -55,16 +65,25 @@ public class AssignmentSubmissionController {
         }
     }
 
-    @PostMapping("")
-    public Response createAssignmentSubmission(@RequestBody AssignmentSubmissionDto assignmentSubmissionDto) {
+    @Transactional
+    @PostMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Response createAssignmentSubmission(
+            @RequestPart("assignment") AssignmentSubmissionRequest req,
+            @RequestPart("file") @Nullable MultipartFile file) {
         try {
+            String fileUrl = null;
+            if (file != null) {
+                fileUrl = cloudinaryService.upload(file);
+            }
+
+            User currentUser = AuthService.getCurrentUser();
+            Assignment assignment = assignmentService.getAssignmentById(req.getAssignmentId()).orElseThrow(ResourceNotFoundException::new);
+
             AssignmentSubmission assignmentSubmission = AssignmentSubmission.builder()
-                    .score(assignmentSubmissionDto.getScore())
-                    .textSubmission(assignmentSubmissionDto.getTextSubmission())
-                    .fileSubmissionUrl(assignmentSubmissionDto.getFileSubmissionUrl())
-                    .linkSubmission(assignmentSubmissionDto.getLinkSubmission())
-                    .assignment(assignmentService.getAssignmentById(assignmentSubmissionDto.getAssignmentId()).get())
-                    .student(userService.getUserById(assignmentSubmissionDto.getStudentId()))
+                    .textSubmission(req.getTextSubmission())
+                    .fileSubmissionUrl(fileUrl)
+                    .assignment(assignment)
+                    .student(currentUser)
                     .build();
             return Response.builder().code(HttpStatus.CREATED.value()).success(true).message("Create assignment submission successfully!").data(assignmentSubmissionService.saveAssignmentSubmission(assignmentSubmission)).build();
         } catch (Exception e) {
@@ -103,7 +122,6 @@ public class AssignmentSubmissionController {
         if (assignmentSubmissionDto.getScore() != null) existingSubmission.setScore(assignmentSubmissionDto.getScore());
         if (assignmentSubmissionDto.getTextSubmission() != null) existingSubmission.setTextSubmission(assignmentSubmissionDto.getTextSubmission());
         if (assignmentSubmissionDto.getFileSubmissionUrl() != null) existingSubmission.setFileSubmissionUrl(assignmentSubmissionDto.getFileSubmissionUrl());
-        if (assignmentSubmissionDto.getLinkSubmission() != null) existingSubmission.setLinkSubmission(assignmentSubmissionDto.getLinkSubmission());
         return existingSubmission;
     }
 

@@ -26,7 +26,7 @@ public class Course extends Auditable {
     @Column(updatable = false)
     private Long id;
 
-    @Column(name="name", unique = true)
+    @Column(name="name")
     private String name;
 
     @Column(name="start_date")
@@ -50,7 +50,7 @@ public class Course extends Auditable {
 
 
     @JsonBackReference
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE})
     @JoinColumn(name = "teacher_id")
     private User teacher;
 

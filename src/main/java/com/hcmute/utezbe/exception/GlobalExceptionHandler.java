@@ -1,6 +1,7 @@
 package com.hcmute.utezbe.exception;
 
 import com.hcmute.utezbe.response.Response;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -9,12 +10,13 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     ResponseEntity<Response> handlingException(Exception e) {
+        e.printStackTrace();
         return ResponseEntity.badRequest().body(Response.builder().code(400).success(false).message(e.getMessage()).build());
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
     ResponseEntity<Response> handlingResourceNotFoundException(ResourceNotFoundException e) {
-        return ResponseEntity.badRequest().body(Response.builder().code(404).success(false).message(e.getMessage()).build());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Response.builder().code(409).success(false).message(e.getMessage()).build());
     }
 
     @ExceptionHandler(AuthenticationException.class)

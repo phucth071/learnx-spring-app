@@ -5,6 +5,7 @@ import com.hcmute.utezbe.entity.enumClass.State;
 import lombok.*;
 
 import jakarta.persistence.*;
+import org.springframework.lang.Nullable;
 
 @Getter
 @Setter
@@ -30,8 +31,5 @@ public class CourseRegistration extends Auditable {
     @JoinColumn(name = "course_id")
     private Course course;
 
-
-    @ManyToOne
-    @JoinColumn(name = "student_id")
-    private User student;
+    private String email;
 }

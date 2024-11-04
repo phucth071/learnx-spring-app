@@ -17,31 +17,30 @@ import jakarta.persistence.*;
 @Builder
 public class AssignmentSubmission extends Auditable {
 
-    @EmbeddedId
-    private AssignmentSubmissionId id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(updatable = false)
+    private Long id;
 
     @Column(name = "score")
     private Double score;
 
-    @Column(name = "text_submission", columnDefinition = "TEXT")
+    @Column(name = "text_submission")
     private String textSubmission;
 
-    @Column(name = "file_submission_url", columnDefinition = "TEXT")
+    @Column(name = "file_submission_url")
     private String fileSubmissionUrl;
 
-    @Column(name = "link_submission", columnDefinition = "TEXT")
-    private String linkSubmission;
+//    TODO: Add submit date -> update_At
 
-//    TODO: Add submit date
-
-    @OneToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "assignment_id", foreignKey = @ForeignKey(name = "FK_assignment_submission_assignment"),
     insertable = false, updatable = false)
     @JsonIgnore
     private Assignment assignment;
 
     @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE})
     @JoinColumn(name = "student_id", foreignKey = @ForeignKey(name = "FK_assignment_submission_account"),
     insertable = false, updatable = false)
     private User student;

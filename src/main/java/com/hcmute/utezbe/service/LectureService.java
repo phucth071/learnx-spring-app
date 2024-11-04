@@ -46,4 +46,8 @@ public class LectureService {
         return lecture.orElse(null);
     }
 
+    public List<Lecture> getAllLecturesByModuleId(Long moduleId) {
+        return lectureRepository.findAllByModuleId(moduleId);
+    }
+
 }

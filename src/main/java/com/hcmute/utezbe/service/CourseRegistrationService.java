@@ -1,6 +1,7 @@
 package com.hcmute.utezbe.service;
 
 import com.hcmute.utezbe.auth.AuthService;
+import com.hcmute.utezbe.entity.Course;
 import com.hcmute.utezbe.entity.CourseRegistration;
 import com.hcmute.utezbe.entity.enumClass.Role;
 import com.hcmute.utezbe.entity.enumClass.State;
@@ -19,15 +20,20 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class CourseRegistrationService {
     private final CourseRegistrationRepository repository;
+    private final UserService userService;
 
-    public Optional<CourseRegistration> getCourseRegistration(Long studentId, Long courseId) {
-        return repository.findByStudentIdAndCourseId(studentId, courseId);
+    public Optional<CourseRegistration> getCourseRegistrationByEmailAndCourseId(String email, Long courseId) {
+        return repository.findByEmailAndCourseId(email, courseId);
     }
 
 
     public CourseRegistration save(CourseRegistration courseRegistration) {
         if (courseRegistration.getState() == null) {
-            courseRegistration.setState(State.PENDING);
+            courseRegistration.setState(State.ACCEPTED);
+        }
+        Optional<CourseRegistration> otp = getCourseRegistrationByEmailAndCourseId(courseRegistration.getEmail(), courseRegistration.getCourse().getId());
+        if (otp.isPresent()) {
+            throw new ResourceNotFoundException("You have already registered this course!");
         }
         return repository.save(courseRegistration);
     }
@@ -37,20 +43,13 @@ public class CourseRegistrationService {
     }
 
     public Page<CourseRegistration> getCourseRegistrationsByStudentId(Long studentId, Pageable pageable) {
-        Page<CourseRegistration> courseRegistrations = repository.findByStudentId(studentId, pageable);
+        Page<CourseRegistration> courseRegistrations = repository.findByEmail(userService.getUserById(studentId).getEmail(), pageable);
         if (courseRegistrations.isEmpty()) {
             throw new ResourceNotFoundException();
         }
         return courseRegistrations;
     }
 
-    public Page<CourseRegistration> getCoursesRegistrationsByStudentEmail(String email, Pageable pageable) {
-        Page<CourseRegistration> courseRegistrations = repository.findAllByStudentEmail(email, pageable);
-        if (courseRegistrations.isEmpty()) {
-            throw new ResourceNotFoundException();
-        }
-        return courseRegistrations;
-    }
 
     public Page<CourseRegistration> getCourseRegistrationsByCourseId(Long courseId, Pageable pageable) {
         Page<CourseRegistration> courseRegistrations = repository.findByCourseId(courseId, pageable);
@@ -79,7 +78,7 @@ public class CourseRegistrationService {
         if (!AuthService.isUserHaveRole(Role.TEACHER) && !AuthService.isUserHaveRole(Role.ADMIN)) {
             throw new AccessDeniedException("You do not have permission to do this action!");
         }
-        Optional<CourseRegistration> otp = getCourseRegistration(studentId, courseId);
+        Optional<CourseRegistration> otp = getCourseRegistrationByEmailAndCourseId(userService.getUserById(studentId).getEmail(), courseId);
         if (otp.isPresent()) {
             CourseRegistration courseRegistration = otp.get();
             if (courseRegistration.getState().equals("PENDING")) {
@@ -90,5 +89,19 @@ public class CourseRegistrationService {
             return save(courseRegistration);
         }
         return null;
+    }
+
+    public List<CourseRegistration> registerCourse(Long courseId, List<String> emails) {
+        if (!AuthService.isUserHaveRole(Role.TEACHER) && !AuthService.isUserHaveRole(Role.ADMIN)) {
+            throw new AccessDeniedException("You do not have permission to do this action!");
+        }
+        List<CourseRegistration> courseRegistrations = emails.stream()
+                .map(email -> CourseRegistration.builder()
+                        .course(Course.builder().id(courseId).build())
+                        .email(email)
+                        .state(State.ACCEPTED)
+                        .build())
+                .toList();
+        return repository.saveAll(courseRegistrations);
     }
 }
