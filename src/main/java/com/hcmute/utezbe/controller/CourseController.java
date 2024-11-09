@@ -47,7 +47,7 @@ public class CourseController {
     private final CloudinaryService cloudinaryService;
 
     @GetMapping("")
-    public Response getAllCourse() {
+    public Response<?> getAllCourse() {
         try {
             List<Course> courses = courseService.getAllCourses();
             List<CourseDto> courseDtos = courses.stream()
@@ -60,7 +60,7 @@ public class CourseController {
     }
 
     @GetMapping("/pageable")
-    public Response getAllCoursesPageable(Pageable pageable) {
+    public Response<?> getAllCoursesPageable(Pageable pageable) {
         try {
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get all course pageable successfully!").data(courseService.getAllCoursesPageable(pageable)).build();
         } catch (Exception e) {
@@ -69,7 +69,7 @@ public class CourseController {
     }
 
     @GetMapping("/{courseId}")
-    public Response getCourseById(@PathVariable("courseId") Long courseId) {
+    public Response<?> getCourseById(@PathVariable("courseId") Long courseId) {
         try {
             Optional<Course> courseOtp = courseService.getCourseById(courseId);
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get course by id successfully!").data(convertToDto(courseOtp.get())).build();
@@ -90,7 +90,7 @@ public class CourseController {
         if (course.getCategory() != null) {
             courseDto.setCategoryId(course.getCategory().getId());
         }
-        
+
         return courseDto;
     }
 
@@ -109,7 +109,7 @@ public class CourseController {
 
     @Transactional
     @PostMapping(value = "", consumes = {"multipart/form-data"})
-    public Response createCourse(@RequestPart("courseInfo") CreateCourseRequest req,
+    public Response<?> createCourse(@RequestPart("courseInfo") CreateCourseRequest req,
                                  @RequestPart("thumbnail") @Nullable MultipartFile thumbnail) throws ParseException {
         try {
             String thumbnailUrl;
@@ -137,7 +137,7 @@ public class CourseController {
     }
 
     @PatchMapping("/{courseId}")
-    public Response editCourse(@PathVariable("courseId") Long courseId,
+    public Response<?> editCourse(@PathVariable("courseId") Long courseId,
                                @RequestParam("name") String name,
                                @RequestParam("description") String description,
                                @RequestParam("categoryId") Long categoryId,
@@ -163,7 +163,7 @@ public class CourseController {
     }
 
     @DeleteMapping("/{courseId}")
-    public Response deleteCourse(@PathVariable("courseId") Long courseId) {
+    public Response<?> deleteCourse(@PathVariable("courseId") Long courseId) {
         try {
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Delete course successfully!").data(courseService.deleteCourse(courseId)).build();
         } catch (Exception e) {
@@ -172,7 +172,7 @@ public class CourseController {
     }
 
 //    @PostMapping("/email")
-//    public Response getCoursesByEmail(@RequestBody EmailRequest request, Pageable pageable) {
+//    public Response<?>getCoursesByEmail(@RequestBody EmailRequest request, Pageable pageable) {
 //        try {
 //            Page<CourseRegistration> courseRegistrations = courseRegistrationService.getCoursesRegistrationsByStudentEmail(request.getEmail(), pageable);
 //            List<Long> ids = courseRegistrations.stream().map(courseRegistration -> courseRegistration.getCourse().getId()).collect(Collectors.toList());
@@ -188,7 +188,7 @@ public class CourseController {
 //    }
 
     @GetMapping("/my-courses")
-    public Response getMyCourses(Pageable pageable) {
+    public Response<?>getMyCourses(Pageable pageable) {
         try {
             Page<Course> course = courseService.getCoursesByStudentId(AuthService.getCurrentUser().getId(), pageable);
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get my courses successfully!").data(course).build();
@@ -198,7 +198,7 @@ public class CourseController {
     }
 
     @GetMapping("/teacher/my-courses")
-    public Response getMyCoursesAsTeacher(Pageable pageable) {
+    public Response<?> getMyCoursesAsTeacher(Pageable pageable) {
         try {
             Page<Course> courses = courseService.getCourseByTeacherId(AuthService.getCurrentUser().getId(), pageable);
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get my courses as teacher successfully!").data(courses).build();
@@ -208,7 +208,7 @@ public class CourseController {
     }
 
     @GetMapping("/{coursedId}/modules")
-    public Response getModulesByCourseId(@PathVariable("coursedId") Long id) {
+    public Response<?> getModulesByCourseId(@PathVariable("coursedId") Long id) {
         try {
             List<Module> modules = moduleService.findAllByCourseId(id);
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get modules by course id successfully!").data(modules).build();
