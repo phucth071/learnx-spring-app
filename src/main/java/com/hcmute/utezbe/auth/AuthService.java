@@ -227,6 +227,7 @@ public class AuthService {
                 .build();
     }
 
+    @Transactional
     public Response loginWithGoogle(IdTokenRequest idTokenRequest) throws IOException {
 //        GoogleTokenResponse tokenResponse = exchangeCode(authCode.getAuthCode());
         User user = verifyGoogleIdToken(idTokenRequest.getIdToken());
@@ -236,6 +237,10 @@ public class AuthService {
         user = createOrUpdateUser(user);
         RequestContext.setUserId(user.getId());
         String accessToken = jwtService.generateAccessToken(user);
+        RefreshToken oldRefreshToken = refreshTokenService.findByUserId(user.getId());
+        if (oldRefreshToken != null) {
+            refreshTokenService.deleteByToken(oldRefreshToken.getToken());
+        }
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getEmail());
         return Response.builder()
                 .code(HttpStatus.OK.value())
@@ -436,5 +441,34 @@ public class AuthService {
     public static boolean checkAdminRole() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return (authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals(Role.ADMIN.name())));
+    }
+
+    public User getGoogleUserDetails(String email) {
+        // Implement the logic to fetch user details from Google using the email
+        // This might involve calling the Google People API or similar
+        // For example:
+        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(
+                new NetHttpTransport(),
+                JacksonFactory.getDefaultInstance())
+                .setAudience(Collections.singletonList(CLIENT_ID))
+                .build();
+        try {
+            GoogleIdToken idToken = verifier.verify(email);
+            if (idToken != null) {
+                GoogleIdToken.Payload payload = idToken.getPayload();
+                String fullName = (String) payload.get("name");
+                String avatarUrl = (String) payload.get("picture");
+                return User.builder()
+                        .email(email)
+                        .fullName(fullName)
+                        .avatarUrl(avatarUrl)
+                        .provider(Provider.GOOGLE)
+                        .role(Role.STUDENT) // or determine role based on your logic
+                        .build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

@@ -15,10 +15,10 @@ spring:
     generate-ddl: true
     hibernate:
       ddl-auto: update
-      properties:
-        hibernate:
-          dialect: org.hibernate.dialect.MySQL8Dialect
-          format_sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: true
 
   mail:
     host: smtp.gmail.com

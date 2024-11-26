@@ -3,16 +3,21 @@ package com.hcmute.utezbe.service;
 import com.hcmute.utezbe.auth.AuthService;
 import com.hcmute.utezbe.entity.Course;
 import com.hcmute.utezbe.entity.CourseRegistration;
+import com.hcmute.utezbe.entity.User;
 import com.hcmute.utezbe.entity.enumClass.Role;
 import com.hcmute.utezbe.entity.enumClass.State;
 import com.hcmute.utezbe.exception.AccessDeniedException;
 import com.hcmute.utezbe.exception.ResourceNotFoundException;
 import com.hcmute.utezbe.repository.CourseRegistrationRepository;
+import com.hcmute.utezbe.response.CourseRegistrationUserResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -51,12 +56,24 @@ public class CourseRegistrationService {
     }
 
 
-    public Page<CourseRegistration> getCourseRegistrationsByCourseId(Long courseId, Pageable pageable) {
+    public Page<CourseRegistrationUserResponse> getCourseRegistrationsByCourseId(Long courseId, Pageable pageable) {
         Page<CourseRegistration> courseRegistrations = repository.findByCourseId(courseId, pageable);
+
         if (courseRegistrations.isEmpty()) {
             throw new ResourceNotFoundException();
         }
-        return courseRegistrations;
+
+        return courseRegistrations.map(courseRegistration -> {
+            Optional<User> userOtp = userService.findByEmailIgnoreCase(courseRegistration.getEmail());
+            Role userRole = Role.STUDENT;
+            String userFullName = userOtp.isEmpty() ? "Unregistered Account" : userOtp.get().getFullName();
+            return CourseRegistrationUserResponse.builder()
+                    .id(courseRegistration.getId())
+                    .email(courseRegistration.getEmail())
+                    .fullName(userFullName)
+                    .role(userRole.name())
+                    .build();
+        });
     }
 
 
@@ -102,6 +119,8 @@ public class CourseRegistrationService {
                         .state(State.ACCEPTED)
                         .build())
                 .toList();
+
+
         return repository.saveAll(courseRegistrations);
     }
 }

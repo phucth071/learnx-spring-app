@@ -35,6 +35,17 @@ public class UserController {
     private final CloudinaryService cloudinary;
     private final AuthService authService;
     private final ChangeRoleQueueService changeRoleQueueService;
+
+    @GetMapping("")
+    public Response<?> getAllUsers() {
+        try {
+            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get all users successfully!").data(userService.findAll()).build();
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+
+
     @GetMapping("/info")
     public Response getUserInfo(Principal principal) {
         if(principal == null) {
@@ -55,7 +66,6 @@ public class UserController {
         return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get user info successfully!").data(userDto).build();
     }
 
-//    TODO: Implement the HASH REQUEST to check if the request is sent multiple times
     @PatchMapping(value = "", consumes = {"multipart/form-data"})
     public Response patchUser(@RequestPart("user") UserPatchRequest req,
                               @RequestPart("avatar") @Nullable MultipartFile avatar) {

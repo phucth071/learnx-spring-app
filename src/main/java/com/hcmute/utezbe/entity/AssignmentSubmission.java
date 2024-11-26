@@ -31,8 +31,6 @@ public class AssignmentSubmission extends Auditable {
     @Column(name = "file_submission_url")
     private String fileSubmissionUrl;
 
-//    TODO: Add submit date -> update_At
-
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "assignment_id", foreignKey = @ForeignKey(name = "FK_assignment_submission_assignment"),
     insertable = false, updatable = false)

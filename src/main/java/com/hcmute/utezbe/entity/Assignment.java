@@ -23,7 +23,7 @@ public class Assignment extends Auditable{
     @Column(updatable = false)
     private Long id;
 
-    @Column(name="content", columnDefinition = "TEXT")
+    @Column(name="content", columnDefinition = "LONGTEXT")
     private String content;
 
     @Column(name="start_date")

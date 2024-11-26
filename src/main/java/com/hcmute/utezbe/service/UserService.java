@@ -3,6 +3,8 @@ package com.hcmute.utezbe.service;
 import com.hcmute.utezbe.auth.AuthService;
 import com.hcmute.utezbe.dto.UserDto;
 import com.hcmute.utezbe.entity.User;
+import com.hcmute.utezbe.entity.enumClass.Role;
+import com.hcmute.utezbe.exception.AccessDeniedException;
 import com.hcmute.utezbe.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,6 +18,9 @@ public class UserService {
     private final UserRepository userRepository;
 
     public List<User> findAll() {
+        if (AuthService.getCurrentUser().getRole() != Role.ADMIN) {
+            throw new AccessDeniedException("You do not have permission to do this action!");
+        }
         return userRepository.findAll();
     }
 

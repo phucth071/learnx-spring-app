@@ -20,7 +20,7 @@ public class CloudinaryService {
             Map<?, ?> res = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
             return (String) res.get("url");
         } catch (Exception e) {
-            throw new RuntimeException("Failed to upload image");
+            throw new RuntimeException("Failed to upload");
         }
     }
 }
