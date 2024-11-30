@@ -13,9 +13,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Optional;
@@ -50,8 +52,8 @@ public class AssignmentController {
 
     @PostMapping(value = "", consumes = "multipart/form-data")
     public Response<?> createAssignment(@RequestPart("assignment") CreateAssignmentRequest req,
-                                     @RequestPart("document") MultipartFile document) {
-        String urlDocument = cloudinaryService.upload(document);
+                                     @RequestPart(value = "document") @Nullable MultipartFile document) throws IOException {
+        String urlDocument = document != null ? cloudinaryService.uploadRemainFileName(document) : null;
         Assignment assignment = Assignment.builder()
                 .content(req.getContent())
                 .startDate(req.getStartDate())

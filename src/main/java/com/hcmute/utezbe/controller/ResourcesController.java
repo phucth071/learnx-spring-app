@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Optional;
 
 @RestController
@@ -37,8 +38,8 @@ public class ResourcesController {
 
     @Transactional
     @PostMapping(value = "", consumes = {"multipart/form-data"})
-    public Response<?> createResources(@RequestPart("resources") CreateResourceRequest req, @RequestPart("file") MultipartFile document) {
-        String urlDocument = cloudinaryService.upload(document);
+    public Response<?> createResources(@RequestPart("resources") CreateResourceRequest req, @RequestPart("document") MultipartFile document) throws IOException {
+        String urlDocument = cloudinaryService.uploadRemainFileName(document);
         Resources resources = Resources.builder()
                 .title(req.getTitle())
                 .urlDocument(urlDocument)

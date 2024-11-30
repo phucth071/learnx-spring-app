@@ -2,6 +2,11 @@ spring:
   application:
     name: utez-be
 
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+
   datasource:
     url: jdbc:mysql://localhost:3306/utez_db
     # username: root
