@@ -1,8 +1,6 @@
 package com.hcmute.utezbe.controller;
 
 import com.hcmute.utezbe.auth.AuthService;
-import com.hcmute.utezbe.auth.request.EmailRequest;
-import com.hcmute.utezbe.domain.RequestContext;
 import com.hcmute.utezbe.dto.CourseDto;
 import com.hcmute.utezbe.dto.ModuleDto;
 import com.hcmute.utezbe.entity.*;

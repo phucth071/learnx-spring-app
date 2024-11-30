@@ -1,6 +1,7 @@
 package com.hcmute.utezbe.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.hcmute.utezbe.entity.auditing.Auditable;
 import lombok.*;
 
 import jakarta.persistence.*;
@@ -14,7 +15,7 @@ import java.util.List;
 @Entity
 @Table(name = "category")
 @Builder
-public class Category extends Auditable{
+public class Category extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

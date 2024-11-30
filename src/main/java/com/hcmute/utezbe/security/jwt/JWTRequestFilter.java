@@ -1,12 +1,10 @@
 package com.hcmute.utezbe.security.jwt;
 
-import com.hcmute.utezbe.domain.RequestContext;
-import com.hcmute.utezbe.entity.RefreshToken;
 import com.hcmute.utezbe.service.RefreshTokenService;
 import com.hcmute.utezbe.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
+
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -16,11 +14,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Arrays;
 
 @Component
 @RequiredArgsConstructor
@@ -54,11 +50,7 @@ public class JWTRequestFilter extends OncePerRequestFilter {
         String header = request.getHeader("Authorization");
 
         if (header == null) {
-            try {
-                filterChain.doFilter(request, response);
-            } finally {
-                RequestContext.start();
-            }
+            filterChain.doFilter(request, response);
             return;
         }
         final String jwt = header.substring(7);
@@ -74,7 +66,6 @@ public class JWTRequestFilter extends OncePerRequestFilter {
                 return;
             }
             Long userId = userService.findByEmailIgnoreCase(userEmail).get().getId();
-            RequestContext.setUserId(userId);
             authentication = new UsernamePasswordAuthenticationToken(
                     userDetails,
                     null,

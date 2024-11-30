@@ -4,7 +4,10 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.hcmute.utezbe.entity.enumClass.Provider;
 import com.hcmute.utezbe.entity.enumClass.Role;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,7 +17,6 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 @Getter
 @Setter
@@ -24,7 +26,7 @@ import java.util.Set;
 @ToString
 @Entity
 @Table(name = "users")
-public class User extends Auditable implements UserDetails {
+public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(updatable = false)
@@ -44,6 +46,24 @@ public class User extends Auditable implements UserDetails {
     private Role role;
     @Enumerated(EnumType.STRING)
     private Provider provider;
+
+    @NotNull
+    @CreatedDate
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+    @LastModifiedDate
+    @Column(name = "updated_at", insertable = false)
+    private LocalDateTime updatedAt;
+
+    @PrePersist
+    public void prePersist() {
+        setCreatedAt(LocalDateTime.now());
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        setUpdatedAt(LocalDateTime.now());
+    }
 
 
     @Override
@@ -92,5 +112,6 @@ public class User extends Auditable implements UserDetails {
     @JsonBackReference
     @OneToMany(mappedBy = "student", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
     private List<AssignmentSubmission> assignmentSubmissions;
+
 
 }

@@ -9,7 +9,6 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.hcmute.utezbe.auth.request.*;
-import com.hcmute.utezbe.domain.RequestContext;
 import com.hcmute.utezbe.dto.UserDto;
 import com.hcmute.utezbe.entity.ConfirmToken;
 import com.hcmute.utezbe.entity.ForgotPasswordToken;
@@ -27,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -188,12 +188,17 @@ public class AuthService {
     }
 
     public Response authenticate(AuthenticationRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
-                        request.getPassword()
-                )
-        );
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getEmail(),
+                            request.getPassword()
+                    )
+            );
+        } catch (BadCredentialsException e) {
+            throw new AuthenticationException("Invalid email or password!");
+        }
+
         Optional<User> opt = userService.findByEmailIgnoreCase(request.getEmail());
         if(opt.isEmpty()) {
             throw new AuthenticationException("User not found!");
@@ -208,7 +213,6 @@ public class AuthService {
 //        if(user.getRole() != request.getRole()) {
 //            return Response.builder().error(true).success(false).message("You Do Not Have Authorize").build();
 //        };
-        RequestContext.setUserId(user.getId());
         var jwtToken = jwtService.generateAccessToken(user);
         var jwtRefreshToken = refreshTokenService.createRefreshToken(user.getEmail());
         return Response.builder()
@@ -235,7 +239,6 @@ public class AuthService {
             throw new AuthenticationException("Invalid id token");
         }
         user = createOrUpdateUser(user);
-        RequestContext.setUserId(user.getId());
         String accessToken = jwtService.generateAccessToken(user);
         RefreshToken oldRefreshToken = refreshTokenService.findByUserId(user.getId());
         if (oldRefreshToken != null) {
@@ -405,7 +408,6 @@ public class AuthService {
                 .map(refreshTokenService::verifyExpiration)
                 .map(RefreshToken::getUser)
                 .map(user -> {
-                    RequestContext.setUserId(user.getId());
                     String accessToken = jwtService.generateAccessToken(user);
                     String oldToken = refreshTokenRequest.getToken();
                     RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getEmail());

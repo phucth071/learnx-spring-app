@@ -2,6 +2,7 @@ package com.hcmute.utezbe.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.hcmute.utezbe.entity.auditing.Auditable;
 import com.hcmute.utezbe.entity.enumClass.State;
 import lombok.*;
 
@@ -16,7 +17,7 @@ import java.util.Date;
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "module"})
 @Table(name = "assignment")
 @Builder
-public class Assignment extends Auditable{
+public class Assignment extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

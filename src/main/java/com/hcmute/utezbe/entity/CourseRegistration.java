@@ -1,11 +1,11 @@
 package com.hcmute.utezbe.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.hcmute.utezbe.entity.auditing.Auditable;
 import com.hcmute.utezbe.entity.enumClass.State;
 import lombok.*;
 
 import jakarta.persistence.*;
-import org.springframework.lang.Nullable;
 
 @Getter
 @Setter

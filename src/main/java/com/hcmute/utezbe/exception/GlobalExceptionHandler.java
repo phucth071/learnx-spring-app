@@ -21,11 +21,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AuthenticationException.class)
     ResponseEntity<Response> handlingAuthenticationException(AuthenticationException e) {
-        return ResponseEntity.badRequest().body(Response.builder().code(403).success(false).message(e.getMessage()).build());
+        return ResponseEntity.status(403).body(Response.builder().code(403).success(false).message(e.getMessage()).build());
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     ResponseEntity<Response> handlingAccessDeniedException(AccessDeniedException e) {
-        return ResponseEntity.badRequest().body(Response.builder().code(403).success(false).message(e.getMessage()).build());
+        return ResponseEntity.status(403).body(Response.builder().code(403).success(false).message(e.getMessage()).build());
     }
 }

@@ -1,13 +1,12 @@
 package com.hcmute.utezbe.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.hcmute.utezbe.entity.auditing.Auditable;
 import com.hcmute.utezbe.entity.enumClass.State;
 import lombok.*;
 
 import jakarta.persistence.*;
-import java.util.ArrayList;
+
 import java.util.Date;
 import java.util.List;
 import java.util.Set;

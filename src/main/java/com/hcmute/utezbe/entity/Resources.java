@@ -2,6 +2,7 @@ package com.hcmute.utezbe.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.hcmute.utezbe.entity.auditing.Auditable;
 import lombok.*;
 
 import jakarta.persistence.*;
@@ -14,7 +15,7 @@ import jakarta.persistence.*;
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "modules"})
 @Table(name = "resources")
 @Builder
-public class Resources extends Auditable{
+public class Resources extends Auditable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(updatable = false)

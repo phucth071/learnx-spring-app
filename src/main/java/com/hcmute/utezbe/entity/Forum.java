@@ -1,6 +1,7 @@
 package com.hcmute.utezbe.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.hcmute.utezbe.entity.auditing.Auditable;
 import lombok.*;
 
 import jakarta.persistence.*;

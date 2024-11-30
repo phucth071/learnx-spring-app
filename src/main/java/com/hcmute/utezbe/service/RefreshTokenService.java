@@ -6,6 +6,7 @@ import com.hcmute.utezbe.exception.AuthenticationException;
 import com.hcmute.utezbe.repository.RefreshTokenRepository;
 import com.hcmute.utezbe.repository.UserRepository;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -14,6 +15,7 @@ import java.util.UUID;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class RefreshTokenService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final UserRepository userRepository;
@@ -23,12 +25,13 @@ public class RefreshTokenService {
         if(optUser.isPresent()) {
             User user = optUser.get();
             Optional<RefreshToken> optRefreshToken = refreshTokenRepository.findByUser(user);
-            optRefreshToken.ifPresent(token -> refreshTokenRepository.delete(token));
+            optRefreshToken.ifPresent(refreshTokenRepository::delete);
             RefreshToken refreshToken = RefreshToken.builder()
-                    .user(userRepository.findByEmailIgnoreCase(email).get())
+                    .user(user)
                     .token(UUID.randomUUID().toString())
                     .expiryDate(Instant.now().plusMillis(7L * 24 * 60 * 60 * 1000))
                     .build();
+            log.info("REFRESH TOKEN: " + refreshToken.getToken());
             return refreshTokenRepository.save(refreshToken);
         }
         return null;

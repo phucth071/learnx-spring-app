@@ -1,6 +1,6 @@
 package com.hcmute.utezbe.controller;
 
-import com.hcmute.utezbe.domain.RequestContext;
+import com.hcmute.utezbe.auth.AuthService;
 import com.hcmute.utezbe.dto.CourseRegistrationDto;
 import com.hcmute.utezbe.entity.CourseRegistration;
 import com.hcmute.utezbe.request.ListEmailRequest;
@@ -50,7 +50,7 @@ public class CourseRegistrationController {
     @PostMapping("")
     public Response createRegistration(CourseRegistrationDto dto) {
         try {
-            Long studentId = RequestContext.getUserId();
+            Long studentId = AuthService.getCurrentUser().getId();
             CourseRegistration courseRegistration = CourseRegistration.builder()
                     .course(courseService.getCourseById(dto.getCourseId()).get())
                     .email(userService.getUserById(studentId).getEmail())
