@@ -1,7 +1,10 @@
-package com.hcmute.utezbe.dto;
+package com.hcmute.utezbe.request;
 
 import com.hcmute.utezbe.entity.enumClass.State;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
@@ -9,12 +12,11 @@ import java.util.Date;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AssignmentDto {
+public class CreateAssignmentRequest {
     private String content;
     private Date startDate;
     private Date endDate;
     private State state;
     private String title;
-    private String urlDocument;
     private Long moduleId;
 }

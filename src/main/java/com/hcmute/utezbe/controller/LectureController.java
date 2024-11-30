@@ -20,56 +20,35 @@ public class LectureController {
     private final ModuleService moduleService;
 
     @GetMapping("")
-    public Response getAllLecture() {
-        try {
-            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get all lecture successfully!").data(lectureService.getAllLectures()).build();
-        } catch (Exception e) {
-            throw e;
-        }
+    public Response<?> getAllLecture() {
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get all lecture successfully!").data(lectureService.getAllLectures()).build();
     }
 
     @GetMapping("/{lectureId}")
-    public Response getLectureById(@PathVariable("lectureId") Long lectureId) {
-        try {
-            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get lecture with id " + lectureId + " successfully!").data(lectureService.getLectureById(lectureId)).build();
-        } catch (Exception e) {
-            throw e;
-        }
+    public Response<?> getLectureById(@PathVariable("lectureId") Long lectureId) {
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get lecture with id " + lectureId + " successfully!").data(lectureService.getLectureById(lectureId)).build();
     }
 
     @PostMapping("")
-    public Response createLecture(@RequestBody LectureDto lectureDto) {
-        try{
-            Lecture lecture = Lecture.builder()
-                    .module(moduleService.getModuleById(lectureDto.getModuleId()).get())
-                    .content(lectureDto.getContent())
-                    .name(lectureDto.getName())
-                    .build();
-            return Response.builder().code(HttpStatus.CREATED.value()).success(true).message("Create lecture successfully!").data(lectureService.saveLecture(lecture)).build();
-        } catch (Exception e) {
-            throw e;
-        }
+    public Response<?> createLecture(@RequestBody LectureDto lectureDto) {
+        Lecture lecture = Lecture.builder()
+                .module(moduleService.getModuleById(lectureDto.getModuleId()).get())
+                .content(lectureDto.getContent())
+                .name(lectureDto.getName())
+                .build();
+        return Response.builder().code(HttpStatus.CREATED.value()).success(true).message("Create lecture successfully!").data(lectureService.saveLecture(lecture)).build();
     }
 
     @PatchMapping("/{lectureId}")
-    public Response editLecture(@PathVariable("lectureId") Long lectureId, @RequestBody LectureDto lectureDto) {
-        try{
-            Optional<Lecture> optionalLecture = lectureService.getLectureById(lectureId);
-            Lecture lecture = optionalLecture.get();
-            lecture = convertLectureDTO(lectureDto, optionalLecture);
-            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Edit lecture with id " + lectureId + " successfully!").data(lectureService.saveLecture(lecture)).build();
-        } catch (Exception e) {
-            throw e;
-        }
+    public Response<?> editLecture(@PathVariable("lectureId") Long lectureId, @RequestBody LectureDto lectureDto) {
+        Optional<Lecture> optionalLecture = lectureService.getLectureById(lectureId);
+        Lecture lecture = convertLectureDTO(lectureDto, optionalLecture);
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Edit lecture with id " + lectureId + " successfully!").data(lectureService.saveLecture(lecture)).build();
     }
 
     @DeleteMapping("/{lectureId}")
-    public Response deleteLecture(@PathVariable("lectureId") Long lectureId) {
-        try {
-            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Delete lecture with id " + lectureId + " successfully!").data(lectureService.deleteLecture(lectureId)).build();
-        } catch (Exception e) {
-            throw e;
-        }
+    public Response<?> deleteLecture(@PathVariable("lectureId") Long lectureId) {
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Delete lecture with id " + lectureId + " successfully!").data(lectureService.deleteLecture(lectureId)).build();
     }
 
     private Lecture convertLectureDTO(LectureDto lectureDto, Optional<Lecture> optionalLecture) {
