@@ -1,11 +1,15 @@
 package com.hcmute.utezbe.service;
 
 import com.hcmute.utezbe.auth.AuthService;
+import com.hcmute.utezbe.dto.CourseDto;
 import com.hcmute.utezbe.entity.*;
 import com.hcmute.utezbe.entity.Module;
 import com.hcmute.utezbe.entity.enumClass.Role;
 import com.hcmute.utezbe.exception.AccessDeniedException;
 import com.hcmute.utezbe.exception.ResourceNotFoundException;
+import com.hcmute.utezbe.redis.RedisService;
+import com.hcmute.utezbe.redisson.RedisDistributedLocker;
+import com.hcmute.utezbe.redisson.RedisDistributedService;
 import com.hcmute.utezbe.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,6 +39,9 @@ public class CourseService {
     private final ResourcesRepository resourcesRepository;
     private final UserService userService;
 
+    private final RedisDistributedService redisDistributedService;
+    private final RedisService redisService;
+
     public Optional<Course> getCourseById(Long id) {
         Course course = courseRepository.findById(id).orElse(null);
         if (course == null) {
@@ -41,6 +49,68 @@ public class CourseService {
         }
         return courseRepository.findById(id);
     }
+
+    public CourseDto getCourseByIdWithCache(Long id) {
+        log.info("Get course by id with cache: {}", id);
+        CourseDto course = redisService.getObject(genCourseItemKey(id), CourseDto.class);
+        if (course != null) {
+            log.info("FROM CACHE EXIST {}", course);
+            return course;
+        }
+        log.info("CACHE NO EXIST, START GET DB AND SET CACHE->, {}", id);
+        RedisDistributedLocker locker = redisDistributedService.getDistributedLock("LOCK_KEY_ITEM" + id);
+        try {
+            // 1 - Tao lock
+            boolean isLock = locker.tryLock(1, 5, TimeUnit.SECONDS);
+            // Lưu ý: Cho dù thành công hay không cũng phải unLock, bằng mọi giá.
+            // Lưu ý: Cho dù thành công hay không cũng phải unLock, bằng mọi giá.
+            // Lưu ý: Cho dù thành công hay không cũng phải unLock, bằng mọi giá.
+            if (!isLock) {
+                log.info("LOCK WAIT ITEM PLEASE....");
+                return course;
+            }
+            // Get cache
+            course = redisService.getObject(genCourseItemKey(id), CourseDto.class);
+            // 2. YES
+
+            if (course != null) {
+                log.info("FROM CACHE EXIST {}", course);
+                return course;
+            }
+            // 3 -> Van khong co thi truy van DB
+
+            Course courseEntity = courseRepository.findById(id).orElse(null);
+            assert courseEntity != null;
+            course = CourseDto.builder()
+                    .id(courseEntity.getId())
+                    .name(courseEntity.getName())
+                    .description(courseEntity.getDescription())
+                    .startDate(courseEntity.getStartDate())
+                    .state(courseEntity.getState())
+                    .thumbnail(courseEntity.getThumbnail())
+                    .categoryId(courseEntity.getCategory().getId())
+                    .build();
+            log.info("FROM DBS ->>>> {}", course);
+            if (course == null) { // Neu trong dbs van khong co thi return ve not exists;
+                log.info("COURSE NOT EXITS....");
+                // set
+                redisService.setObject(genCourseItemKey(id), course);
+                return course;
+            }
+
+            // neu co thi set redis
+            redisService.setObject(genCourseItemKey(id), course); // TTL
+            return course;
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            // Lưu ý: Cho dù thành công hay không cũng phải unLock, bằng mọi giá.
+            locker.unlock();
+        }
+    }
+
+
 
     public List<Course> getAllCourses() {
         return courseRepository.findAll();
@@ -114,5 +184,7 @@ public class CourseService {
         return courseRepository.findByTeacherId(teacherId, pageable);
     }
 
-
+    private String genCourseItemKey(Long itemId) {
+        return "COURSE:ITEM:" + itemId;
+    }
 }

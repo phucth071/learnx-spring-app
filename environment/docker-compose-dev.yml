@@ -1,0 +1,9 @@
+version: '3.2'
+
+services:
+  #Redis
+  redis:
+    container_name: utez-redis
+    image: redislabs/redismod:latest
+    ports:
+      - "6319:6379"

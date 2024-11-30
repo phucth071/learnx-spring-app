@@ -16,7 +16,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)
     ResponseEntity<Response> handlingResourceNotFoundException(ResourceNotFoundException e) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(Response.builder().code(409).success(false).message(e.getMessage()).build());
+        return ResponseEntity.status(200).body(Response.builder().code(200).success(false).message(e.getMessage()).build());
     }
 
     @ExceptionHandler(AuthenticationException.class)

@@ -69,8 +69,8 @@ public class CourseController {
     @GetMapping("/{courseId}")
     public Response<?> getCourseById(@PathVariable("courseId") Long courseId) {
         try {
-            Optional<Course> courseOtp = courseService.getCourseById(courseId);
-            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get course by id successfully!").data(convertToDto(courseOtp.get())).build();
+            CourseDto course = courseService.getCourseByIdWithCache(courseId);
+            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get course by id successfully!").data(course).build();
         } catch (Exception e) {
             throw e;
         }
@@ -143,8 +143,9 @@ public class CourseController {
                                @RequestParam("state") @Nullable String state,
                                @RequestPart("thumbnail") @Nullable MultipartFile thumbnail) throws ParseException {
         try {
-            Optional<Course> courseOtp = courseService.getCourseById(courseId);
-            Course course = courseOtp.get();
+//            Optional<Course> courseOtp = courseService.getCourseById(courseId);
+//            Course course = courseOtp.get();
+            Course course = courseService.getCourseById(courseId).get();
             course.setName(name);
             course.setDescription(description);
             course.setCategory(categoryService.getCategoryById(categoryId).get());

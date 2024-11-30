@@ -32,7 +32,7 @@ public class CourseRegistrationController {
         }
     }
 
-    @PostMapping("/register/{courseId}")
+    @PostMapping("/register/{courseId}/list-email")
     public Response registerCourse(@PathVariable("courseId") Long courseId, @RequestBody ListEmailRequest req) {
         List<CourseRegistration> courseRegistrations = courseRegistrationService.registerCourse(courseId, req.getEmails());
         return Response.builder().code(HttpStatus.OK.value()).success(true).message("Register course successfully!").data(courseRegistrations).build();
