@@ -2,8 +2,7 @@ package com.hcmute.utezbe.dto;
 
 import lombok.*;
 
-@Setter
-@Getter
+@Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

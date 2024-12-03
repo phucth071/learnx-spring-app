@@ -20,6 +20,8 @@ import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
@@ -112,7 +114,15 @@ public class CourseRegistrationService {
         if (!AuthService.isUserHaveRole(Role.TEACHER) && !AuthService.isUserHaveRole(Role.ADMIN)) {
             throw new AccessDeniedException("You do not have permission to do this action!");
         }
+
+        String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
+        Pattern pattern = Pattern.compile(emailRegex);
+
         List<CourseRegistration> courseRegistrations = emails.stream()
+                .filter(email -> {
+                    Matcher matcher = pattern.matcher(email);
+                    return matcher.matches();
+                })
                 .map(email -> CourseRegistration.builder()
                         .course(Course.builder().id(courseId).build())
                         .email(email)
@@ -120,7 +130,16 @@ public class CourseRegistrationService {
                         .build())
                 .toList();
 
-
         return repository.saveAll(courseRegistrations);
+    }
+
+    public void removeStudentsFromCourse(Long courseId, List<String> emails) {
+        if (!AuthService.isUserHaveRole(Role.TEACHER) && !AuthService.isUserHaveRole(Role.ADMIN)) {
+            throw new AccessDeniedException("You do not have permission to do this action!");
+        }
+        emails.forEach(email -> {
+            Optional<CourseRegistration> otp = getCourseRegistrationByEmailAndCourseId(email, courseId);
+            otp.ifPresent(this::delete);
+        });
     }
 }

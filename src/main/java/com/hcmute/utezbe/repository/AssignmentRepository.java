@@ -20,4 +20,6 @@ public interface AssignmentRepository extends JpaRepository<Assignment, Long> {
     @Query("SELECT a FROM Course a WHERE a.state = 'OPEN'")
     Page<Assignment> findAllPageable(Pageable pageable);
 
+    @Query("SELECT a FROM Assignment a JOIN a.module m JOIN m.course c JOIN c.courseRegistrations cr WHERE cr.email = ?1")
+    List<Assignment> findAllByEmail(String email);
 }

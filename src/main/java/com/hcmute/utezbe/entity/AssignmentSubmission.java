@@ -32,15 +32,13 @@ public class AssignmentSubmission extends Auditable {
     private String fileSubmissionUrl;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "assignment_id", foreignKey = @ForeignKey(name = "FK_assignment_submission_assignment"),
-    insertable = false, updatable = false)
+    @JoinColumn(name = "assignment_id")
     @JsonIgnore
     private Assignment assignment;
 
     @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE})
-    @JoinColumn(name = "student_id", foreignKey = @ForeignKey(name = "FK_assignment_submission_account"),
-    insertable = false, updatable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "student_id")
     private User student;
 
 }

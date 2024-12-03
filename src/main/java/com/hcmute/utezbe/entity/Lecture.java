@@ -24,11 +24,11 @@ public class Lecture extends Auditable {
     @Column(name="content", columnDefinition = "TEXT")
     private String content;
 
-    @Column(name="name")
-    private String name;
+    @Column(name="title")
+    private String title;
 
     @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "module_id", foreignKey = @ForeignKey(name = "FK_lecture_modules"))
     private Module module;
 

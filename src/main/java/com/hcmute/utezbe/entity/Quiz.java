@@ -46,7 +46,7 @@ public class Quiz extends Auditable {
     @Transient
     private int totalQuestions;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToOne(fetch = FetchType.LAZY)
     @JsonBackReference
     @JoinColumn(name = "module_id",
             referencedColumnName = "id", insertable = false,  updatable = false,

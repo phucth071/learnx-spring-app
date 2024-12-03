@@ -17,6 +17,10 @@ public class ChangeRoleQueueService {
         return repository.save(changeRoleQueue);
     }
 
+    public ChangeRoleQueue findById(Long id) {
+        return repository.findById(id).orElse(null);
+    }
+
     public ChangeRoleQueue createChangeRoleQueue(ChangeRoleQueue changeRoleQueue) {
         if (AuthService.getCurrentUser().getRole() != Role.ADMIN) {
             if (changeRoleQueue.getUser().getId() != AuthService.getCurrentUser().getId()) {

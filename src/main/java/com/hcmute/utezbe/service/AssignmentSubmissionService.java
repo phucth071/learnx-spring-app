@@ -19,8 +19,8 @@ public class AssignmentSubmissionService {
     private final AssignmentSubmissionRepository assignmentSubmissionRepository;
 
     public Optional<AssignmentSubmission> getAssignmentSubmissionById(Long assignmentId, Long studentId) {
-        AssignmentSubmissionId id = new AssignmentSubmissionId(assignmentId, studentId);
-        return assignmentSubmissionRepository.findById(id);
+        return assignmentSubmissionRepository.findByAssignmentIdAndStudentId(assignmentId, studentId);
+
     }
 
     public List<AssignmentSubmission> getAllAssignmentSubmissions() {

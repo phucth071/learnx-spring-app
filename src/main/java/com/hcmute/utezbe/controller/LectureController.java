@@ -2,6 +2,7 @@ package com.hcmute.utezbe.controller;
 
 import com.hcmute.utezbe.dto.LectureDto;
 import com.hcmute.utezbe.entity.Lecture;
+import com.hcmute.utezbe.exception.ResourceNotFoundException;
 import com.hcmute.utezbe.response.Response;
 import com.hcmute.utezbe.service.LectureService;
 import com.hcmute.utezbe.service.ModuleService;
@@ -34,7 +35,7 @@ public class LectureController {
         Lecture lecture = Lecture.builder()
                 .module(moduleService.getModuleById(lectureDto.getModuleId()).get())
                 .content(lectureDto.getContent())
-                .name(lectureDto.getName())
+                .title(lectureDto.getTitle())
                 .build();
         return Response.builder().code(HttpStatus.CREATED.value()).success(true).message("Create lecture successfully!").data(lectureService.saveLecture(lecture)).build();
     }
@@ -42,6 +43,9 @@ public class LectureController {
     @PatchMapping("/{lectureId}")
     public Response<?> editLecture(@PathVariable("lectureId") Long lectureId, @RequestBody LectureDto lectureDto) {
         Optional<Lecture> optionalLecture = lectureService.getLectureById(lectureId);
+        if (optionalLecture.isEmpty()) {
+            throw new ResourceNotFoundException("Lecture with id " + lectureId + " not found!");
+        }
         Lecture lecture = convertLectureDTO(lectureDto, optionalLecture);
         return Response.builder().code(HttpStatus.OK.value()).success(true).message("Edit lecture with id " + lectureId + " successfully!").data(lectureService.saveLecture(lecture)).build();
     }
@@ -54,7 +58,7 @@ public class LectureController {
     private Lecture convertLectureDTO(LectureDto lectureDto, Optional<Lecture> optionalLecture) {
         Lecture lecture = optionalLecture.get();
         if (lectureDto.getContent() != null) lecture.setContent(lectureDto.getContent());
-        if(lectureDto.getName() != null) lecture.setName(lectureDto.getName());
+        if(lectureDto.getTitle() != null) lecture.setTitle(lectureDto.getTitle());
         if (lectureDto.getModuleId() != null) lecture.setModule(moduleService.getModuleById(lectureDto.getModuleId()).get());
         return lecture;
     }

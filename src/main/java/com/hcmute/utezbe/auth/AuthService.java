@@ -10,14 +10,13 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.hcmute.utezbe.auth.request.*;
 import com.hcmute.utezbe.dto.UserDto;
-import com.hcmute.utezbe.entity.ConfirmToken;
-import com.hcmute.utezbe.entity.ForgotPasswordToken;
+import com.hcmute.utezbe.entity.*;
 import com.hcmute.utezbe.entity.enumClass.Provider;
-import com.hcmute.utezbe.entity.RefreshToken;
 import com.hcmute.utezbe.entity.enumClass.Role;
-import com.hcmute.utezbe.entity.User;
+import com.hcmute.utezbe.entity.enumClass.State;
 import com.hcmute.utezbe.exception.AccessDeniedException;
 import com.hcmute.utezbe.exception.AuthenticationException;
+import com.hcmute.utezbe.request.ChangeRoleQueueRequest;
 import com.hcmute.utezbe.response.Response;
 import com.hcmute.utezbe.security.jwt.JWTService;
 import com.hcmute.utezbe.service.*;
@@ -52,6 +51,7 @@ public class AuthService {
     private final ConfirmTokenService confirmTokenService;
     private final JavaMailService emailService;
     private final ForgotPasswordService forgotPasswordService;
+    private final ChangeRoleQueueService changeRoleQueueService;
 
     private static final String CLIENT_ID = "660554863773-c5na5d9dvnogok0i23ekgnpr15to3rvn.apps.googleusercontent.com";
     private static final String CLIENT_SECRET = "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";
@@ -187,6 +187,7 @@ public class AuthService {
                 "</html>";
     }
 
+    @Transactional
     public Response authenticate(AuthenticationRequest request) {
         try {
             authenticationManager.authenticate(
@@ -214,14 +215,18 @@ public class AuthService {
 //            return Response.builder().error(true).success(false).message("You Do Not Have Authorize").build();
 //        };
         var jwtToken = jwtService.generateAccessToken(user);
-        var jwtRefreshToken = refreshTokenService.createRefreshToken(user.getEmail());
+        RefreshToken oldRefreshToken = refreshTokenService.findByUserId(user.getId());
+        if (oldRefreshToken != null) {
+            refreshTokenService.deleteByToken(oldRefreshToken.getToken());
+        }
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getEmail());
         return Response.builder()
                 .code(HttpStatus.OK.value())
                 .success(true)
                 .data(objectMapper.createObjectNode()
                         .putObject("user")
                         .put("accessToken", jwtToken)
-                        .put("refreshToken", jwtRefreshToken.getToken())
+                        .put("refreshToken", refreshToken.getToken())
                         .put("fullName", user.getFullName())
                         .put("email", user.getEmail())
                         .put("avatar", user.getAvatarUrl())
@@ -403,6 +408,7 @@ public class AuthService {
         return existedUser == null ? user : existedUser;
     }
 
+    @Transactional 
     public Object refreshToken(RefreshTokenRequest refreshTokenRequest) {
         return refreshTokenService.findByToken(refreshTokenRequest.getToken())
                 .map(refreshTokenService::verifyExpiration)
@@ -410,8 +416,8 @@ public class AuthService {
                 .map(user -> {
                     String accessToken = jwtService.generateAccessToken(user);
                     String oldToken = refreshTokenRequest.getToken();
-                    RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getEmail());
                     refreshTokenService.deleteByToken(oldToken);
+                    RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getEmail());
                     return Response.builder()
                             .data(objectMapper.createObjectNode()
                                     .put("accessToken", accessToken)
@@ -423,6 +429,29 @@ public class AuthService {
                 })
                 .orElseThrow(() -> new RuntimeException(
                         "Invalid refresh token"));
+    }
+
+    public Response<?> changeRoleQueueForId(Long changeRoleQueueId) {
+        ChangeRoleQueue changeRoleQueue = changeRoleQueueService.findById(changeRoleQueueId);
+        if (changeRoleQueue == null) {
+            throw new RuntimeException("Request not found!");
+        }
+        if (changeRoleQueue.getStatus() != State.PENDING) {
+            return Response.builder()
+                    .code(200)
+                    .success(false)
+                    .message("Request has been processed!")
+                    .build();
+        }
+        User user = changeRoleQueue.getUser();
+        user.setRole(changeRoleQueue.getNewRole());
+        userService.save(user);
+        changeRoleQueueService.deleteByUserEmail(user.getEmail());
+        return Response.builder()
+                .code(HttpStatus.OK.value())
+                .success(true)
+                .message("Change role successfully!")
+                .build();
     }
 
     public static boolean isUserHaveRole(Role role) {

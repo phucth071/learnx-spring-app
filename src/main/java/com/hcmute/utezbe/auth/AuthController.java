@@ -103,4 +103,9 @@ public class AuthController {
     public ResponseEntity<?> confirmForgotPassword(@RequestBody ForgotPasswordRequest request) {
         return ResponseEntity.ok(service.resetPassword(request));
     }
+
+    @PostMapping("/handle-change-role/{id}")
+    public ResponseEntity<?> handleChangeRole(@PathVariable("id") Long id) {
+        return ResponseEntity.ok(service.changeRoleQueueForId(id));
+    }
 }

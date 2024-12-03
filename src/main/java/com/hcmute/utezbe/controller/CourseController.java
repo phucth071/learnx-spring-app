@@ -46,34 +46,22 @@ public class CourseController {
 
     @GetMapping("")
     public Response<?> getAllCourse() {
-        try {
-            List<Course> courses = courseService.getAllCourses();
-            List<CourseDto> courseDtos = courses.stream()
-                    .map(this::convertToDto)
-                    .collect(Collectors.toList());
-            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get all courses successfully!").data(courseDtos).build();
-        } catch (Exception e) {
-            throw e;
-        }
+        List<Course> courses = courseService.getAllCourses();
+        List<CourseDto> courseDtos = courses.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get all courses successfully!").data(courseDtos).build();
     }
 
     @GetMapping("/pageable")
     public Response<?> getAllCoursesPageable(Pageable pageable) {
-        try {
-            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get all course pageable successfully!").data(courseService.getAllCoursesPageable(pageable)).build();
-        } catch (Exception e) {
-            throw e;
-        }
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get all course pageable successfully!").data(courseService.getAllCoursesPageable(pageable)).build();
     }
 
     @GetMapping("/{courseId}")
     public Response<?> getCourseById(@PathVariable("courseId") Long courseId) {
-        try {
-            CourseDto course = courseService.getCourseByIdWithCache(courseId);
-            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get course by id successfully!").data(course).build();
-        } catch (Exception e) {
-            throw e;
-        }
+        CourseDto course = courseService.getCourseByIdWithCache(courseId);
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get course by id successfully!").data(course).build();
     }
 
     private CourseDto convertToDto(Course course) {
@@ -122,7 +110,7 @@ public class CourseController {
             Course course = Course.builder()
                     .category(category)
                     .name(req.getName())
-                    .description(req.getDescription())
+                    .description(req.getDescription() == null ? "" : req.getDescription())
                     .startDate(dateFormatter.parse(req.getStartDate()))
                     .thumbnail(thumbnailUrl)
                     .state(req.getState() != null ? req.getState() : State.OPEN)
@@ -163,11 +151,7 @@ public class CourseController {
 
     @DeleteMapping("/{courseId}")
     public Response<?> deleteCourse(@PathVariable("courseId") Long courseId) {
-        try {
-            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Delete course successfully!").data(courseService.deleteCourse(courseId)).build();
-        } catch (Exception e) {
-            throw e;
-        }
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Delete course successfully!").data(courseService.deleteCourse(courseId)).build();
     }
 
 //    @PostMapping("/email")

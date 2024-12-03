@@ -10,6 +10,7 @@ import com.hcmute.utezbe.service.ModuleService;
 import com.hcmute.utezbe.service.ResourcesService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -38,7 +39,8 @@ public class ResourcesController {
 
     @Transactional
     @PostMapping(value = "", consumes = {"multipart/form-data"})
-    public Response<?> createResources(@RequestPart("resources") CreateResourceRequest req, @RequestPart("document") MultipartFile document) throws IOException {
+    public Response<?> createResources(@RequestPart("resources") CreateResourceRequest req, @RequestPart("document") @Nullable MultipartFile document) throws IOException {
+        assert document != null;
         String urlDocument = cloudinaryService.uploadRemainFileName(document);
         Resources resources = Resources.builder()
                 .title(req.getTitle())

@@ -3,6 +3,7 @@ package com.hcmute.utezbe.service;
 import com.hcmute.utezbe.auth.AuthService;
 import com.hcmute.utezbe.entity.Assignment;
 import com.hcmute.utezbe.entity.AssignmentSubmission;
+import com.hcmute.utezbe.entity.User;
 import com.hcmute.utezbe.entity.enumClass.Role;
 import com.hcmute.utezbe.exception.AccessDeniedException;
 import com.hcmute.utezbe.repository.AssignmentRepository;
@@ -37,9 +38,7 @@ public class AssignmentService {
 
     @Transactional
     public Assignment saveAssignment(Assignment assignment) {
-        if (!AuthService.isUserHaveRole(Role.TEACHER) && !AuthService.isUserHaveRole(Role.ADMIN)) {
-            throw new AccessDeniedException();
-        }
+
         return assignmentRepository.save(assignment);
     }
 
@@ -55,6 +54,11 @@ public class AssignmentService {
             assignmentRepository.delete(a);
         });
         return assignments.orElse(null);
+    }
+
+    public List<Assignment> getAllAssignmentsLoggedInUser() {
+        User user = AuthService.getCurrentUser();
+        return assignmentRepository.findAllByEmail(user.getEmail());
     }
 
     public List<Assignment> getAllAssignmentsByModuleId(Long moduleId) {

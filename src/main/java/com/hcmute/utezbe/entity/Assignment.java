@@ -46,7 +46,7 @@ public class Assignment extends Auditable {
     private String urlDocument;
 
     @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "module_id", foreignKey = @ForeignKey(name = "FK_assignment_module"))
     private Module module;
 

@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -50,6 +51,21 @@ public class AssignmentController {
         return ResponseEntity.ok(Response.builder().code(HttpStatus.OK.value()).success(true).message("Get assignment with id " + assignmentId + " successfully!").data(assignmentService.getAssignmentById(assignmentId)).build());
     }
 
+    @GetMapping("/get-by-user")
+    public ResponseEntity<?> getAssignmentsByLoggedInUser() {
+        List<Assignment> assignments = assignmentService.getAllAssignmentsLoggedInUser();
+        List<AssignmentDto> assignmentDtos = assignments.stream().map(assignment -> AssignmentDto.builder()
+                .content(assignment.getContent())
+                .startDate(assignment.getStartDate())
+                .endDate(assignment.getEndDate())
+                .state(assignment.getState())
+                .title(assignment.getTitle())
+                .urlDocument(assignment.getUrlDocument())
+                .moduleId(assignment.getModule().getId())
+                .build()).toList();
+        return ResponseEntity.ok(Response.builder().code(HttpStatus.OK.value()).success(true).message("Get all assignment by user successfully!").data(assignmentDtos).build());
+    }
+
     @PostMapping(value = "", consumes = "multipart/form-data")
     public Response<?> createAssignment(@RequestPart("assignment") CreateAssignmentRequest req,
                                      @RequestPart(value = "document") @Nullable MultipartFile document) throws IOException {
@@ -78,13 +94,12 @@ public class AssignmentController {
 
     @PatchMapping("/{assignmentId}")
     public Response<?> editAssignment(@PathVariable("assignmentId") Long assignmentId,
-                                      @RequestParam("content") String content,
-                                      @RequestParam("startDate") String startDate,
-                                      @RequestParam("endDate") String endDate,
-                                      @RequestParam("state") String state,
-                                      @RequestParam("title") String title,
-                                      @RequestParam("moduleId") Long moduleId,
-                                      @RequestPart(value = "document", required = false) MultipartFile document) throws ParseException {
+                                      @RequestParam("content") @Nullable String content,
+                                      @RequestParam("startDate") @Nullable String startDate,
+                                      @RequestParam("endDate") @Nullable String endDate,
+                                      @RequestParam("state") @Nullable String state,
+                                      @RequestParam("title") @Nullable String title,
+                                      @RequestPart(value = "document", required = false) @Nullable MultipartFile document) throws ParseException {
         Optional<Assignment> optionalAssignment = assignmentService.getAssignmentById(assignmentId);
         if (optionalAssignment.isEmpty()) {
             return Response.builder().code(HttpStatus.NOT_FOUND.value()).success(false).message("Assignment not found").build();
@@ -96,7 +111,6 @@ public class AssignmentController {
         if (endDate != null) assignment.setEndDate(new SimpleDateFormat("yyyy-MM-dd").parse(endDate));
         if (state != null) assignment.setState(State.valueOf(state));
         if (title != null) assignment.setTitle(title);
-        if (moduleId != null) assignment.setModule(moduleService.getModuleById(moduleId).get());
         if (urlDocument != null) assignment.setUrlDocument(urlDocument);
         assignmentService.saveAssignment(assignment);
         AssignmentDto assignmentDto = AssignmentDto.builder()

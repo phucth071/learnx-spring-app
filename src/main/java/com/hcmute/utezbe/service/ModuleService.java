@@ -47,17 +47,7 @@ public class ModuleService {
             throw new AccessDeniedException("You do not have permission to do this action!");
         }
         Optional<Module> module = moduleRepository.findById(id);
-        module.ifPresent(m -> {
-            List<Assignment> assignments = assignmentRepository.findAllByModuleId(m.getId());
-            assignmentRepository.deleteAll(assignments);
-            List<Resources> resources = resourcesRepository.findAllByModuleId(m.getId());
-            resourcesRepository.deleteAll(resources);
-            List<Lecture> lectures = lectureRepository.findAllByModuleId(m.getId());
-            lectureRepository.deleteAll(lectures);
-            List<Quiz> quizzes = quizRepository.findAllByModuleId(m.getId());
-            quizRepository.deleteAll(quizzes);
-            moduleRepository.delete(m);
-        });
+        module.ifPresent(moduleRepository::delete);
         return module.orElse(null);
     }
 

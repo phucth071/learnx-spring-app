@@ -9,8 +9,8 @@ import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@Getter
-@Setter
+@EqualsAndHashCode(callSuper = true)
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -29,15 +29,15 @@ public class Module extends Auditable {
     @Column(name="name")
     private String name;
 
-    @OneToMany(mappedBy = "module", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<Assignment> assignments = new ArrayList<>();
 
-    @OneToMany(mappedBy = "module", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<Resources> resources = new ArrayList<>();
 
-    @OneToMany(mappedBy = "module", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<Lecture> lectures = new ArrayList<>();
 
@@ -47,7 +47,7 @@ public class Module extends Auditable {
     private Course course;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "module", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Quiz> quizzes = new ArrayList<>();
 
 }

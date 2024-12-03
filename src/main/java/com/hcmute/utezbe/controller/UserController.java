@@ -65,32 +65,28 @@ public class UserController {
     }
 
     @PatchMapping(value = "", consumes = {"multipart/form-data"})
-    public Response patchUser(@RequestPart("user") UserPatchRequest req,
+    public Response<?> patchUser(@RequestPart("user") UserPatchRequest req,
                               @RequestPart("avatar") @Nullable MultipartFile avatar) {
-        try {
-            User user = userService.findByEmailIgnoreCase(req.getEmail()).orElse(null);
+        User user = userService.findByEmailIgnoreCase(req.getEmail()).orElse(null);
 
-            if (user == null) {
-                throw new RuntimeException("User not found!");
-            }
-            if (user.getId() != AuthService.getCurrentUser().getId()) {
-                throw new RuntimeException("You are not allowed to do this action!");
-            }
-            if (req.getFullName() != null) {
-                user.setFullName(req.getFullName());
-            }
-            if (req.getEmail() == null || !req.getEmail().equals(user.getEmail())) {
-                throw new RuntimeException("Email cannot be changed!");
-            }
-            if (avatar != null) {
-                String avatarUrl = cloudinary.upload(avatar);
-                user.setAvatarUrl(avatarUrl);
-            }
-            UserDto userDto = UserDto.convertToDto(userService.save(user));
-            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Update user successfully!").data(userDto).build();
-        } catch (Exception e) {
-            throw e;
+        if (user == null) {
+            throw new RuntimeException("User not found!");
         }
+        if (user.getId() != AuthService.getCurrentUser().getId()) {
+            throw new RuntimeException("You are not allowed to do this action!");
+        }
+        if (req.getFullName() != null) {
+            user.setFullName(req.getFullName());
+        }
+        if (req.getEmail() == null || !req.getEmail().equals(user.getEmail())) {
+            throw new RuntimeException("Email cannot be changed!");
+        }
+        if (avatar != null) {
+            String avatarUrl = cloudinary.upload(avatar);
+            user.setAvatarUrl(avatarUrl);
+        }
+        UserDto userDto = UserDto.convertToDto(userService.save(user));
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Update user successfully!").data(userDto).build();
     }
 
     @PostMapping("/change-password")

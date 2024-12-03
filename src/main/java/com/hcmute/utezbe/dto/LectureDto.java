@@ -9,6 +9,6 @@ import lombok.*;
 @AllArgsConstructor
 public class LectureDto {
     private String content;
-    private String name;
+    private String title;
     private Long moduleId;
 }
