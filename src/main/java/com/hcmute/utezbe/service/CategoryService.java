@@ -8,6 +8,8 @@ import com.hcmute.utezbe.exception.AccessDeniedException;
 import com.hcmute.utezbe.exception.ResourceNotFoundException;
 import com.hcmute.utezbe.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,10 +42,8 @@ public class CategoryService {
         return categoryRepository.findAll();
     }
 
+    @PostAuthorize("hasAnyAuthority('TEACHER', 'ADMIN')")
     public Category saveCategory(Category category) {
-        if (!AuthService.isUserHaveRole(Role.TEACHER) && !AuthService.isUserHaveRole(Role.ADMIN)) {
-            throw new AccessDeniedException("You do not have permission to do this action!");
-        }
         return categoryRepository.save(category);
     }
 
@@ -51,11 +51,9 @@ public class CategoryService {
         return categoryRepository.findByName(name);
     }
 
+    @PreAuthorize("hasAnyAuthority('TEACHER', 'ADMIN')")
     @Transactional
     public Category deleteCategory(Long id) {
-        if (!AuthService.isUserHaveRole(Role.TEACHER) && !AuthService.isUserHaveRole(Role.ADMIN)) {
-            throw new AccessDeniedException("You do not have permission to do this action!");
-        }
         Optional<Category> category = categoryRepository.findById(id);
         category.ifPresent(cate -> {
             List<Course> courses = courseRepository.findByCategoryId(cate.getId());

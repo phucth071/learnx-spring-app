@@ -8,6 +8,7 @@ import com.hcmute.utezbe.exception.AccessDeniedException;
 import com.hcmute.utezbe.exception.ResourceNotFoundException;
 import com.hcmute.utezbe.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -35,17 +36,13 @@ public class ModuleService {
         return module;
     }
 
+    @PreAuthorize("hasAnyAuthority('TEACHER', 'ADMIN')")
     public Module saveModule(Module module) {
-        if (!AuthService.isUserHaveRole(Role.TEACHER) && !AuthService.isUserHaveRole(Role.ADMIN)) {
-            throw new AccessDeniedException("You do not have permission to do this action!");
-        }
         return moduleRepository.save(module);
     }
 
+    @PreAuthorize("hasAnyAuthority('TEACHER', 'ADMIN')")
     public Module deleteModule(Long id) {
-        if (!AuthService.isUserHaveRole(Role.TEACHER) && !AuthService.isUserHaveRole(Role.ADMIN)) {
-            throw new AccessDeniedException("You do not have permission to do this action!");
-        }
         Optional<Module> module = moduleRepository.findById(id);
         module.ifPresent(moduleRepository::delete);
         return module.orElse(null);

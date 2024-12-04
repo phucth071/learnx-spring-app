@@ -7,6 +7,7 @@ import com.hcmute.utezbe.entity.enumClass.Role;
 import com.hcmute.utezbe.exception.AccessDeniedException;
 import com.hcmute.utezbe.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,10 +18,8 @@ import java.util.Optional;
 public class UserService {
     private final UserRepository userRepository;
 
+    @PreAuthorize("hasRole('ADMIN')")
     public List<User> findAll() {
-        if (AuthService.getCurrentUser().getRole() != Role.ADMIN) {
-            throw new AccessDeniedException("You do not have permission to do this action!");
-        }
         return userRepository.findAll();
     }
 

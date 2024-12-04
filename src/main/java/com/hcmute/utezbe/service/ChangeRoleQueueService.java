@@ -5,6 +5,8 @@ import com.hcmute.utezbe.entity.ChangeRoleQueue;
 import com.hcmute.utezbe.entity.enumClass.Role;
 import com.hcmute.utezbe.repository.ChangeRoleRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -21,12 +23,8 @@ public class ChangeRoleQueueService {
         return repository.findById(id).orElse(null);
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ChangeRoleQueue createChangeRoleQueue(ChangeRoleQueue changeRoleQueue) {
-        if (AuthService.getCurrentUser().getRole() != Role.ADMIN) {
-            if (changeRoleQueue.getUser().getId() != AuthService.getCurrentUser().getId()) {
-                throw new RuntimeException("You are not allowed to do this action!");
-            }
-        }
         if (repository.findByUserEmail(changeRoleQueue.getUser().getEmail()).isPresent()) {
             throw new RuntimeException("You have already sent a request to change role!");
         }

@@ -13,6 +13,8 @@ import com.hcmute.utezbe.response.CourseRegistrationUserResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -78,12 +80,8 @@ public class CourseRegistrationService {
         });
     }
 
-
-
+    @PreAuthorize("hasAnyAuthority('TEACHER', 'ADMIN')")
     public List<CourseRegistration> getAllCourseRegistrations() {
-        if (!AuthService.isUserHaveRole(Role.TEACHER) && !AuthService.isUserHaveRole(Role.ADMIN)) {
-            throw new AccessDeniedException("You do not have permission to do this action!");
-        }
         return repository.findAll();
     }
     public Page<CourseRegistration> getAllCourseRegistrations(Pageable pageable) {
@@ -93,10 +91,8 @@ public class CourseRegistrationService {
         return repository.findAll(pageable);
     }
 
+    @PreAuthorize("hasAnyAuthority('TEACHER', 'ADMIN')")
     public CourseRegistration toggleCourseRegistration(Long studentId, Long courseId) {
-        if (!AuthService.isUserHaveRole(Role.TEACHER) && !AuthService.isUserHaveRole(Role.ADMIN)) {
-            throw new AccessDeniedException("You do not have permission to do this action!");
-        }
         Optional<CourseRegistration> otp = getCourseRegistrationByEmailAndCourseId(userService.getUserById(studentId).getEmail(), courseId);
         if (otp.isPresent()) {
             CourseRegistration courseRegistration = otp.get();
@@ -110,11 +106,8 @@ public class CourseRegistrationService {
         return null;
     }
 
+    @PreAuthorize("hasAnyAuthority('TEACHER', 'ADMIN')")
     public List<CourseRegistration> registerCourse(Long courseId, List<String> emails) {
-        if (!AuthService.isUserHaveRole(Role.TEACHER) && !AuthService.isUserHaveRole(Role.ADMIN)) {
-            throw new AccessDeniedException("You do not have permission to do this action!");
-        }
-
         String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
         Pattern pattern = Pattern.compile(emailRegex);
 
@@ -133,10 +126,8 @@ public class CourseRegistrationService {
         return repository.saveAll(courseRegistrations);
     }
 
+    @PreAuthorize("hasAnyAuthority('TEACHER', 'ADMIN')")
     public void removeStudentsFromCourse(Long courseId, List<String> emails) {
-        if (!AuthService.isUserHaveRole(Role.TEACHER) && !AuthService.isUserHaveRole(Role.ADMIN)) {
-            throw new AccessDeniedException("You do not have permission to do this action!");
-        }
         emails.forEach(email -> {
             Optional<CourseRegistration> otp = getCourseRegistrationByEmailAndCourseId(email, courseId);
             otp.ifPresent(this::delete);

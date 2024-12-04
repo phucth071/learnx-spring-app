@@ -70,11 +70,7 @@ public class JWTService {
             return new UsernamePasswordAuthenticationToken(claims.getSubject(), token, authorities);
         } catch (ExpiredJwtException e) {
             return null;
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        } catch (InvalidPublicKeyException e) {
-            throw new RuntimeException(e);
-        } catch (JwkException e) {
+        } catch (MalformedURLException | JwkException e) {
             throw new RuntimeException(e);
         }
     }

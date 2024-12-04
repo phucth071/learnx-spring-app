@@ -7,6 +7,7 @@ import com.hcmute.utezbe.exception.AccessDeniedException;
 import com.hcmute.utezbe.exception.ResourceNotFoundException;
 import com.hcmute.utezbe.repository.LectureRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -30,17 +31,13 @@ public class LectureService {
         return lectureRepository.findAll();
     }
 
+    @PreAuthorize("hasAnyAuthority('TEACHER', 'ADMIN')")
     public Lecture saveLecture(Lecture lecture) {
-        if (!AuthService.isUserHaveRole(Role.TEACHER) && !AuthService.isUserHaveRole(Role.ADMIN)) {
-            throw new AccessDeniedException("You do not have permission to do this action!");
-        }
         return lectureRepository.save(lecture);
     }
 
+    @PreAuthorize("hasAnyAuthority('TEACHER', 'ADMIN')")
     public Lecture deleteLecture(Long id) {
-        if (!AuthService.isUserHaveRole(Role.TEACHER) && !AuthService.isUserHaveRole(Role.ADMIN)) {
-            throw new AccessDeniedException("You do not have permission to do this action!");
-        }
         Optional<Lecture> lecture = lectureRepository.findById(id);
         lecture.ifPresent(lectureRepository::delete);
         return lecture.orElse(null);

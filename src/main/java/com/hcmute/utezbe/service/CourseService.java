@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -116,10 +117,21 @@ public class CourseService {
         return courseRepository.findAll();
     }
 
+    @PreAuthorize("hasAnyAuthority('TEACHER', 'ADMIN')")
     @Transactional
     public Course saveCourse(Course course) {
-        if (!AuthService.isUserHaveRole(Role.TEACHER) && !AuthService.isUserHaveRole(Role.ADMIN)) {
-            throw new AccessDeniedException("You do not have permission to do this action!");
+        Course savedCourse = courseRepository.save(course);
+        CourseDto courseDto = CourseDto.builder()
+                .id(savedCourse.getId())
+                .name(savedCourse.getName())
+                .description(savedCourse.getDescription())
+                .startDate(savedCourse.getStartDate())
+                .state(savedCourse.getState())
+                .thumbnail(savedCourse.getThumbnail())
+                .categoryId(savedCourse.getCategory().getId())
+                .build();
+        if (redisService.getObject(genCourseItemKey(savedCourse.getId()), CourseDto.class) != null) {
+            redisService.setObject(genCourseItemKey(savedCourse.getId()), courseDto);
         }
         return courseRepository.save(course);
     }
@@ -128,11 +140,9 @@ public class CourseService {
         return courseRepository.findAllPageable(pageable);
     }
 
+    @PreAuthorize("hasAnyAuthority('TEACHER', 'ADMIN')")
     @Transactional
     public Course deleteCourse(Long id) {
-        if (!AuthService.isUserHaveRole(Role.TEACHER) && !AuthService.isUserHaveRole(Role.ADMIN)) {
-            throw new AccessDeniedException("You do not have permission to do this action!");
-        }
         Optional<Course> course = courseRepository.findById(id);
         course.ifPresent(c -> {
             Forum forum = forumRepository.findByCourseId(c.getId());
@@ -176,10 +186,9 @@ public class CourseService {
         return new PageImpl<>(paginatedCourses, pageable, courseRegistrations.size());
     }
 
+    @PreAuthorize("hasAnyAuthority('TEACHER', 'ADMIN')")
+
     public Page<Course> getCourseByTeacherId(Long teacherId, Pageable pageable) {
-        if (AuthService.getCurrentUser().getRole() != Role.TEACHER && AuthService.getCurrentUser().getRole() != Role.ADMIN) {
-            throw new AccessDeniedException("You do not have permission to do this action!");
-        }
         log.info("Pageable: " + pageable);
         return courseRepository.findByTeacherId(teacherId, pageable);
     }

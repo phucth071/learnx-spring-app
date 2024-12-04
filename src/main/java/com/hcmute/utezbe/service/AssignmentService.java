@@ -11,6 +11,8 @@ import com.hcmute.utezbe.repository.AssignmentSubmissionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,11 +44,9 @@ public class AssignmentService {
         return assignmentRepository.save(assignment);
     }
 
+    @PreAuthorize("hasAnyAuthority('TEACHER', 'ADMIN')")
     @Transactional
     public Assignment deleteAssignment(Long id) {
-        if (!AuthService.isUserHaveRole(Role.TEACHER) && !AuthService.isUserHaveRole(Role.ADMIN)) {
-            throw new AccessDeniedException();
-        }
         Optional<Assignment> assignments = assignmentRepository.findById(id);
         assignments.ifPresent(a -> {
             List<AssignmentSubmission> assignmentSubmissions = assignmentSubmissionRepository.findAllByAssignmentId(a.getId());
