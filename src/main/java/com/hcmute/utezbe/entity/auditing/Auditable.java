@@ -25,7 +25,6 @@ public abstract class Auditable {
     private LocalDateTime createdAt;
 
     @LastModifiedDate
-    @Nullable
     @Column(name = "updated_at", insertable = false, nullable = true)
     private LocalDateTime updatedAt;
 
