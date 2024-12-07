@@ -9,6 +9,7 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
@@ -34,7 +35,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
+                .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(AUTH_WHITELIST).permitAll()
@@ -44,28 +45,12 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/user/**").permitAll()
                         .anyRequest().authenticated()
                 )
-                .logout(logout -> logout
-                        .logoutUrl("/api/v1/auth/logout")
-                        .invalidateHttpSession(true)
-                        .deleteCookies("access_token", "refresh_token")
-                        .logoutSuccessHandler(logoutSuccessHandler)
-                )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
-//
-//    @Bean
-//    public SecurityFilterChain oauth2SecurityFilterChain(HttpSecurity http) throws Exception {
-//        http
-//                .authorizeHttpRequests()
-//                .antMatchers("/api/v1/auth/oauth2/**").permitAll()
-//                .anyRequest().authenticated()
-//                .and()
-//                .oauth2ResourceServer().jwt().decoder(jwtDecoder());
-//        return http.build();
-//    }
+
 
     @Bean
     public JwtDecoder jwtDecoder() {

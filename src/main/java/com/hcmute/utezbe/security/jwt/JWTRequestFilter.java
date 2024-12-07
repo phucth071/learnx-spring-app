@@ -2,6 +2,7 @@ package com.hcmute.utezbe.security.jwt;
 
 import com.hcmute.utezbe.service.RefreshTokenService;
 import com.hcmute.utezbe.service.UserService;
+import jakarta.servlet.http.Cookie;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
@@ -17,6 +18,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Arrays;
 
 @Component
 @RequiredArgsConstructor
@@ -32,28 +34,21 @@ public class JWTRequestFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
 
-//        Cookie[] cookies = request.getCookies();
-//        String jwt = null;
-//
-//        if (cookies != null) {
-//            jwt = Arrays.stream(cookies)
-//                    .filter(cookie -> cookie.getName().equals("access_token"))
-//                    .map(Cookie::getValue)
-//                    .findFirst()
-//                    .orElse(null);
-//        }
-//
-//        if (jwt == null) {
-//            filterChain.doFilter(request, response);
-//            return;
-//        }
-        String header = request.getHeader("Authorization");
+        Cookie[] cookies = request.getCookies();
+        String jwt = null;
 
-        if (header == null) {
+        if (cookies != null) {
+            jwt = Arrays.stream(cookies)
+                    .filter(cookie -> cookie.getName().equals("access_token"))
+                    .map(Cookie::getValue)
+                    .findFirst()
+                    .orElse(null);
+        }
+
+        if (jwt == null) {
             filterChain.doFilter(request, response);
             return;
         }
-        final String jwt = header.substring(7);
 
         UsernamePasswordAuthenticationToken authentication = null;
         final String userEmail = jwtService.extractUserEmail(jwt, response);
@@ -61,21 +56,18 @@ public class JWTRequestFilter extends OncePerRequestFilter {
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
 
-            if (!jwtService.isTokenValid(jwt, userDetails, response)) {
-                filterChain.doFilter(request, response);
-                return;
+            if (jwtService.isTokenValid(jwt, userDetails, response)) {
+                Long userId = userService.findByEmailIgnoreCase(userEmail).get().getId();
+                authentication = new UsernamePasswordAuthenticationToken(
+                        userDetails,
+                        null,
+                        userDetails.getAuthorities()
+                );
+                authentication.setDetails(
+                        new WebAuthenticationDetailsSource().buildDetails(request)
+                );
+                SecurityContextHolder.getContext().setAuthentication(authentication);
             }
-            Long userId = userService.findByEmailIgnoreCase(userEmail).get().getId();
-            authentication = new UsernamePasswordAuthenticationToken(
-                    userDetails,
-                    null,
-                    userDetails.getAuthorities()
-            );
-            authentication.setDetails(
-                    new WebAuthenticationDetailsSource().buildDetails(request)
-            );
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-
         }
         filterChain.doFilter(request, response);
     }
