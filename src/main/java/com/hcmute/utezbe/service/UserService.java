@@ -18,7 +18,6 @@ import java.util.Optional;
 public class UserService {
     private final UserRepository userRepository;
 
-    @PreAuthorize("hasRole('ADMIN')")
     public List<User> findAll() {
         return userRepository.findAll();
     }

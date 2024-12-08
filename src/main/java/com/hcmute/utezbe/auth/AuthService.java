@@ -400,10 +400,10 @@ public class AuthService {
             throw new AuthenticationException("Email already registered by another method!");
         }
         System.out.println("Update existed user");
-        existedUser.setFullName(user.getFullName());
-        existedUser.setAvatarUrl(user.getAvatarUrl());
-        existedUser.setProvider(user.getProvider());
-        existedUser.setEnabled(true);
+//        existedUser.setFullName(user.getFullName());
+//        existedUser.setAvatarUrl(user.getAvatarUrl());
+//        existedUser.setProvider(user.getProvider());
+//        existedUser.setEnabled(true);
         existedUser = userService.save(existedUser);
         return existedUser == null ? user : existedUser;
     }
@@ -429,29 +429,6 @@ public class AuthService {
                 })
                 .orElseThrow(() -> new RuntimeException(
                         "Invalid refresh token"));
-    }
-
-    public Response<?> changeRoleQueueForId(Long changeRoleQueueId) {
-        ChangeRoleQueue changeRoleQueue = changeRoleQueueService.findById(changeRoleQueueId);
-        if (changeRoleQueue == null) {
-            throw new RuntimeException("Request not found!");
-        }
-        if (changeRoleQueue.getStatus() != State.PENDING) {
-            return Response.builder()
-                    .code(200)
-                    .success(false)
-                    .message("Request has been processed!")
-                    .build();
-        }
-        User user = changeRoleQueue.getUser();
-        user.setRole(changeRoleQueue.getNewRole());
-        userService.save(user);
-        changeRoleQueueService.deleteByUserEmail(user.getEmail());
-        return Response.builder()
-                .code(HttpStatus.OK.value())
-                .success(true)
-                .message("Change role successfully!")
-                .build();
     }
 
     public static boolean isUserHaveRole(Role role) {

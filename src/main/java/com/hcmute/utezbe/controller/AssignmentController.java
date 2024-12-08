@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -107,8 +108,8 @@ public class AssignmentController {
         String urlDocument = document != null ? cloudinaryService.upload(document) : null;
         Assignment assignment = optionalAssignment.get();
         if (content != null) assignment.setContent(content);
-        if (startDate != null) assignment.setStartDate(new SimpleDateFormat("yyyy-MM-dd").parse(startDate));
-        if (endDate != null) assignment.setEndDate(new SimpleDateFormat("yyyy-MM-dd").parse(endDate));
+        if (startDate != null) assignment.setStartDate(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(startDate));
+        if (endDate != null) assignment.setEndDate(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(endDate));
         if (state != null) assignment.setState(State.valueOf(state));
         if (title != null) assignment.setTitle(title);
         if (urlDocument != null) assignment.setUrlDocument(urlDocument);
@@ -122,7 +123,7 @@ public class AssignmentController {
                 .urlDocument(assignment.getUrlDocument())
                 .moduleId(assignment.getModule().getId())
                 .build();
-        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Edit assignment with id " + assignmentId + " successfully!").data(assignmentDto).build();
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Edit assignment with id " + assignmentId + " successfully!").data(assignment).build();
     }
 
     @DeleteMapping("/{assignmentId}")

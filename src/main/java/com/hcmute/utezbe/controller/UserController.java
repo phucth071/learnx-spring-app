@@ -19,9 +19,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.net.URI;
 import java.security.Principal;
 import java.util.Optional;
 
@@ -34,13 +36,10 @@ public class UserController {
     private final AuthService authService;
     private final ChangeRoleQueueService changeRoleQueueService;
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping("")
     public Response<?> getAllUsers() {
-        try {
-            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get all users successfully!").data(userService.findAll()).build();
-        } catch (Exception e) {
-            throw e;
-        }
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get all users successfully!").data(userService.findAll()).build();
     }
 
 
@@ -101,38 +100,17 @@ public class UserController {
 
     @PostMapping("/change-role/request")
     public ResponseEntity<?> changeRoleRequest(@RequestBody ChangeRoleQueueRequest request) {
+        ChangeRoleQueue existChangeRoleQueue = changeRoleQueueService.findByUserEmail(request.getEmail());
+        if (existChangeRoleQueue != null) {
+            return ResponseEntity.ok(Response.builder().code(200).success(false).message("Yêu cầu đang phê duyệt. Vui lòng chờ!").build());
+        }
         ChangeRoleQueue changeRoleQueue = ChangeRoleQueue.builder()
                 .newRole(request.getNewRole())
                 .oldRole(request.getOldRole())
                 .status(State.PENDING)
                 .user(userService.findByEmailIgnoreCase(request.getEmail()).orElse(null))
                 .build();
-        return ResponseEntity.ok(changeRoleQueueService.createChangeRoleQueue(changeRoleQueue));
+        return ResponseEntity.created(null).body(changeRoleQueueService.save(changeRoleQueue));
     }
-
-    @PostMapping("/change-role/accept")
-    public Response changeRoleAccept(@RequestBody EmailRequest req) {
-        ChangeRoleQueue changeRoleQueue = changeRoleQueueService.findByUserEmail(req.getEmail());
-        if (changeRoleQueue == null) {
-            throw new RuntimeException("CHANGE ROLE: Request not found!");
-        }
-        if (changeRoleQueue.getStatus() != State.PENDING) {
-            throw new RuntimeException("CHANGE ROLE: Request has been processed!");
-        }
-
-        if (AuthService.getCurrentUser().getRole() != Role.ADMIN) {
-            System.out.println("Current user " + AuthService.getCurrentUser().getEmail());
-            throw new RuntimeException("CHANGE ROLE: You are not allowed to do this action!");
-        }
-
-        User user = changeRoleQueue.getUser();
-        user.setRole(changeRoleQueue.getNewRole());
-        userService.save(user);
-
-        changeRoleQueue.setStatus(State.ACCEPTED);
-        changeRoleQueueService.save(changeRoleQueue);
-        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Change role successfully!").build();
-    }
-
 
 }

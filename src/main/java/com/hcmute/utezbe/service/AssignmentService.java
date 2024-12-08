@@ -44,7 +44,6 @@ public class AssignmentService {
         return assignmentRepository.save(assignment);
     }
 
-    @PreAuthorize("hasAnyAuthority('TEACHER', 'ADMIN')")
     @Transactional
     public Assignment deleteAssignment(Long id) {
         Optional<Assignment> assignments = assignmentRepository.findById(id);

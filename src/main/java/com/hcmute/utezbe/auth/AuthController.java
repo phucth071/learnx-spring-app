@@ -3,6 +3,7 @@ package com.hcmute.utezbe.auth;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.hcmute.utezbe.auth.request.*;
 import com.hcmute.utezbe.response.Response;
+import com.hcmute.utezbe.service.ChangeRoleQueueService;
 import com.hcmute.utezbe.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -22,6 +23,7 @@ import java.security.Principal;
 public class AuthController {
     private final AuthService service;
     private final UserService userService;
+    private final ChangeRoleQueueService changeRoleQueueService;
 
     @PostMapping("/authenticate")
     public ResponseEntity<?> authenticate(
@@ -104,8 +106,6 @@ public class AuthController {
         return ResponseEntity.ok(service.resetPassword(request));
     }
 
-    @PostMapping("/handle-change-role/{id}")
-    public ResponseEntity<?> handleChangeRole(@PathVariable("id") Long id) {
-        return ResponseEntity.ok(service.changeRoleQueueForId(id));
-    }
+
+
 }

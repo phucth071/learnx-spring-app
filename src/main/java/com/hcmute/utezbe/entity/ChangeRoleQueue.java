@@ -2,20 +2,21 @@ package com.hcmute.utezbe.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.hcmute.utezbe.entity.auditing.Auditable;
 import com.hcmute.utezbe.entity.enumClass.Role;
 import com.hcmute.utezbe.entity.enumClass.State;
 import jakarta.persistence.*;
 import lombok.*;
 
-@Getter
-@Setter
+@EqualsAndHashCode(callSuper = true)
+@Entity
+@Table(name = "change_role_queue")
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "module"})
-@Table(name = "change_role_queue")
 @Builder
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class ChangeRoleQueue extends Auditable {
 
     @Id
@@ -35,9 +36,7 @@ public class ChangeRoleQueue extends Auditable {
     @Enumerated(EnumType.STRING)
     private State status;
 
-    @JsonIgnoreProperties
-    @JsonBackReference
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne()
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 }

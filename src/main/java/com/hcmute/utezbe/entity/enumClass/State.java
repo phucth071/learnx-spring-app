@@ -12,4 +12,5 @@ public enum State {
     PASSED,
     FAILED,
     ACCEPTED,
+    REJECTED,
 }
