@@ -2,14 +2,18 @@ package com.hcmute.utezbe.controller;
 
 import com.hcmute.utezbe.dto.AssignmentDto;
 import com.hcmute.utezbe.entity.Assignment;
+import com.hcmute.utezbe.entity.Course;
 import com.hcmute.utezbe.entity.enumClass.State;
 import com.hcmute.utezbe.exception.ResourceNotFoundException;
 import com.hcmute.utezbe.request.CreateAssignmentRequest;
+import com.hcmute.utezbe.response.AssignmentWithCourseId;
 import com.hcmute.utezbe.response.Response;
 import com.hcmute.utezbe.service.AssignmentService;
 import com.hcmute.utezbe.service.CloudinaryService;
+import com.hcmute.utezbe.service.CourseService;
 import com.hcmute.utezbe.service.ModuleService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,11 +31,13 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/v1/assignments")
 @RequiredArgsConstructor
+@Slf4j
 public class AssignmentController {
 
     private final AssignmentService assignmentService;
     private final ModuleService moduleService;
     private final CloudinaryService cloudinaryService;
+    private final CourseService courseService;
 
     @GetMapping("")
     public ResponseEntity<?> getAllAssignment() {
@@ -69,12 +75,12 @@ public class AssignmentController {
 
     @PostMapping(value = "", consumes = "multipart/form-data")
     public Response<?> createAssignment(@RequestPart("assignment") CreateAssignmentRequest req,
-                                     @RequestPart(value = "document") @Nullable MultipartFile document) throws IOException {
+                                     @RequestPart(value = "document") @Nullable MultipartFile document) throws IOException, ParseException {
         String urlDocument = document != null ? cloudinaryService.uploadRemainFileName(document) : null;
         Assignment assignment = Assignment.builder()
                 .content(req.getContent())
-                .startDate(req.getStartDate())
-                .endDate(req.getEndDate())
+                .startDate(new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy").parse(req.getStartDate().toString()))
+                .endDate(new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy").parse(req.getEndDate().toString()))
                 .state(req.getState())
                 .title(req.getTitle())
                 .urlDocument(urlDocument)
@@ -129,6 +135,42 @@ public class AssignmentController {
     @DeleteMapping("/{assignmentId}")
     public Response<?> deleteAssignment(@PathVariable("assignmentId") Long assignmentId) {
         return Response.builder().code(HttpStatus.OK.value()).success(true).message("Delete assignment with id " + assignmentId + " successfully!").data(assignmentService.deleteAssignment(assignmentId)).build();
+    }
+
+    @GetMapping("/get-top-3")
+    public ResponseEntity<?> getTop3AssignmentsByStudentId() {
+        List<Assignment> assignments = assignmentService.getTop3AssignmentsByStudentId();
+        List<AssignmentWithCourseId> assignmentDtos = assignments.stream().map(assignment -> AssignmentWithCourseId.builder()
+                .id(assignment.getId())
+                .content(assignment.getContent())
+                .startDate(assignment.getStartDate())
+                .endDate(assignment.getEndDate())
+                .state(assignment.getState())
+                .title(assignment.getTitle())
+                .urlDocument(assignment.getUrlDocument())
+                .moduleId(assignment.getModule().getId())
+                .courseId(assignment.getModule().getCourse().getId())
+                .courseName(assignment.getModule().getCourse().getName())
+                .build()).toList();
+        return ResponseEntity.ok(Response.builder().code(HttpStatus.OK.value()).success(true).message("Get top 3 assignment by user successfully!").data(assignmentDtos).build());
+    }
+
+    @GetMapping("/get-by-month-year")
+    public ResponseEntity<?> getAssignmentsByStudentIdAndEndDateMonthYear(@RequestParam("month") int month, @RequestParam("year") int year) {
+        List<Assignment> assignments = assignmentService.getAllAssignmentsByStudentIdAndEndDateMonthYear(month, year);
+        List<AssignmentWithCourseId> assignmentDtos = assignments.stream().map(assignment -> AssignmentWithCourseId.builder()
+                .id(assignment.getId())
+                .content(assignment.getContent())
+                .startDate(assignment.getStartDate())
+                .endDate(assignment.getEndDate())
+                .state(assignment.getState())
+                .title(assignment.getTitle())
+                .urlDocument(assignment.getUrlDocument())
+                .moduleId(assignment.getModule().getId())
+                .courseId(assignment.getModule().getCourse().getId())
+                .courseName(assignment.getModule().getCourse().getName())
+                .build()).toList();
+        return ResponseEntity.ok(Response.builder().code(HttpStatus.OK.value()).success(true).message("Get all assignment by user successfully!").data(assignmentDtos).build());
     }
 
     private Assignment convertAssignmentDTO(AssignmentDto assignmentDto, Optional<Assignment> assignmentOptional) {

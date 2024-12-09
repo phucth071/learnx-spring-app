@@ -11,6 +11,7 @@ import com.hcmute.utezbe.repository.AssignmentSubmissionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -62,5 +63,15 @@ public class AssignmentService {
 
     public List<Assignment> getAllAssignmentsByModuleId(Long moduleId) {
         return assignmentRepository.findAllByModuleId(moduleId);
+    }
+
+    public List<Assignment> getTop3AssignmentsByStudentId() {
+        User user = AuthService.getCurrentUser();
+        return assignmentRepository.findTop3ByStudentIdOrderByDateTimeDesc(user.getEmail());
+    }
+
+    public List<Assignment> getAllAssignmentsByStudentIdAndEndDateMonthYear(int month, int year) {
+        User user = AuthService.getCurrentUser();
+        return assignmentRepository.findAllByEmailAndEndDateMonthYear(user.getEmail(), month, year);
     }
 }

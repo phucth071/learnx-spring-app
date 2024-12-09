@@ -6,6 +6,7 @@ import com.google.auth.oauth2.IdTokenCredentials;
 import com.google.auth.oauth2.IdTokenProvider;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.scheduling.annotation.EnableAsync;
 
@@ -15,6 +16,7 @@ import java.util.Arrays;
 @SpringBootApplication
 @EnableAsync
 @EnableJpaAuditing
+@EnableAspectJAutoProxy
 public class UtezBeApplication {
 
 	public static void main(String[] args) {

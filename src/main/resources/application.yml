@@ -16,7 +16,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
-    show-sql: true
+    show-sql: false
     generate-ddl: true
     hibernate:
       ddl-auto: update
@@ -61,6 +61,14 @@ spring:
 
 app:
   jwtSecret: WJCHZdb4R1p+qpHJ9/bwVLaiBWxz1wFbUDiZvWpDNLvXROOzueEqj5o/6x2s2v71
+
+resilience4j:
+  ratelimiter:
+    instances:
+      default:
+        limitForPeriod: 1000
+        limitRefreshPeriod: 1s
+        timeoutDuration: 0
 
 server:
   port: 9191
