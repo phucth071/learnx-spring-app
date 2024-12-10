@@ -15,17 +15,17 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    ResponseEntity<Response> handlingResourceNotFoundException(ResourceNotFoundException e) {
+    ResponseEntity<Response<?>> handlingResourceNotFoundException(ResourceNotFoundException e) {
         return ResponseEntity.status(200).body(Response.builder().code(200).success(false).message(e.getMessage()).build());
     }
 
     @ExceptionHandler(AuthenticationException.class)
-    ResponseEntity<Response> handlingAuthenticationException(AuthenticationException e) {
+    ResponseEntity<Response<?>> handlingAuthenticationException(AuthenticationException e) {
         return ResponseEntity.status(403).body(Response.builder().code(403).success(false).message(e.getMessage()).build());
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    ResponseEntity<Response> handlingAccessDeniedException(AccessDeniedException e) {
+    ResponseEntity<Response<?>> handlingAccessDeniedException(AccessDeniedException e) {
         return ResponseEntity.status(403).body(Response.builder().code(403).success(false).message(e.getMessage()).build());
     }
 }

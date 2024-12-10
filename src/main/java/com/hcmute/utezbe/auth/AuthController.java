@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.security.Principal;
 
 @RestController
@@ -31,47 +32,13 @@ public class AuthController {
     ) {
         var authResponse = service.authenticate(request);
 
-//        // Set cookie
-//        if (authResponse.isSuccess()) {
-//            ObjectNode data = (ObjectNode) authResponse.getData();
-//            var accessToken = data.get("accessToken").asText();
-//            var refreshToken = data.get("refreshToken").asText();
-//
-//            response.addHeader(HttpHeaders.SET_COOKIE, ResponseCookie.from("access_token", accessToken)
-//                    .httpOnly(true)
-//                    .maxAge(60 * 60 * 24 * 7)
-//                    .path("/")
-//                    .build().toString());
-//            response.addHeader(HttpHeaders.SET_COOKIE, ResponseCookie.from("refresh_token", refreshToken)
-//                    .httpOnly(true)
-//                    .maxAge(60 * 60 * 24 * 7)
-//                    .path("/")
-//                    .build().toString());
-//        }
         return ResponseEntity.ok(authResponse);
     }
 
     @PostMapping("/oauth2/google")
-    public ResponseEntity<?> oauthAuthenticate(@RequestBody IdTokenRequest IdTokenRequest, HttpServletResponse response) throws IOException {
-        System.out.println("TOKEN REQUEST:::" + IdTokenRequest.getIdToken());
+    public ResponseEntity<?> oauthAuthenticate(@RequestBody IdTokenRequest IdTokenRequest, HttpServletResponse response) throws IOException, GeneralSecurityException {
         var authResponse = service.loginWithGoogle(IdTokenRequest);
 
-//        if (authResponse.isSuccess()) {
-//            ObjectNode data = (ObjectNode) authResponse.getData();
-//            var accessToken = data.get("accessToken").asText();
-//            var refreshToken = data.get("refreshToken").asText();
-//
-//            response.addHeader(HttpHeaders.SET_COOKIE, ResponseCookie.from("access_token", accessToken)
-//                    .httpOnly(true)
-//                    .maxAge(60 * 60 * 24 * 7)
-//                    .path("/")
-//                    .build().toString());
-//            response.addHeader(HttpHeaders.SET_COOKIE, ResponseCookie.from("refresh_token", refreshToken)
-//                    .httpOnly(true)
-//                    .maxAge(60 * 60 * 24 * 7)
-//                    .path("/")
-//                    .build().toString());
-//        }
         return ResponseEntity.ok(authResponse);
     }
 

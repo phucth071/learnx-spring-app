@@ -37,7 +37,7 @@ public class LectureController {
                 .content(lectureDto.getContent())
                 .title(lectureDto.getTitle())
                 .build();
-        return Response.builder().code(HttpStatus.CREATED.value()).success(true).message("Create lecture successfully!").data(lectureService.saveLecture(lecture)).build();
+        return Response.builder().code(HttpStatus.CREATED.value()).success(true).message("Thêm bài giảng thành công!").data(lectureService.saveLecture(lecture)).build();
     }
 
     @PatchMapping("/{lectureId}")
@@ -47,12 +47,12 @@ public class LectureController {
             throw new ResourceNotFoundException("Lecture with id " + lectureId + " not found!");
         }
         Lecture lecture = convertLectureDTO(lectureDto, optionalLecture);
-        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Edit lecture with id " + lectureId + " successfully!").data(lectureService.saveLecture(lecture)).build();
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Sửa bài giảng thành công!").data(lectureService.saveLecture(lecture)).build();
     }
 
     @DeleteMapping("/{lectureId}")
     public Response<?> deleteLecture(@PathVariable("lectureId") Long lectureId) {
-        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Delete lecture with id " + lectureId + " successfully!").data(lectureService.deleteLecture(lectureId)).build();
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Xóa bài giảng thành công!").data(lectureService.deleteLecture(lectureId)).build();
     }
 
     private Lecture convertLectureDTO(LectureDto lectureDto, Optional<Lecture> optionalLecture) {

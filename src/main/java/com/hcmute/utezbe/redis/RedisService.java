@@ -6,4 +6,6 @@ public interface RedisService {
 
     void setObject(String key, Object value);
     <T> T getObject(String key, Class<T> targetClass);
+
+    void delete(String key);
 }

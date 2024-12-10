@@ -36,21 +36,17 @@ public class AssignmentSubmissionController {
     private final CloudinaryService cloudinaryService;
 
     @GetMapping("")
-    public Response getAllAssignmentSubmission() {
-        try {
-            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get all assignment submission successfully!").data(assignmentSubmissionService.getAllAssignmentSubmissions()).build();
-        } catch (Exception e) {
-            throw e;
-        }
+    public Response<?> getAllAssignmentSubmission() {
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get all assignment submission successfully!").data(assignmentSubmissionService.getAllAssignmentSubmissions()).build();
     }
 
     @GetMapping("/pageable")
-    public Response getAllAssignmentSubmissionsPageable(Pageable pageable) {
+    public Response<?> getAllAssignmentSubmissionsPageable(Pageable pageable) {
         return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get all assignment submission pageable successfully!").data(assignmentSubmissionService.getAllAssignmentSubmissionsPageable(pageable)).build();
     }
 
     @GetMapping("/{assignmentId}/{studentId}")
-    public Response getAssignmentSubmissionById(@PathVariable("assignmentId") Long assignmentId, @PathVariable("studentId") Long studentId) {
+    public Response<?> getAssignmentSubmissionById(@PathVariable("assignmentId") Long assignmentId, @PathVariable("studentId") Long studentId) {
         Optional<AssignmentSubmission> assignmentSubmission = assignmentSubmissionService.getAssignmentSubmissionById(assignmentId, studentId);
         if (assignmentSubmission.isPresent()) {
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get assignment submission successfully!").data(assignmentSubmission.get()).build();
@@ -91,7 +87,7 @@ public class AssignmentSubmissionController {
                 .student(currentUser)
                 .build();
         assignmentSubmission = assignmentSubmissionService.saveAssignmentSubmission(assignmentSubmission);
-        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Create assignment submission successfully!").data(assignmentSubmission).build();
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Nộp bài thành công!").data(assignmentSubmission).build();
     }
 
     @Transactional
@@ -111,34 +107,26 @@ public class AssignmentSubmissionController {
         assignmentSubmission.setFileSubmissionUrl(fileUrl);
 
         assignmentSubmission = assignmentSubmissionService.saveAssignmentSubmission(assignmentSubmission);
-        return Response.builder().code(HttpStatus.CREATED.value()).success(true).message("Create assignment submission successfully!").data(assignmentSubmission).build();
+        return Response.builder().code(HttpStatus.CREATED.value()).success(true).message("Chỉnh sửa thành công!").data(assignmentSubmission).build();
     }
 
     @PatchMapping("/{assignmentId}/{studentId}")
-    public Response editAssignmentSubmission(@PathVariable("assignmentId") Long assignmentId, @PathVariable("studentId") Long studentId, @RequestBody AssignmentSubmissionDto assignmentSubmissionDto) {
-        try {
-            Optional<AssignmentSubmission> assignmentSubmissionOpt = assignmentSubmissionService.getAssignmentSubmissionById(assignmentId, studentId);
-            if (assignmentSubmissionOpt.isPresent()) {
-                AssignmentSubmission existingSubmission = assignmentSubmissionOpt.get();
-                AssignmentSubmission updatedSubmission = convertAssignmentSubmissionDTO(assignmentSubmissionDto, existingSubmission);
-                AssignmentSubmission savedSubmission = assignmentSubmissionService.updateAssignmentSubmission(existingSubmission, updatedSubmission);
-                return Response.builder().code(HttpStatus.OK.value()).success(true).message("Assignment submission updated successfully!").data(savedSubmission).build();
-            } else {
-                throw new ResourceNotFoundException();
-            }
-        } catch (Exception e) {
-            throw e;
+    public Response<?> editAssignmentSubmission(@PathVariable("assignmentId") Long assignmentId, @PathVariable("studentId") Long studentId, @RequestBody AssignmentSubmissionDto assignmentSubmissionDto) {
+        Optional<AssignmentSubmission> assignmentSubmissionOpt = assignmentSubmissionService.getAssignmentSubmissionById(assignmentId, studentId);
+        if (assignmentSubmissionOpt.isPresent()) {
+            AssignmentSubmission existingSubmission = assignmentSubmissionOpt.get();
+            AssignmentSubmission updatedSubmission = convertAssignmentSubmissionDTO(assignmentSubmissionDto, existingSubmission);
+            AssignmentSubmission savedSubmission = assignmentSubmissionService.updateAssignmentSubmission(existingSubmission, updatedSubmission);
+            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Chỉnh sửa thành công!").data(savedSubmission).build();
+        } else {
+            throw new ResourceNotFoundException();
         }
     }
 
     @DeleteMapping("/{assignmentId}/{studentId}")
-    public Response deleteAssignmentSubmission(@PathVariable("assignmentId") Long assignmentId, @PathVariable("studentId") Long studentId) {
-        try {
-            assignmentSubmissionService.deleteAssignmentSubmission(assignmentId, studentId);
-            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Assignment submission deleted successfully!").data(null).build();
-        } catch (Exception e) {
-            throw e;
-        }
+    public Response<?> deleteAssignmentSubmission(@PathVariable("assignmentId") Long assignmentId, @PathVariable("studentId") Long studentId) {
+        assignmentSubmissionService.deleteAssignmentSubmission(assignmentId, studentId);
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Xóa thành công!").data(null).build();
     }
 
     private AssignmentSubmission convertAssignmentSubmissionDTO(AssignmentSubmissionDto assignmentSubmissionDto, AssignmentSubmission existingSubmission) {

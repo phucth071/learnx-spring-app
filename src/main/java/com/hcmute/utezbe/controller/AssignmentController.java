@@ -53,7 +53,7 @@ public class AssignmentController {
     public ResponseEntity<?> getAssignmentById(@PathVariable("assignmentId") Long assignmentId) {
         Assignment assignment = assignmentService.getAssignmentById(assignmentId).orElse(null);
         if (assignment == null) {
-            throw new ResourceNotFoundException("Assignment with id " + assignmentId + " not found!");
+            throw new ResourceNotFoundException("Không tìm thấy bài tập!");
         }
         return ResponseEntity.ok(Response.builder().code(HttpStatus.OK.value()).success(true).message("Get assignment with id " + assignmentId + " successfully!").data(assignmentService.getAssignmentById(assignmentId)).build());
     }
@@ -96,7 +96,7 @@ public class AssignmentController {
                 .urlDocument(assignment.getUrlDocument())
                 .moduleId(assignment.getModule().getId())
                 .build();
-        return Response.builder().code(HttpStatus.CREATED.value()).success(true).message("Create assignment successfully!").data(assignmentDto).build();
+        return Response.builder().code(HttpStatus.CREATED.value()).success(true).message("Tạo bài tập thành công!").data(assignmentDto).build();
     }
 
     @PatchMapping("/{assignmentId}")
@@ -109,7 +109,7 @@ public class AssignmentController {
                                       @RequestPart(value = "document", required = false) @Nullable MultipartFile document) throws ParseException {
         Optional<Assignment> optionalAssignment = assignmentService.getAssignmentById(assignmentId);
         if (optionalAssignment.isEmpty()) {
-            return Response.builder().code(HttpStatus.NOT_FOUND.value()).success(false).message("Assignment not found").build();
+            return Response.builder().code(HttpStatus.NOT_FOUND.value()).success(false).message("Không tìm thấy bài tập!").build();
         }
         String urlDocument = document != null ? cloudinaryService.upload(document) : null;
         Assignment assignment = optionalAssignment.get();
@@ -129,12 +129,12 @@ public class AssignmentController {
                 .urlDocument(assignment.getUrlDocument())
                 .moduleId(assignment.getModule().getId())
                 .build();
-        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Edit assignment with id " + assignmentId + " successfully!").data(assignment).build();
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Chỉnh sửa bài tập thành công!").data(assignment).build();
     }
 
     @DeleteMapping("/{assignmentId}")
     public Response<?> deleteAssignment(@PathVariable("assignmentId") Long assignmentId) {
-        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Delete assignment with id " + assignmentId + " successfully!").data(assignmentService.deleteAssignment(assignmentId)).build();
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Xóa bài tập thành công!").data(assignmentService.deleteAssignment(assignmentId)).build();
     }
 
     @GetMapping("/get-top-3")
@@ -170,7 +170,7 @@ public class AssignmentController {
                 .courseId(assignment.getModule().getCourse().getId())
                 .courseName(assignment.getModule().getCourse().getName())
                 .build()).toList();
-        return ResponseEntity.ok(Response.builder().code(HttpStatus.OK.value()).success(true).message("Get all assignment by user successfully!").data(assignmentDtos).build());
+        return ResponseEntity.ok(Response.builder().code(HttpStatus.OK.value()).success(true).message("Lấy dữ liệu bài học thành công!").data(assignmentDtos).build());
     }
 
     private Assignment convertAssignmentDTO(AssignmentDto assignmentDto, Optional<Assignment> assignmentOptional) {

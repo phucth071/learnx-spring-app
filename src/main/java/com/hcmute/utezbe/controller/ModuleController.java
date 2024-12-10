@@ -41,7 +41,7 @@ public class ModuleController {
                 .description(moduleDto.getDescription() != null ? moduleDto.getDescription() : "")
                 .course(courseService.getCourseById(moduleDto.getCourseId()).get())
                 .build();
-        return Response.builder().code(HttpStatus.CREATED.value()).success(true).message("Create module successfully!").data(moduleService.saveModule(module)).build();
+        return Response.builder().code(HttpStatus.CREATED.value()).success(true).message("Thêm chương thành công!").data(moduleService.saveModule(module)).build();
     }
 
     @PatchMapping("/{moduleId}")
@@ -54,12 +54,12 @@ public class ModuleController {
         assert req != null;
         if (req.getName() != null) module.setName(req.getName());
         if (req.getDescription() != null) module.setDescription(req.getDescription());
-        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Edit module with id " + moduleId + " successfully!").data(moduleService.saveModule(module)).build();
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Sửa chương thành công!").data(moduleService.saveModule(module)).build();
     }
 
     @DeleteMapping("/{moduleId}")
     public Response<?> deleteModule(@PathVariable("moduleId") Long moduleId) {
-        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Delete module with id " + moduleId + " successfully!").data(moduleService.deleteModule(moduleId)).build();
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Xóa chương thành công!").data(moduleService.deleteModule(moduleId)).build();
     }
 
     @GetMapping("/{moduleId}/lectures")

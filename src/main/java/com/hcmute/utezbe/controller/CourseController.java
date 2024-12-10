@@ -97,29 +97,25 @@ public class CourseController {
     @PostMapping(value = "", consumes = {"multipart/form-data"})
     public Response<?> createCourse(@RequestPart("courseInfo") CreateCourseRequest req,
                                  @RequestPart("thumbnail") @Nullable MultipartFile thumbnail) throws ParseException {
-        try {
-            String thumbnailUrl;
-            SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
-            Category category = categoryService.getCategoryByName(req.getCategoryName()).orElseGet(() -> categoryService.saveCategory(Category.builder().name(req.getCategoryName()).build()));
-            if (thumbnail != null) {
-                thumbnailUrl = cloudinaryService.upload(thumbnail);
-            } else {
-                thumbnailUrl = "https://res.cloudinary.com/dnarlcqth/image/upload/v1719906429/samples/landscapes/architecture-signs.jpg";
-            }
-            User user = AuthService.getCurrentUser();
-            Course course = Course.builder()
-                    .category(category)
-                    .name(req.getName())
-                    .description(req.getDescription() == null ? "" : req.getDescription())
-                    .startDate(dateFormatter.parse(req.getStartDate()))
-                    .thumbnail(thumbnailUrl)
-                    .state(req.getState() != null ? req.getState() : State.OPEN)
-                    .teacher(user)
-                    .build();
-            return Response.builder().code(HttpStatus.CREATED.value()).success(true).message("Create course successfully!").data(courseService.saveCourse(course)).build();
-        } catch (Exception e) {
-            throw e;
+        String thumbnailUrl;
+        SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+        Category category = categoryService.getCategoryByName(req.getCategoryName()).orElseGet(() -> categoryService.saveCategory(Category.builder().name(req.getCategoryName()).build()));
+        if (thumbnail != null) {
+            thumbnailUrl = cloudinaryService.upload(thumbnail);
+        } else {
+            thumbnailUrl = "https://res.cloudinary.com/dnarlcqth/image/upload/v1719906429/samples/landscapes/architecture-signs.jpg";
         }
+        User user = AuthService.getCurrentUser();
+        Course course = Course.builder()
+                .category(category)
+                .name(req.getName())
+                .description(req.getDescription() == null ? "" : req.getDescription())
+                .startDate(dateFormatter.parse(req.getStartDate()))
+                .thumbnail(thumbnailUrl)
+                .state(req.getState() != null ? req.getState() : State.OPEN)
+                .teacher(user)
+                .build();
+        return Response.builder().code(HttpStatus.CREATED.value()).success(true).message("Create course successfully!").data(courseService.saveCourse(course)).build();
     }
 
     @PatchMapping("/{courseId}")

@@ -96,4 +96,9 @@ public class RedisServiceImpl implements RedisService{
 
         return null; // hoặc ném ra một ngoại lệ tùy ý
     }
+
+    @Override
+    public void delete(String key) {
+        redisTemplate.delete(key);
+    }
 }

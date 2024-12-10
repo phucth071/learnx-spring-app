@@ -34,6 +34,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -61,11 +62,11 @@ public class AuthService {
     public UserDto register(RegisterRequest request) {
         boolean isValidEmail = emailValidator.test(request.getEmail());
         if (!isValidEmail) {
-            throw new RuntimeException("Email is not valid!");
+            throw new RuntimeException("Email không hợp lệ!");
         }
         Optional<User> opt = userService.findByEmailIgnoreCase(request.getEmail());
         if (opt.isPresent()) {
-            throw new RuntimeException("Email already exists!");
+            throw new RuntimeException("Email đã được sử dụng!");
         }
         User user = User.builder()
                 .email(request.getEmail())
@@ -89,40 +90,42 @@ public class AuthService {
                 .build();
 
         confirmTokenService.saveConfirmationToken(confirmToken);
-        String message = "Mã OTP để xác nhận tài khoản của bạn là: <span>" + token + "</span>";
+        String message = "Mã OTP để xác nhận tài khoản của bạn là: <span>" + token + "</span>"
+                + "<br>OTP sẽ hết hạn sau 15 phút!"
+                + "<br>Hoặc ấn vào liên kết sau để xác nhận: <a href='http://localhost:3000/register/verify?otp=" + token + "&email=" + user.getEmail() + "'>Xác nhận</a>";
         emailService.send(request.getEmail(), buildEmailOTP(request.getFullName(), message));
         return UserDto.convertToDto(user);
     }
 
-    public Response confirmOTP(String token, String email) {
+    public Response<?> confirmOTP(String token, String email) {
         Optional<ConfirmToken> otpConfirmToken = confirmTokenService.getToken(token);
         if (otpConfirmToken.isEmpty()) {
-            throw new RuntimeException("Invalid OTP!");
+            throw new RuntimeException("Mã xác nhận không chính xác!");
         }
         ConfirmToken confirmToken = otpConfirmToken.get();
         if (confirmToken.getConfirmedAt() != null) {
-            throw new RuntimeException("OTP already confirmed!");
+            throw new RuntimeException("Tài khoản đã được xác nhận!");
         }
         if (confirmToken.getExpiredAt().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("OTP expired!");
+            throw new RuntimeException("Mã xác nhận đã hết hạn!");
         }
         if (!confirmToken.getUser().getEmail().equals(email)) {
-            throw new RuntimeException("Invalid OTP!");
+            throw new RuntimeException("Mã xác nhận không chính xác!");
         }
         confirmTokenService.setConfirmedAt(token);
         userService.enableUser(confirmToken.getUser().getEmail());
-        return Response.builder().code(HttpStatus.OK.value()).message("Account confirmed successfully!").success(true).build();
+        return Response.builder().code(HttpStatus.OK.value()).message("Xác nhận thành công!").success(true).build();
     }
 
 
-    public Response resendOTP(String email) {
+    public Response<?> resendOTP(String email) {
         System.out.println("EMAIL:" + email);
-        User user = userService.findByEmailIgnoreCase(email).orElseThrow(() -> new AuthenticationException("User not found"));
+        User user = userService.findByEmailIgnoreCase(email).orElseThrow(() -> new AuthenticationException("Không tìm thấy tài khoản!"));
         if (user.getProvider() == Provider.GOOGLE) {
-            throw new AuthenticationException("Email already registered by another method!");
+            throw new AuthenticationException("Tài khoản đã đăng ký bằng Google! Vui lòng đăng nhập bằng Google!");
         }
         if (user.isEnabled()) {
-            throw new RuntimeException("Account already confirmed!");
+            throw new RuntimeException("Tài khoản đã được xác nhận!");
         }
         ConfirmToken oldToken = confirmTokenService.getTokenByUser(user.getId()).get();
         confirmTokenService.delete(oldToken);
@@ -136,7 +139,7 @@ public class AuthService {
         confirmTokenService.saveConfirmationToken(confirmToken);
         String message = "Mã OTP để xác nhận tài khoản của bạn là: <span>" + newOtp + "</span>";
         emailService.send(email, buildEmailOTP(user.getFullName(), message));
-        return Response.builder().code(HttpStatus.OK.value()).message("OTP sent successfully! Please check your email").success(true).build();
+        return Response.builder().code(HttpStatus.OK.value()).message("Gửi mã xác nhận thành công! Vui lòng kiểm tra hòm thư của bạn").success(true).build();
     }
 
 
@@ -188,7 +191,7 @@ public class AuthService {
     }
 
     @Transactional
-    public Response authenticate(AuthenticationRequest request) {
+    public Response<?> authenticate(AuthenticationRequest request) {
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -197,19 +200,19 @@ public class AuthService {
                     )
             );
         } catch (BadCredentialsException e) {
-            throw new AuthenticationException("Invalid email or password!");
+            throw new AuthenticationException("Sai tên đăng nhập hoặc mật khẩu!");
         }
 
         Optional<User> opt = userService.findByEmailIgnoreCase(request.getEmail());
         if(opt.isEmpty()) {
-            throw new AuthenticationException("User not found!");
+            throw new AuthenticationException("Người dùng không tồn tại!");
         }
         User user = opt.get();
         if(user.getProvider() == Provider.GOOGLE) {
-            throw new AuthenticationException("Email already registered by another method!");
+            throw new AuthenticationException("Tài khoản đã đăng ký bằng Google! Vui lòng đăng nhập bằng Google!");
         }
         if(!user.isEnabled()) {
-            throw new AuthenticationException("Account is not confirmed yet!");
+            throw new AuthenticationException("Tài khoản chưa xác nhận bằng OTP!");
         }
 //        if(user.getRole() != request.getRole()) {
 //            return Response.builder().error(true).success(false).message("You Do Not Have Authorize").build();
@@ -237,11 +240,11 @@ public class AuthService {
     }
 
     @Transactional
-    public Response loginWithGoogle(IdTokenRequest idTokenRequest) throws IOException {
+    public Response<?> loginWithGoogle(IdTokenRequest idTokenRequest) throws IOException, GeneralSecurityException {
 //        GoogleTokenResponse tokenResponse = exchangeCode(authCode.getAuthCode());
         User user = verifyGoogleIdToken(idTokenRequest.getIdToken());
         if (user == null) {
-            throw new AuthenticationException("Invalid id token");
+            throw new AuthenticationException("Có lỗi xảy ra khi xác thực tài khoản Google!");
         }
         user = createOrUpdateUser(user);
         String accessToken = jwtService.generateAccessToken(user);
@@ -265,7 +268,7 @@ public class AuthService {
                 .build();
     }
 
-    public Response logout(Long userId) {
+    public Response<?> logout(Long userId) {
         if (userId == null) {
             throw new RuntimeException("User not found!");
         }
@@ -284,27 +287,27 @@ public class AuthService {
                 .build();
     }
 
-    public Response changePassword(ChangePasswordRequest request) {
-        User user = userService.findByEmailIgnoreCase(request.getEmail()).orElseThrow(() -> new RuntimeException("User not found"));
-        if (user.getId() != AuthService.getCurrentUser().getId()) {
+    public Response<?> changePassword(ChangePasswordRequest request) {
+        User user = userService.findByEmailIgnoreCase(request.getEmail()).orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản!"));
+        if (!Objects.equals(user.getId(), AuthService.getCurrentUser().getId())) {
             throw new AccessDeniedException("You do not have permission to change password!");
         }
         if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
-            throw new RuntimeException("Old password is incorrect!");
+            throw new RuntimeException("Mật khẩu cũ không chính xác!");
         }
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userService.save(user);
         return Response.builder()
                 .code(HttpStatus.OK.value())
                 .success(true)
-                .message("Change password successfully!")
+                .message("Đổi mật khẩu thành công!")
                 .build();
     }
 
-    public Response sendForgotPasswordToken(String email) {
-        User user = userService.findByEmailIgnoreCase(email).orElseThrow(() -> new RuntimeException("User not found"));
+    public Response<?> sendForgotPasswordToken(String email) {
+        User user = userService.findByEmailIgnoreCase(email).orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản!"));
         if (user.getProvider() != Provider.DATABASE) {
-            throw new RuntimeException("Email already registered by " + user.getProvider().name() + " method");
+            throw new RuntimeException("Tài khoản đã đăng ký bằng Google! Vui lòng đăng nhập bằng Google!");
         }
         String token = UUID.randomUUID().toString();
         ForgotPasswordToken forgotPasswordToken = ForgotPasswordToken.builder()
@@ -318,30 +321,29 @@ public class AuthService {
         return Response.builder()
                 .code(HttpStatus.OK.value())
                 .success(true)
-                .message("Reset password link sent successfully! Please check your email")
+                .message("Gửi mã xác nhận thành công! Vui lòng kiểm tra hòm thư của bạn")
                 .build();
     }
 
     @Transactional
-    public Response resetPassword(ForgotPasswordRequest request) {
+    public Response<?> resetPassword(ForgotPasswordRequest request) {
         ForgotPasswordToken forgotPasswordToken = forgotPasswordService.findByToken(request.getToken());
         if (forgotPasswordToken == null) {
-            throw new RuntimeException("Invalid token!");
+            throw new RuntimeException("Mã xác nhận không chính xác!");
         }
         if (forgotPasswordToken.getExpiredAt().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("Token expired!");
+            throw new RuntimeException("Mã xác nhận đã hết hạn!");
         }
         User user = forgotPasswordToken.getUser();
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         userService.save(user);
 
-        log.info("FORGOT PASSWORD TOKEN: {}", forgotPasswordToken.getId());
         forgotPasswordService.delete(forgotPasswordToken);
 
         return Response.builder()
                 .code(HttpStatus.OK.value())
                 .success(true)
-                .message("Reset password successfully!")
+                .message("Đổi mật khẩu thành công!")
                 .build();
     }
     public GoogleTokenResponse exchangeCode(String authCode) throws IOException {
@@ -358,34 +360,29 @@ public class AuthService {
 
 
 
-    private User verifyGoogleIdToken(String idToken) {
+    private User verifyGoogleIdToken(String idToken) throws GeneralSecurityException, IOException {
         GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(
                 new NetHttpTransport(),
                 JacksonFactory.getDefaultInstance())
                 .setAudience(Collections.singletonList(CLIENT_ID))
                 .build();
-        try {
-            var token = verifier.verify(idToken);
-            if (Objects.isNull(token)) {
-                throw new AuthenticationException("Token verification failed!");
-            }
-            var payload = token.getPayload();
-            String email = payload.getEmail();
-            String fullName = payload.get("name").toString();
-            String avatarUrl = (String) payload.get("picture");
-            Role role = (payload.get("hd") == null) ? Role.STUDENT :  (payload.get("hd").equals("hcmute.edu.vn") ? Role.TEACHER : Role.STUDENT);
-
-            return User.builder()
-                    .email(email)
-                    .fullName(fullName)
-                    .avatarUrl(avatarUrl)
-                    .provider(Provider.GOOGLE)
-                    .role(role)
-                    .build();
-        } catch (Exception e) {
-            e.printStackTrace();
+        var token = verifier.verify(idToken);
+        if (Objects.isNull(token)) {
+            throw new AuthenticationException("Xác thực với Google thất bại!");
         }
-        return null;
+        var payload = token.getPayload();
+        String email = payload.getEmail();
+        String fullName = payload.get("name").toString();
+        String avatarUrl = (String) payload.get("picture");
+        Role role = Role.STUDENT;
+
+        return User.builder()
+                .email(email)
+                .fullName(fullName)
+                .avatarUrl(avatarUrl)
+                .provider(Provider.GOOGLE)
+                .role(role)
+                .build();
     }
 
     @Transactional

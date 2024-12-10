@@ -31,13 +31,13 @@ public class CourseRegistrationController {
     @PostMapping("/register/{courseId}/list-email")
     public Response<?> registerCourse(@PathVariable("courseId") Long courseId, @RequestBody ListEmailRequest req) {
         List<CourseRegistration> courseRegistrations = courseRegistrationService.registerCourse(courseId, req.getEmails());
-        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Register course successfully!").data(courseRegistrations).build();
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Đăng ký khóa học thành công!").data(courseRegistrations).build();
     }
 
     @PostMapping("/remove/{courseId}/list-email")
     public Response<?> removeCourse(@PathVariable("courseId") Long courseId, @RequestBody ListEmailRequest req) {
         courseRegistrationService.removeStudentsFromCourse(courseId, req.getEmails());
-        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Remove student from course successfully!").data(null).build();
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Thêm sinh viên vào khóa học thành công!").data(null).build();
     }
 
     @GetMapping("/pageable")
@@ -52,7 +52,7 @@ public class CourseRegistrationController {
                 .course(courseService.getCourseById(dto.getCourseId()).get())
                 .email(userService.getUserById(studentId).getEmail())
                 .build();
-        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Create course registration successfully!").data(courseRegistrationService.save(courseRegistration)).build();
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Thêm sinh viên vào khóa học thành công!").data(courseRegistrationService.save(courseRegistration)).build();
     }
 
     @GetMapping("/student/{studentId}")

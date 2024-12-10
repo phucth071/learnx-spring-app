@@ -19,61 +19,36 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @GetMapping("")
-    public Response getAllCategory() {
-        try {
-            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get all category successfully!").data(categoryService.getAllCategories()).build();
-        } catch (Exception e) {
-            throw e;
-        }
+    public Response<?> getAllCategory() {
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get all category successfully!").data(categoryService.getAllCategories()).build();
     }
 
     @GetMapping("/{categoryId}")
-    public Response getCategoryById(@PathVariable("categoryId") Long categoryId) {
-        try {
-            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get category with id " + categoryId + " successfully!").data(categoryService.getCategoryById(categoryId)).build();
-        } catch (Exception e) {
-            throw e;
-        }
+    public Response<?> getCategoryById(@PathVariable("categoryId") Long categoryId) {
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get category with id " + categoryId + " successfully!").data(categoryService.getCategoryById(categoryId)).build();
     }
 
     @PostMapping("")
-    public Response createCategory(@RequestBody CategoryDto categoryDto) {
-        try {
-            Category category = Category.builder()
-                    .name(categoryDto.getName())
-                    .build();
-            return Response.builder().code(HttpStatus.CREATED.value()).success(true).message("Create category successfully!").data(categoryService.saveCategory(category)).build();
-        } catch (Exception e) {
-            throw e;
-        }
+    public Response<?> createCategory(@RequestBody CategoryDto categoryDto) {
+        Category category = Category.builder()
+                .name(categoryDto.getName())
+                .build();
+        return Response.builder().code(HttpStatus.CREATED.value()).success(true).message("Tạo danh mục thành công!").data(categoryService.saveCategory(category)).build();
     }
 
     @PatchMapping("/{categoryId}")
-    public Response editCategory(@PathVariable("categoryId") Long categoryId, @RequestBody CategoryDto categoryDto) {
-        try {
-            Optional<Category> categoryOptional = categoryService.getCategoryById(categoryId);
-            if (!categoryOptional.isPresent()) {
-                throw new ResourceNotFoundException("Category with id " + categoryId + " not found!");
-            }
-            Category category = categoryOptional.get();
-            if (category != null) {
-                category = convertCategoryDTO(categoryDto, categoryOptional);
-                return Response.builder().code(HttpStatus.OK.value()).success(true).message("Edit category with id " + categoryId + " successfully!").data(categoryService.saveCategory(category)).build();
-            } else {
-                throw new ResourceNotFoundException("Category with id " + categoryId + " not found!");
-            }
-        } catch (Exception e) {
-            throw e;
+    public Response<?> editCategory(@PathVariable("categoryId") Long categoryId, @RequestBody CategoryDto categoryDto) {
+        Optional<Category> categoryOptional = categoryService.getCategoryById(categoryId);
+        if (categoryOptional.isEmpty()) {
+            throw new ResourceNotFoundException("Không tìm thấy danh mục!");
         }
+        Category category = convertCategoryDTO(categoryDto, categoryOptional);
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Edit category with id " + categoryId + " successfully!").data(categoryService.saveCategory(category)).build();
     }
 
     @DeleteMapping("/{categoryId}")
-    public Response deleteCategory(@PathVariable("categoryId") Long categoryId) {
-        try {
-            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Delete category with id " + categoryId + " successfully!").data(categoryService.deleteCategory(categoryId)).build();
-        } catch (Exception e) {
-            throw e;
-        }
+    public Response<?> deleteCategory(@PathVariable("categoryId") Long categoryId) {
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Delete category with id " + categoryId + " successfully!").data(categoryService.deleteCategory(categoryId)).build();
     }
 
     private Category convertCategoryDTO(CategoryDto categoryDto, Optional<Category> categoryOptional) {
