@@ -79,8 +79,8 @@ public class AssignmentController {
         String urlDocument = document != null ? cloudinaryService.uploadRemainFileName(document) : null;
         Assignment assignment = Assignment.builder()
                 .content(req.getContent())
-                .startDate(new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy").parse(req.getStartDate().toString()))
-                .endDate(new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy").parse(req.getEndDate().toString()))
+                .startDate(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(req.getStartDate()))
+                .endDate(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(req.getEndDate()))
                 .state(req.getState())
                 .title(req.getTitle())
                 .urlDocument(urlDocument)

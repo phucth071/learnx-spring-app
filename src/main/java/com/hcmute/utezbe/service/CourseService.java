@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -156,9 +157,11 @@ public class CourseService {
     }
 
     @PreAuthorize("hasAnyAuthority('TEACHER', 'ADMIN')")
+    @PostAuthorize("returnObject == null or returnObject.getTeacher().getId() == principal.id")
     @Transactional
     public Course deleteCourse(Long id) {
         Optional<Course> course = courseRepository.findById(id);
+
         RedisDistributedLocker locker = redisDistributedService.getDistributedLock(LOCK_COURSE_KEY + id);
         try {
             boolean isLock = locker.tryLock(1, 5, TimeUnit.SECONDS);
@@ -217,7 +220,6 @@ public class CourseService {
     }
 
     @PreAuthorize("hasAnyAuthority('TEACHER', 'ADMIN')")
-
     public Page<Course> getCourseByTeacherId(Long teacherId, Pageable pageable) {
         log.info("Pageable: " + pageable);
         return courseRepository.findByTeacherId(teacherId, pageable);

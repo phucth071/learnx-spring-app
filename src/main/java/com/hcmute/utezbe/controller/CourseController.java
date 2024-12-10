@@ -37,8 +37,6 @@ public class CourseController {
 
     private final CourseService courseService;
     private final CategoryService categoryService;
-    private final UserService userService;
-    private final CourseRegistrationService courseRegistrationService;
     private final ModuleService moduleService;
 
 
@@ -115,7 +113,7 @@ public class CourseController {
                 .state(req.getState() != null ? req.getState() : State.OPEN)
                 .teacher(user)
                 .build();
-        return Response.builder().code(HttpStatus.CREATED.value()).success(true).message("Create course successfully!").data(courseService.saveCourse(course)).build();
+        return Response.builder().code(HttpStatus.CREATED.value()).success(true).message("Tạo khóa học thành công!").data(courseService.saveCourse(course)).build();
     }
 
     @PatchMapping("/{courseId}")
@@ -126,28 +124,25 @@ public class CourseController {
                                @RequestParam("startDate") String startDate,
                                @RequestParam("state") @Nullable String state,
                                @RequestPart("thumbnail") @Nullable MultipartFile thumbnail) throws ParseException {
-        try {
-//            Optional<Course> courseOtp = courseService.getCourseById(courseId);
+        //            Optional<Course> courseOtp = courseService.getCourseById(courseId);
 //            Course course = courseOtp.get();
-            Course course = courseService.getCourseById(courseId).get();
-            course.setName(name);
-            course.setDescription(description);
-            course.setCategory(categoryService.getCategoryById(categoryId).get());
-            course.setStartDate(new SimpleDateFormat("yyyy-MM-dd").parse(startDate));
-            course.setState(state != null ? State.valueOf(state) : State.OPEN);
-            if (thumbnail != null) {
-                course.setThumbnail(cloudinaryService.upload(thumbnail));
-            }
-            CourseDto courseDto = convertToDto(courseService.saveCourse(course));
-            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Edit course successfully!").data(courseDto).build();
-        } catch (Exception e) {
-            throw e;
+
+        Course course = courseService.getCourseById(courseId).get();
+        course.setName(name);
+        course.setDescription(description);
+        course.setCategory(categoryService.getCategoryById(categoryId).get());
+        course.setStartDate(new SimpleDateFormat("yyyy-MM-dd").parse(startDate));
+        course.setState(state != null ? State.valueOf(state) : State.OPEN);
+        if (thumbnail != null) {
+            course.setThumbnail(cloudinaryService.upload(thumbnail));
         }
+        CourseDto courseDto = convertToDto(courseService.saveCourse(course));
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Sửa khóa học thành công!").data(courseDto).build();
     }
 
     @DeleteMapping("/{courseId}")
     public Response<?> deleteCourse(@PathVariable("courseId") Long courseId) {
-        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Delete course successfully!").data(courseService.deleteCourse(courseId)).build();
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Xóa khóa học thành công!").data(courseService.deleteCourse(courseId)).build();
     }
 
 //    @PostMapping("/email")
@@ -168,33 +163,21 @@ public class CourseController {
 
     @GetMapping("/my-courses")
     public Response<?>getMyCourses(Pageable pageable) {
-        try {
-            Page<Course> course = courseService.getCoursesByStudentId(AuthService.getCurrentUser().getId(), pageable);
-            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get my courses successfully!").data(course).build();
-        } catch (Exception e) {
-            throw e;
-        }
+        Page<Course> course = courseService.getCoursesByStudentId(AuthService.getCurrentUser().getId(), pageable);
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get my courses successfully!").data(course).build();
     }
 
     @GetMapping("/teacher/my-courses")
     public Response<?> getMyCoursesAsTeacher(Pageable pageable) {
-        try {
-            Page<Course> courses = courseService.getCourseByTeacherId(AuthService.getCurrentUser().getId(), pageable);
-            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get my courses as teacher successfully!").data(courses).build();
-        } catch (Exception e) {
-            throw e;
-        }
+        Page<Course> courses = courseService.getCourseByTeacherId(AuthService.getCurrentUser().getId(), pageable);
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get my courses as teacher successfully!").data(courses).build();
     }
 
     @GetMapping("/{coursedId}/modules")
     public Response<?> getModulesByCourseId(@PathVariable("coursedId") Long id) {
-        try {
-            List<Module> modules = moduleService.findAllByCourseId(id);
-            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get modules by course id successfully!").data(modules).build();
+        List<Module> modules = moduleService.findAllByCourseId(id);
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get modules by course id successfully!").data(modules).build();
 
-        } catch (Exception e) {
-            throw e;
-        }
     }
 
 

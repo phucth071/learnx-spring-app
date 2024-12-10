@@ -14,8 +14,8 @@ import java.util.Date;
 @AllArgsConstructor
 public class CreateAssignmentRequest {
     private String content;
-    private Date startDate;
-    private Date endDate;
+    private String startDate;
+    private String endDate;
     private State state;
     private String title;
     private Long moduleId;

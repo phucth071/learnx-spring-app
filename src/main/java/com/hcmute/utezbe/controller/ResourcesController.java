@@ -53,7 +53,7 @@ public class ResourcesController {
                 .urlDocument(resources.getUrlDocument())
                 .moduleId(resources.getModule().getId())
                 .build();
-        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Create resources successfully!").data(resourcesDto).build();
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Tạo tài nguyên thành công!").data(resourcesDto).build();
     }
 
     @PatchMapping("/{resourcesId}")
@@ -62,7 +62,7 @@ public class ResourcesController {
                                      @RequestPart(value = "file", required = false) MultipartFile document) {
         Optional<Resources> optionalResources = resourcesService.getResourcesById(resourcesId);
         if (optionalResources.isEmpty()) {
-            return Response.builder().code(HttpStatus.NOT_FOUND.value()).success(false).message("Resources not found").build();
+            return Response.builder().code(HttpStatus.NOT_FOUND.value()).success(false).message("Không tìm thấy tài nguyên!").build();
         }
 
         Resources resources = optionalResources.get();
@@ -84,7 +84,7 @@ public class ResourcesController {
                 .moduleId(resources.getModule().getId())
                 .build();
 
-        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Edit resources with id " + resourcesId + " successfully!").data(resourcesDto).build();
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Sửa tài nguyên thành công!").data(resourcesDto).build();
     }
 
     @DeleteMapping("/{resourcesId}")
@@ -93,7 +93,7 @@ public class ResourcesController {
         if (optionalResources.isEmpty()) {
             throw new ResourceNotFoundException("Resources not found");
         }
-        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Delete resources with id " + resourcesId + " successfully!").data(resourcesService.deleteResources(resourcesId)).build();
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Xóa tài nguyên thành công!").data(resourcesService.deleteResources(resourcesId)).build();
     }
 
     private Resources convertResourcesDTO(ResourcesDto resourcesDto, Optional<Resources> optionalResources) {
