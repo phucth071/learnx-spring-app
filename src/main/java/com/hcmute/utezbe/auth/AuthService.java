@@ -389,14 +389,12 @@ public class AuthService {
     public User createOrUpdateUser(User user) {
         User existedUser = userService.findByEmailIgnoreCase(user.getEmail()).orElse(null);
         if (existedUser == null) {
-            System.out.println("Create new user");
             userService.save(user);
             return user;
         }
         if (existedUser.getProvider() != Provider.GOOGLE) {
-            throw new AuthenticationException("Email already registered by another method!");
+            throw new AuthenticationException("Email đã đăng ký với mật khẩu! Vui lòng đăng nhập với mật khẩu");
         }
-        System.out.println("Update existed user");
 //        existedUser.setFullName(user.getFullName());
 //        existedUser.setAvatarUrl(user.getAvatarUrl());
 //        existedUser.setProvider(user.getProvider());
@@ -418,7 +416,12 @@ public class AuthService {
                     return Response.builder()
                             .data(objectMapper.createObjectNode()
                                     .put("accessToken", accessToken)
-                                    .put("refreshToken", refreshToken.getToken()))
+                                    .put("refreshToken", refreshToken.getToken())
+                                    .put("email", user.getEmail())
+                                    .put("fullName", user.getFullName())
+                                    .put("avatar", user.getAvatarUrl())
+                                    .put("role", user.getRole().name())
+                            )
                             .code(HttpStatus.OK.value())
                             .success(true)
                             .message("Get new token Successfully!")

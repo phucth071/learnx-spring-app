@@ -8,7 +8,7 @@ spring:
       max-request-size: 50MB
 
   datasource:
-    url: jdbc:mysql://localhost:3306/utez_db
+    url: jdbc:mysql://localhost:3306/utezdb
     # username: root
     # password:
     username: utez-admin

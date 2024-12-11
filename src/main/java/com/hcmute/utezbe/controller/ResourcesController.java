@@ -59,7 +59,7 @@ public class ResourcesController {
     @PatchMapping("/{resourcesId}")
     public Response<?> editResources(@PathVariable("resourcesId") Long resourcesId,
                                      @RequestParam(value = "title", required = false) String title,
-                                     @RequestPart(value = "file", required = false) MultipartFile document) {
+                                     @RequestPart(value = "file", required = false) MultipartFile document) throws IOException {
         Optional<Resources> optionalResources = resourcesService.getResourcesById(resourcesId);
         if (optionalResources.isEmpty()) {
             return Response.builder().code(HttpStatus.NOT_FOUND.value()).success(false).message("Không tìm thấy tài nguyên!").build();
@@ -72,7 +72,7 @@ public class ResourcesController {
         }
 
         if (document != null) {
-            String urlDocument = cloudinaryService.upload(document);
+            String urlDocument = cloudinaryService.uploadRemainFileName(document);
             resources.setUrlDocument(urlDocument);
         }
 

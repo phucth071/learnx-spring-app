@@ -3,8 +3,6 @@ package com.hcmute.utezbe.service;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -27,8 +25,12 @@ public class CloudinaryService {
     }
 
     public String uploadRemainFileName(MultipartFile file) throws IOException {
+        String originalFilename = Objects.requireNonNull(file.getOriginalFilename());
+        String filenameWithoutExtension = originalFilename.replaceFirst("[.][^.]+$", "");
+        String fileExtension = originalFilename.substring(originalFilename.lastIndexOf(".") + 1);
+
         Map<?, ?> uploadResult = cloudinary.uploader().upload(file.getBytes(),
-                ObjectUtils.asMap("public_id", Objects.requireNonNull(file.getOriginalFilename()).replaceFirst("[.][^.]+$", "")));
+                ObjectUtils.asMap("resource_type", "raw", "public_id", filenameWithoutExtension + "." + fileExtension));
         return uploadResult.get("url").toString();
     }
 }
