@@ -3,6 +3,7 @@ package com.hcmute.utezbe.controller;
 import com.hcmute.utezbe.auth.AuthService;
 import com.hcmute.utezbe.dto.CourseDto;
 import com.hcmute.utezbe.dto.ModuleDto;
+import com.hcmute.utezbe.dto.UserDto;
 import com.hcmute.utezbe.entity.*;
 
 import com.hcmute.utezbe.entity.Module;
@@ -12,6 +13,7 @@ import com.hcmute.utezbe.request.CreateCourseRequest;
 import com.hcmute.utezbe.response.Response;
 import com.hcmute.utezbe.service.*;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.Hibernate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -38,7 +40,7 @@ public class CourseController {
     private final CourseService courseService;
     private final CategoryService categoryService;
     private final ModuleService moduleService;
-
+    private final UserService userService;
 
     private final CloudinaryService cloudinaryService;
 
@@ -118,26 +120,33 @@ public class CourseController {
 
     @PatchMapping("/{courseId}")
     public Response<?> editCourse(@PathVariable("courseId") Long courseId,
-                               @RequestParam("name") String name,
-                               @RequestParam("description") String description,
-                               @RequestParam("categoryId") Long categoryId,
-                               @RequestParam("startDate") String startDate,
-                               @RequestParam("state") @Nullable String state,
-                               @RequestPart("thumbnail") @Nullable MultipartFile thumbnail) throws ParseException {
-        //            Optional<Course> courseOtp = courseService.getCourseById(courseId);
-//            Course course = courseOtp.get();
-
-        Course course = courseService.getCourseById(courseId).get();
-        course.setName(name);
-        course.setDescription(description);
-        course.setCategory(categoryService.getCategoryById(categoryId).get());
-        course.setStartDate(new SimpleDateFormat("yyyy-MM-dd").parse(startDate));
-        course.setState(state != null ? State.valueOf(state) : State.OPEN);
+                                  @RequestParam("name") @Nullable String name,
+                                  @RequestParam("description") @Nullable String description,
+                                  @RequestParam("categoryName") @Nullable String categoryName,
+                                  @RequestParam("startDate") @Nullable String startDate,
+                                  @RequestParam("state") @Nullable String state,
+                                  @RequestPart("thumbnail") @Nullable MultipartFile thumbnail) throws ParseException {
+        Optional<Course> courseOtp = courseService.getCourseById(courseId);
+        if (courseOtp.isEmpty()) {
+            return Response.builder().code(HttpStatus.NOT_FOUND.value()).success(false).message("Không tìm thấy khóa học!").build();
+        }
+        Course course = courseOtp.get();
+        if (categoryName != null) {
+            Category category = categoryService.getCategoryByName(categoryName).orElseGet(() -> categoryService.saveCategory(Category.builder().name(categoryName).build()));
+            course.setCategory(category);
+        }
+        if (name != null) course.setName(name);
+        if (description != null) course.setDescription(description);
+        if (startDate != null) {
+            SimpleDateFormat dateFormatter = new SimpleDateFormat("EEE MMM dd yyyy HH:mm:ss 'GMT'Z (z)");
+            course.setStartDate(dateFormatter.parse(startDate));
+        }
+        if (state != null) course.setState(State.valueOf(state));
         if (thumbnail != null) {
             course.setThumbnail(cloudinaryService.upload(thumbnail));
         }
-        CourseDto courseDto = convertToDto(courseService.saveCourse(course));
-        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Sửa khóa học thành công!").data(courseDto).build();
+        courseService.saveCourse(course);
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Sửa khóa học thành công!").data(course).build();
     }
 
     @DeleteMapping("/{courseId}")
@@ -160,6 +169,19 @@ public class CourseController {
 //            throw e;
 //        }
 //    }
+
+    @GetMapping("/{courseId}/teacher")
+    public Response<?> getTeacherByCourseId(@PathVariable("courseId") Long courseId) {
+        Course course = courseService.getCourseById(courseId).orElseThrow(() -> new RuntimeException("Course not found"));
+        User teacher = userService.getUserById(course.getTeacher().getId());
+        UserDto userDto = UserDto.builder()
+                .email(teacher.getEmail())
+                .fullName(teacher.getFullName())
+                .avatar(teacher.getAvatarUrl())
+                .role(teacher.getRole())
+                .build();
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get teacher by course id successfully!").data(userDto).build();
+    }
 
     @GetMapping("/my-courses")
     public Response<?>getMyCourses(Pageable pageable) {

@@ -68,7 +68,7 @@ public class ChangeRoleQueueService {
         return Response.builder()
                 .code(HttpStatus.OK.value())
                 .success(true)
-                .message("Change role successfully!")
+                .message("Duyệt yêu cầu thành công!")
                 .build();
     }
 

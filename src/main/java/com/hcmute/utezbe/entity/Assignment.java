@@ -1,5 +1,6 @@
 package com.hcmute.utezbe.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.hcmute.utezbe.entity.auditing.Auditable;
@@ -8,6 +9,7 @@ import lombok.*;
 
 import jakarta.persistence.*;
 import java.util.Date;
+import java.util.List;
 
 @Getter
 @Setter
@@ -49,5 +51,9 @@ public class Assignment extends Auditable {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "module_id", foreignKey = @ForeignKey(name = "FK_assignment_module"))
     private Module module;
+
+    @JsonBackReference
+    @OneToMany(mappedBy = "assignment", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
+    private List<AssignmentSubmission> assignmentSubmissions;
 
 }

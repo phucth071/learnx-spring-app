@@ -31,13 +31,13 @@ public class CourseRegistrationController {
     @PostMapping("/register/{courseId}/list-email")
     public Response<?> registerCourse(@PathVariable("courseId") Long courseId, @RequestBody ListEmailRequest req) {
         List<CourseRegistration> courseRegistrations = courseRegistrationService.registerCourse(courseId, req.getEmails());
-        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Đăng ký khóa học thành công!").data(courseRegistrations).build();
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Thêm sinh viên vào khóa học thành công!").data(courseRegistrations).build();
     }
 
     @PostMapping("/remove/{courseId}/list-email")
     public Response<?> removeCourse(@PathVariable("courseId") Long courseId, @RequestBody ListEmailRequest req) {
         courseRegistrationService.removeStudentsFromCourse(courseId, req.getEmails());
-        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Thêm sinh viên vào khóa học thành công!").data(null).build();
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Xóa sinh viên khỏi khóa học thành công!").data(null).build();
     }
 
     @GetMapping("/pageable")

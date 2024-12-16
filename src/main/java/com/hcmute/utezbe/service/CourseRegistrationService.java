@@ -116,6 +116,7 @@ public class CourseRegistrationService {
                     Matcher matcher = pattern.matcher(email);
                     return matcher.matches();
                 })
+                .filter(email -> repository.findByEmailAndCourseId(email, courseId).isEmpty())
                 .map(email -> CourseRegistration.builder()
                         .course(Course.builder().id(courseId).build())
                         .email(email)

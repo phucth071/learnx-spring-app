@@ -19,7 +19,6 @@ public class AssignmentSubmission extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(updatable = false)
     private Long id;
 
     @Column(name = "score")
@@ -31,7 +30,7 @@ public class AssignmentSubmission extends Auditable {
     @Column(name = "file_submission_url")
     private String fileSubmissionUrl;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "assignment_id")
     @JsonIgnore
     private Assignment assignment;

@@ -1,8 +1,10 @@
 package com.hcmute.utezbe.service;
 
 import com.hcmute.utezbe.entity.AssignmentSubmission;
+import com.hcmute.utezbe.entity.User;
 import com.hcmute.utezbe.entity.embeddedId.AssignmentSubmissionId;
 import com.hcmute.utezbe.repository.AssignmentSubmissionRepository;
+import com.hcmute.utezbe.response.AssignmentSubmissionWStudentInfoResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,7 +20,7 @@ public class AssignmentSubmissionService {
 
     private final AssignmentSubmissionRepository assignmentSubmissionRepository;
 
-    public Optional<AssignmentSubmission> getAssignmentSubmissionById(Long assignmentId, Long studentId) {
+    public Optional<AssignmentSubmission> getAssignmentSubmissionByAssignmentIdAndStudentId(Long assignmentId, Long studentId) {
         return assignmentSubmissionRepository.findByAssignmentIdAndStudentId(assignmentId, studentId);
 
     }
@@ -27,8 +29,34 @@ public class AssignmentSubmissionService {
         return assignmentSubmissionRepository.findAll();
     }
 
+    public List<AssignmentSubmissionWStudentInfoResponse> getAllByAssignmentId(Long assignmentId) {
+        List<AssignmentSubmission> assignmentSubmissions = assignmentSubmissionRepository.findAllByAssignmentId(assignmentId);
+        if (assignmentSubmissions != null) {
+            return assignmentSubmissions.stream().map(assignmentSubmission -> {
+                User student = assignmentSubmission.getStudent();
+                return AssignmentSubmissionWStudentInfoResponse.builder()
+                        .assignmentId(assignmentSubmission.getAssignment().getId())
+                        .studentId(student.getId())
+                        .studentName(student.getFullName())
+                        .studentEmail(student.getEmail())
+                        .score(assignmentSubmission.getScore())
+                        .textSubmission(assignmentSubmission.getTextSubmission())
+                        .fileSubmissionUrl(assignmentSubmission.getFileSubmissionUrl())
+                        .linkSubmission(assignmentSubmission.getFileSubmissionUrl())
+                        .createdAt(assignmentSubmission.getCreatedAt().toString())
+                        .updatedAt(assignmentSubmission.getUpdatedAt() != null ? assignmentSubmission.getUpdatedAt().toString() : null)
+                        .build();
+            }).toList();
+        }
+        return null;
+    }
+
     public Page<AssignmentSubmission> getAllAssignmentSubmissionsPageable(Pageable pageable) {
         return assignmentSubmissionRepository.findAllPageable(pageable);
+    }
+
+    public List<AssignmentSubmission> getAllAssignmentSubmissionsByCourseId(Long courseId) {
+        return assignmentSubmissionRepository.findAllByCourseId(courseId);
     }
 
     @Transactional

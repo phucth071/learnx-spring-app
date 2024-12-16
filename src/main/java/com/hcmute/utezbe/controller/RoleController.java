@@ -38,4 +38,10 @@ public class RoleController {
         return ResponseEntity.ok(changeRoleQueueService.changeRoleQueueForId(id));
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @PostMapping("/handle-reject/{id}")
+    public ResponseEntity<?> handleRejectRole(@PathVariable("id") Long id) {
+        return ResponseEntity.ok(changeRoleQueueService.rejectRequest(id));
+    }
+
 }

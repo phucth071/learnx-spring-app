@@ -40,6 +40,7 @@ public class CourseService {
     private final LectureRepository lectureRepository;
     private final ResourcesRepository resourcesRepository;
     private final UserService userService;
+    private final AssignmentRepository assignmentRepository;
 
     private final RedisDistributedService redisDistributedService;
     private final RedisService redisService;
@@ -184,6 +185,9 @@ public class CourseService {
                 for (Module module : modules) {
                     List<Lecture> lectures = lectureRepository.findAllByModuleId(module.getId());
                     lectureRepository.deleteAll(lectures);
+
+                    List<Assignment> assignments = module.getAssignments();
+                    assignmentRepository.deleteAll(assignments);
 
                     List<Resources> resources = resourcesRepository.findAllByModuleId(module.getId());
                     resourcesRepository.deleteAll(resources);

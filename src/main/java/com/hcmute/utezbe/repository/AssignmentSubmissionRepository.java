@@ -23,4 +23,6 @@ public interface AssignmentSubmissionRepository extends JpaRepository<Assignment
     @Query("SELECT a FROM Course a WHERE a.state = 'OPEN'")
     Page<AssignmentSubmission> findAllPageable(Pageable pageable);
 
+    @Query("SELECT asub FROM AssignmentSubmission asub JOIN asub.assignment a JOIN a.module m JOIN m.course c WHERE c.id = :courseId ORDER BY COALESCE(asub.updatedAt, asub.createdAt) DESC")
+    List<AssignmentSubmission> findAllByCourseId(Long courseId);
 }

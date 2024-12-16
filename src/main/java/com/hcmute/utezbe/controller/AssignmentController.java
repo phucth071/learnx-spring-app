@@ -140,36 +140,14 @@ public class AssignmentController {
     @GetMapping("/get-top-3")
     public ResponseEntity<?> getTop3AssignmentsByStudentId() {
         List<Assignment> assignments = assignmentService.getTop3AssignmentsByStudentId();
-        List<AssignmentWithCourseId> assignmentDtos = assignments.stream().map(assignment -> AssignmentWithCourseId.builder()
-                .id(assignment.getId())
-                .content(assignment.getContent())
-                .startDate(assignment.getStartDate())
-                .endDate(assignment.getEndDate())
-                .state(assignment.getState())
-                .title(assignment.getTitle())
-                .urlDocument(assignment.getUrlDocument())
-                .moduleId(assignment.getModule().getId())
-                .courseId(assignment.getModule().getCourse().getId())
-                .courseName(assignment.getModule().getCourse().getName())
-                .build()).toList();
+        List<AssignmentWithCourseId> assignmentDtos = convertToListAssignmentWithCourseId(assignments);
         return ResponseEntity.ok(Response.builder().code(HttpStatus.OK.value()).success(true).message("Get top 3 assignment by user successfully!").data(assignmentDtos).build());
     }
 
     @GetMapping("/get-by-month-year")
     public ResponseEntity<?> getAssignmentsByStudentIdAndEndDateMonthYear(@RequestParam("month") int month, @RequestParam("year") int year) {
         List<Assignment> assignments = assignmentService.getAllAssignmentsByStudentIdAndEndDateMonthYear(month, year);
-        List<AssignmentWithCourseId> assignmentDtos = assignments.stream().map(assignment -> AssignmentWithCourseId.builder()
-                .id(assignment.getId())
-                .content(assignment.getContent())
-                .startDate(assignment.getStartDate())
-                .endDate(assignment.getEndDate())
-                .state(assignment.getState())
-                .title(assignment.getTitle())
-                .urlDocument(assignment.getUrlDocument())
-                .moduleId(assignment.getModule().getId())
-                .courseId(assignment.getModule().getCourse().getId())
-                .courseName(assignment.getModule().getCourse().getName())
-                .build()).toList();
+        List<AssignmentWithCourseId> assignmentDtos = convertToListAssignmentWithCourseId(assignments);
         return ResponseEntity.ok(Response.builder().code(HttpStatus.OK.value()).success(true).message("Lấy dữ liệu bài học thành công!").data(assignmentDtos).build());
     }
 
@@ -184,4 +162,34 @@ public class AssignmentController {
         return assignment;
     }
 
+    @GetMapping("/get-by-next-x-day")
+    public ResponseEntity<?> getAssignmentByNextXDay(@RequestParam("day") int day, @RequestParam("month") int month, @RequestParam("year") int year) {
+        List<Assignment> assignments = assignmentService.getAssignmentByNextXDay(day, month, year);
+        List<AssignmentWithCourseId> assignmentDtos = convertToListAssignmentWithCourseId(assignments);
+        return ResponseEntity.ok(Response.builder().code(HttpStatus.OK.value()).success(true).message("Get assignment by next 7 day successfully!").data(assignmentDtos).build());
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<?> searchByKeyword(@RequestParam("keyword") String keyword) {
+        List<Assignment> assignments = assignmentService.getAssignmentsByEmailAndTitleContaining(keyword);
+        List<AssignmentWithCourseId> assignmentDtos = convertToListAssignmentWithCourseId(assignments);
+        return ResponseEntity.ok(Response.builder().code(HttpStatus.OK.value()).success(true).message("Get assignment by keyword successfully!").data(assignmentDtos).build());
+    }
+
+
+
+    private List<AssignmentWithCourseId> convertToListAssignmentWithCourseId(List<Assignment> assignments) {
+        return assignments.stream().map(assignment -> AssignmentWithCourseId.builder()
+                .id(assignment.getId())
+                .content(assignment.getContent())
+                .startDate(assignment.getStartDate())
+                .endDate(assignment.getEndDate())
+                .state(assignment.getState())
+                .title(assignment.getTitle())
+                .urlDocument(assignment.getUrlDocument())
+                .moduleId(assignment.getModule().getId())
+                .courseId(assignment.getModule().getCourse().getId())
+                .courseName(assignment.getModule().getCourse().getName())
+                .build()).toList();
+    }
 }
