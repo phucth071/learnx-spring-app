@@ -12,6 +12,7 @@ import com.hcmute.utezbe.entity.enumClass.State;
 import com.hcmute.utezbe.request.CreateCourseRequest;
 import com.hcmute.utezbe.response.Response;
 import com.hcmute.utezbe.service.*;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Hibernate;
 import org.springframework.data.domain.Page;
@@ -95,7 +96,7 @@ public class CourseController {
 
     @Transactional
     @PostMapping(value = "", consumes = {"multipart/form-data"})
-    public Response<?> createCourse(@RequestPart("courseInfo") CreateCourseRequest req,
+    public Response<?> createCourse(@RequestPart("courseInfo") @Valid CreateCourseRequest req,
                                  @RequestPart("thumbnail") @Nullable MultipartFile thumbnail) throws ParseException {
         String thumbnailUrl;
         SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
