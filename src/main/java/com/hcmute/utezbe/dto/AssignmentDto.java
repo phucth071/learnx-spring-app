@@ -10,6 +10,7 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AssignmentDto {
+    private Long id;
     private String content;
     private Date startDate;
     private Date endDate;

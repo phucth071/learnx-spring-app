@@ -21,12 +21,7 @@ public class GlobalExceptionHandler {
 
         String error = exception.getBindingResult().getFieldErrors().get(0).getDefaultMessage();
 
-        Response<Object> res = new Response<>();
-        res.setCode(HttpStatus.BAD_REQUEST.value());
-        res.setMessage(error);
-        res.setSuccess(false);
-
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Response.builder().code(400).success(false).message(error).build());
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)

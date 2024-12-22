@@ -14,6 +14,7 @@ import com.hcmute.utezbe.service.AssignmentService;
 import com.hcmute.utezbe.service.AssignmentSubmissionService;
 import com.hcmute.utezbe.service.CloudinaryService;
 import com.hcmute.utezbe.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -128,7 +129,7 @@ public class AssignmentSubmissionController {
 
     @PreAuthorize("hasAnyAuthority('TEACHER', 'ADMIN')")
     @PostMapping("/{assignmentId}/{studentId}/score")
-    public Response<?> updateScore(@PathVariable("assignmentId") Long assignmentId, @PathVariable("studentId") Long studentId, @RequestBody ScoreRequest req) {
+    public Response<?> updateScore(@PathVariable("assignmentId") Long assignmentId, @PathVariable("studentId") Long studentId, @RequestBody @Valid ScoreRequest req) {
         Optional<AssignmentSubmission> assignmentSubmissionOpt = assignmentSubmissionService.getAssignmentSubmissionByAssignmentIdAndStudentId(assignmentId, studentId);
         if (assignmentSubmissionOpt.isPresent()) {
             AssignmentSubmission existingSubmission = assignmentSubmissionOpt.get();

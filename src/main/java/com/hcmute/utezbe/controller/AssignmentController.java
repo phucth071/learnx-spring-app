@@ -62,6 +62,7 @@ public class AssignmentController {
     public ResponseEntity<?> getAssignmentsByLoggedInUser() {
         List<Assignment> assignments = assignmentService.getAllAssignmentsLoggedInUser();
         List<AssignmentDto> assignmentDtos = assignments.stream().map(assignment -> AssignmentDto.builder()
+                .id(assignment.getId())
                 .content(assignment.getContent())
                 .startDate(assignment.getStartDate())
                 .endDate(assignment.getEndDate())
@@ -88,6 +89,7 @@ public class AssignmentController {
                 .build();
         assignmentService.saveAssignment(assignment);
         AssignmentDto assignmentDto = AssignmentDto.builder()
+                .id(assignment.getId())
                 .content(assignment.getContent())
                 .startDate(assignment.getStartDate())
                 .endDate(assignment.getEndDate())
@@ -121,6 +123,7 @@ public class AssignmentController {
         if (urlDocument != null) assignment.setUrlDocument(urlDocument);
         assignmentService.saveAssignment(assignment);
         AssignmentDto assignmentDto = AssignmentDto.builder()
+                .id(assignment.getId())
                 .content(assignment.getContent())
                 .startDate(assignment.getStartDate())
                 .endDate(assignment.getEndDate())
