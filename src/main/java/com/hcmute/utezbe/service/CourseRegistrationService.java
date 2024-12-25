@@ -29,7 +29,9 @@ import java.util.regex.Pattern;
 @RequiredArgsConstructor
 public class CourseRegistrationService {
     private final CourseRegistrationRepository repository;
+    private final CourseService courseService;
     private final UserService userService;
+    private final NotificationService notificationService;
 
     public Optional<CourseRegistration> getCourseRegistrationByEmailAndCourseId(String email, Long courseId) {
         return repository.findByEmailAndCourseId(email, courseId);
@@ -118,11 +120,17 @@ public class CourseRegistrationService {
                 })
                 .filter(email -> repository.findByEmailAndCourseId(email, courseId).isEmpty())
                 .map(email -> CourseRegistration.builder()
-                        .course(Course.builder().id(courseId).build())
+                        .course(courseService.getCourseById(courseId).orElseThrow())
                         .email(email)
                         .state(State.ACCEPTED)
                         .build())
                 .toList();
+
+        courseRegistrations.stream()
+                .filter(courseRegistration -> userService.findByEmailIgnoreCase(courseRegistration.getEmail()).isPresent())
+                .forEach(courseRegistration -> {
+                    notificationService.sendNotification(courseRegistration.getEmail(), "Bạn đã được thêm vào khóa học " + courseService.getCourseById(courseId).get().getName(), "/course-detail/" + courseId);
+                });
 
         return repository.saveAll(courseRegistrations);
     }

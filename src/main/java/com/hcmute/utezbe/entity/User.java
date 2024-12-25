@@ -113,5 +113,8 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "student", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
     private List<AssignmentSubmission> assignmentSubmissions;
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Notification> notifications;
 
 }

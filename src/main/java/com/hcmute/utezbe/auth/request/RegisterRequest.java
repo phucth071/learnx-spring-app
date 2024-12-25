@@ -1,5 +1,6 @@
 package com.hcmute.utezbe.auth.request;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,7 +11,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class RegisterRequest {
+    @NotBlank
     private String fullName;
+    @NotBlank
     private String email;
     private String password;
 }

@@ -21,6 +21,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
+import java.util.List;
+
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -30,7 +32,7 @@ public class SecurityConfig {
     private final JWTRequestFilter jwtAuthFilter;
     private final LogoutSuccessHandler logoutSuccessHandler;
 
-    private static final String[] AUTH_WHITELIST = { "/v3/api-docs/**", "/swagger-ui/**" };
+    private static final String[] AUTH_WHITELIST = { "/v3/api-docs/**", "/swagger-ui/**", "/ws/**" };
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -62,16 +64,15 @@ public class SecurityConfig {
 
     @Bean
     public CorsFilter corsFilter() {
+        CorsConfiguration corsConfiguration = new CorsConfiguration();
+        corsConfiguration.setAllowedOriginPatterns(List.of("http://localhost:3000"));
+        corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+        corsConfiguration.setAllowedHeaders(List.of("*"));
+        corsConfiguration.setAllowCredentials(true);
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        CorsConfiguration config = new CorsConfiguration();
-        config.setAllowCredentials(true);
-        config.addAllowedOriginPattern("http://localhost:3000");
-        config.addAllowedOriginPattern("http://localhost:5173");
-        config.addAllowedOriginPattern("http://localhost:4000");
-        config.addAllowedOriginPattern("http://res.cloudinary.com");
-        config.addAllowedHeader("*");
-        config.addAllowedMethod("*");
-        source.registerCorsConfiguration("/**", config);
+        source.registerCorsConfiguration("/**", corsConfiguration);
+
         return new CorsFilter(source);
     }
 }
