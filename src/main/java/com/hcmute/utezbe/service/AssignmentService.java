@@ -17,6 +17,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -59,6 +60,12 @@ public class AssignmentService {
     public List<Assignment> getAllAssignmentsLoggedInUser() {
         User user = AuthService.getCurrentUser();
         return assignmentRepository.findAllByEmail(user.getEmail());
+    }
+
+    public List<Assignment> getAssignmentsEndingOn(LocalDate date) {
+        java.util.Date startDate = java.util.Date.from(date.atStartOfDay().atZone(java.time.ZoneId.systemDefault()).toInstant());
+        java.util.Date endDate = java.util.Date.from(date.plusDays(1).atStartOfDay().atZone(java.time.ZoneId.systemDefault()).toInstant());
+        return assignmentRepository.findByEndDateBetween(startDate, endDate);
     }
 
     public List<Assignment> getAllAssignmentsByModuleId(Long moduleId) {

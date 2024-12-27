@@ -61,6 +61,14 @@ public class CourseRegistrationService {
         return courseRegistrations;
     }
 
+    public List<CourseRegistration> getByCourseId(Long courseId) {
+        List<CourseRegistration> courseRegistrations = repository.findByCourseId(courseId);
+        if (courseRegistrations.isEmpty()) {
+            throw new ResourceNotFoundException();
+        }
+        return courseRegistrations;
+    }
+
 
     public Page<CourseRegistrationUserResponse> getCourseRegistrationsByCourseId(Long courseId, Pageable pageable) {
         Page<CourseRegistration> courseRegistrations = repository.findByCourseId(courseId, pageable);

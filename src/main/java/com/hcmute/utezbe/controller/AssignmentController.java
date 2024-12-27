@@ -55,7 +55,7 @@ public class AssignmentController {
         if (assignment == null) {
             throw new ResourceNotFoundException("Không tìm thấy bài tập!");
         }
-        return ResponseEntity.ok(Response.builder().code(HttpStatus.OK.value()).success(true).message("Get assignment with id " + assignmentId + " successfully!").data(assignmentService.getAssignmentById(assignmentId)).build());
+        return ResponseEntity.ok(Response.builder().code(HttpStatus.OK.value()).success(true).message("Get assignment with id " + assignmentId + " successfully!").data(assignment).build());
     }
 
     @GetMapping("/get-by-user")

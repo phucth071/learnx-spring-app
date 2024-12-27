@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,4 +36,7 @@ public interface AssignmentRepository extends JpaRepository<Assignment, Long> {
 
     @Query("SELECT a FROM Assignment a JOIN a.module m JOIN m.course c JOIN c.courseRegistrations cr WHERE cr.email = ?1 AND a.title LIKE %?2%")
     List<Assignment> findAssignmentsByEmailAndTitleContaining(String email, String keyword);
+
+    List<Assignment> findByEndDate(Date endDate);
+    List<Assignment> findByEndDateBetween(Date startDate, Date endDate);
 }

@@ -19,6 +19,7 @@ import java.util.Optional;
 public class AssignmentSubmissionService {
 
     private final AssignmentSubmissionRepository assignmentSubmissionRepository;
+    private final NotificationService notificationService;
 
     public Optional<AssignmentSubmission> getAssignmentSubmissionByAssignmentIdAndStudentId(Long assignmentId, Long studentId) {
         return assignmentSubmissionRepository.findByAssignmentIdAndStudentId(assignmentId, studentId);

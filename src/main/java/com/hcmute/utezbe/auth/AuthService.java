@@ -75,7 +75,7 @@ public class AuthService {
                 .role(Role.STUDENT)
                 .provider(Provider.DATABASE)
                 .isEnabled(false)
-                .avatarUrl("https://res.cloudinary.com/dnarlcqth/image/upload/v1719906429/samples/landscapes/architecture-signs.jpg")
+                .avatarUrl("https://res.cloudinary.com/dnarlcqth/image/upload/v1735279491/clx8ebkbsfeqeqrt1wvf.png")
                 .build();
 
         userService.save(user);

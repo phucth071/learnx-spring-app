@@ -10,10 +10,7 @@ import com.hcmute.utezbe.exception.ResourceNotFoundException;
 import com.hcmute.utezbe.request.AssignmentSubmissionRequest;
 import com.hcmute.utezbe.request.ScoreRequest;
 import com.hcmute.utezbe.response.Response;
-import com.hcmute.utezbe.service.AssignmentService;
-import com.hcmute.utezbe.service.AssignmentSubmissionService;
-import com.hcmute.utezbe.service.CloudinaryService;
-import com.hcmute.utezbe.service.UserService;
+import com.hcmute.utezbe.service.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -37,6 +34,7 @@ public class AssignmentSubmissionController {
     private final AssignmentService assignmentService;
     private final UserService userService;
     private final CloudinaryService cloudinaryService;
+    private final NotificationService notificationService;
 
     @GetMapping("")
     public Response<?> getAllAssignmentSubmission() {
@@ -135,6 +133,8 @@ public class AssignmentSubmissionController {
             AssignmentSubmission existingSubmission = assignmentSubmissionOpt.get();
             existingSubmission.setScore(req.getScore());
             AssignmentSubmission savedSubmission = assignmentSubmissionService.saveAssignmentSubmission(existingSubmission);
+            String email = userService.getUserById(studentId).getEmail();
+            notificationService.sendNotification(email, "Điểm bài tập " + existingSubmission.getAssignment().getTitle() + " của bạn đã được cập nhật", "/submission/" + assignmentService.getAssignmentById(assignmentId).get().getModule().getCourse().getId() + "/" + assignmentService.getAssignmentById(assignmentId).get().getId());
             return Response.builder().code(HttpStatus.OK.value()).success(true).message("Chỉnh sửa thành công!").data(savedSubmission).build();
         } else {
             throw new ResourceNotFoundException();

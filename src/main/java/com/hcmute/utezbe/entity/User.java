@@ -2,6 +2,7 @@ package com.hcmute.utezbe.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.hcmute.utezbe.entity.enumClass.Provider;
 import com.hcmute.utezbe.entity.enumClass.Role;
 import jakarta.validation.constraints.NotNull;
@@ -53,6 +54,7 @@ public class User implements UserDetails {
     private LocalDateTime createdAt;
     @LastModifiedDate
     @Column(name = "updated_at", insertable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private LocalDateTime updatedAt;
 
     @PrePersist
