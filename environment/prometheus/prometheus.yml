@@ -1,0 +1,38 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: "learnx-prometheus"
+    scrape_interval: 5s
+    static_configs:
+      - targets: ["host.docker.internal:9090"]
+    metrics_path: "/metrics"
+
+  - job_name: "learnx-springboot"
+    scrape_interval: 5s
+    static_configs:
+      - targets: [ "host.docker.internal:9191" ]
+    metrics_path: "/actuator/prometheus"
+
+  - job_name: "learnx-node-exporter"
+    scrape_interval: 5s
+    static_configs:
+      - targets: [ "host.docker.internal:9100" ]
+
+  - job_name: "learnx-mysql-exporter"
+    scrape_interval: 5s
+    static_configs:
+      - targets: [ "host.docker.internal:9104" ]
+    metrics_path: "/metrics"
+
+  - job_name: "learnx-redis-exporter"
+    scrape_interval: 5s
+    static_configs:
+      - targets: [ "host.docker.internal:9121" ]
+    metrics_path: "/metrics"
+
+#  - job_name: "learnx-logstash-exporter"
+#    scrape_interval: 5s
+#    static_configs:
+#      - targets: [ "host.docker.internal:9304" ]
+#    metrics_path: "/metrics"

@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.hcmute</groupId>
-	<artifactId>utez-be</artifactId>
+	<artifactId>learnx-be</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>utez-be</name>
 	<description>utez-be</description>
@@ -21,6 +21,10 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -253,11 +257,7 @@
 			<artifactId>jackson-datatype-jsr310</artifactId>
 			<version>2.15.0</version>
 		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.datatype</groupId>
-			<artifactId>jackson-datatype-jdk8</artifactId>
-			<version>2.15.0</version>
-		</dependency>
+
 		<dependency>
 			<groupId>com.fasterxml.jackson.datatype</groupId>
 			<artifactId>jackson-datatype-jdk8</artifactId>
@@ -284,6 +284,13 @@
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-messaging</artifactId>
 			<version>6.2.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-registry-prometheus</artifactId>
+			<version>1.13.6</version>
+			<scope>runtime</scope>
 		</dependency>
 
 

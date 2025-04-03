@@ -33,3 +33,5 @@ build/
 
 ### VS Code ###
 .vscode/
+/environment/data/
+/environment/grafana-storage/
