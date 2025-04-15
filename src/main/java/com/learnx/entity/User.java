@@ -100,7 +100,7 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<ConfirmToken> confirmTokens;
 
-    @JsonIgnore
+    @JsonBackReference
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Topic> topics;
 

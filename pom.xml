@@ -11,8 +11,8 @@
 	<groupId>com.hcmute</groupId>
 	<artifactId>learnx-be</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>utez-be</name>
-	<description>utez-be</description>
+	<name>learnx</name>
+	<description>learnx</description>
 	<properties>
 		<java.version>17</java.version>
 	</properties>
@@ -291,6 +291,11 @@
 			<artifactId>micrometer-registry-prometheus</artifactId>
 			<version>1.13.6</version>
 			<scope>runtime</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.kafka</groupId>
+			<artifactId>spring-kafka</artifactId>
 		</dependency>
 
 

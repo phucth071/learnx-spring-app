@@ -11,6 +11,6 @@ public interface ForumRepository extends JpaRepository<Forum, Long> {
 
     Optional<Forum> findById(Long id);
 
-    Forum findByCourseId(Long courseId);
+    Optional<Forum> findByCourseId(Long courseId);
 
 }

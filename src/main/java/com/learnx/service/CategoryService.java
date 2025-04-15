@@ -6,6 +6,7 @@ import com.learnx.exception.ResourceNotFoundException;
 
 import com.learnx.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -56,11 +57,11 @@ public class CategoryService {
         category.ifPresent(cate -> {
             List<Course> courses = courseRepository.findByCategoryId(cate.getId());
             for (Course course : courses) {
-                Forum forum = forumRepository.findByCourseId(course.getId());
+                Forum forum = forumRepository.findByCourseId(course.getId()).orElse(null);
                 if (forum != null) {
                     List<Topic> topics = topicRepository.findAllByForumId(forum.getId());
                     for (Topic topic : topics) {
-                        List<TopicComment> topicComments = topicCommentRepository.findAllByTopicId(topic.getId());
+                        List<TopicComment> topicComments = topicCommentRepository.findAllByTopicId(topic.getId(), Sort.by(Sort.Direction.DESC, "createdAt"));
                         topicCommentRepository.deleteAll(topicComments);
                         topicRepository.delete(topic);
                     }

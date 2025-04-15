@@ -4,6 +4,7 @@ import com.learnx.entity.TopicComment;
 import com.learnx.exception.ResourceNotFoundException;
 import com.learnx.repository.TopicCommentRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,6 +22,10 @@ public class TopicCommentService {
             throw new ResourceNotFoundException();
         }
         return topicComment;
+    }
+
+    public List<TopicComment> getTopicCommentsByTopicId(Long topicId) {
+        return topicCommentRepository.findAllByTopicId(topicId, Sort.by(Sort.Direction.DESC, "createdAt"));
     }
 
     public List<TopicComment> getAllTopicComments() {

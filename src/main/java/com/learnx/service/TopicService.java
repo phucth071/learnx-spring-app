@@ -30,6 +30,10 @@ public class TopicService {
         return topicRepository.findAll();
     }
 
+    public List<Topic> getTopicsByForumId(Long forumId) {
+        return topicRepository.findAllByForumId(forumId);
+    }
+
     public Topic saveTopic(Topic topic) {
         return topicRepository.save(topic);
     }

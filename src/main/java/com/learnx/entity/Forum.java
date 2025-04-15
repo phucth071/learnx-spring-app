@@ -37,5 +37,4 @@ public class Forum extends Auditable {
     @OneToMany(mappedBy = "forum", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<Topic> topics = new ArrayList<>();
-
 }

@@ -66,7 +66,4 @@ public class AuthController {
     public ResponseEntity<?> confirmForgotPassword(@RequestBody ForgotPasswordRequest request) {
         return ResponseEntity.ok(service.resetPassword(request));
     }
-
-
-
 }

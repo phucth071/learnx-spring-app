@@ -2,6 +2,7 @@ package com.learnx.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.learnx.entity.auditing.Auditable;
 import lombok.*;
 
@@ -27,7 +28,7 @@ public class Topic extends Auditable {
     @Column(name="content", length = 1000)
     private String content;
 
-    @JsonIgnore
+    @JsonManagedReference
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "account_id", foreignKey = @ForeignKey(name = "FK_topic_account"))
     private User account;

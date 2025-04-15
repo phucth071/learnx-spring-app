@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -164,15 +165,15 @@ public class CourseService {
         try {
             boolean isLock = locker.tryLock(1, 5, TimeUnit.SECONDS);
             if (!isLock) {
-                log.info("LOCK WAIT ITEM PLEASE....");
+                log.info("LOCK WAIT");
                 return course.orElse(null);
             }
             course.ifPresent(c -> {
-                Forum forum = forumRepository.findByCourseId(c.getId());
+                Forum forum = forumRepository.findByCourseId(c.getId()).orElse(null);
                 if (forum != null) {
                     List<Topic> topics = topicRepository.findAllByForumId(forum.getId());
                     for (Topic topic : topics) {
-                        List<TopicComment> topicComments = topicCommentRepository.findAllByTopicId(topic.getId());
+                        List<TopicComment> topicComments = topicCommentRepository.findAllByTopicId(topic.getId(), Sort.by(Sort.Direction.DESC, "createdAt"));
                         topicCommentRepository.deleteAll(topicComments);
                         topicRepository.delete(topic);
                     }

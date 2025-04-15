@@ -237,9 +237,11 @@ public class AuthService {
     @Transactional
     public Response<?> authenticateWithGoogle(IdTokenRequest idTokenRequest) throws IOException, GeneralSecurityException {
         User user = verifyGoogleIdToken(idTokenRequest.getIdToken());
+
         if (user == null) {
             throw new AuthenticationException("Có lỗi xảy ra khi xác thực tài khoản Google!");
         }
+
         user = createOrUpdateUser(user);
         String accessToken = jwtService.generateAccessToken(user);
         RefreshToken oldRefreshToken = refreshTokenService.findByUserId(user.getId());
@@ -354,13 +356,11 @@ public class AuthService {
         String email = payload.getEmail();
         String fullName = payload.get("name").toString();
         String avatarUrl = (String) payload.get("picture");
-        Role role = Role.STUDENT;
 
         return User.builder()
                 .email(email)
                 .fullName(fullName)
                 .avatarUrl(avatarUrl)
-                .role(role)
                 .build();
     }
 
@@ -372,6 +372,7 @@ public class AuthService {
             user.setPassword(passwordEncoder.encode(password));
             String message = "Mật khẩu tự động khởi tạo của bạn là: <span>" + password + "</span>"
                     + "<br>Hãy thay đổi sau khi đăng nhập lần đầu!";
+            user.setRole(Role.STUDENT);
             emailService.send(user.getEmail(), buildEmailBody(user.getFullName(), message));
             userService.save(user);
             return user;
@@ -381,9 +382,6 @@ public class AuthService {
         }
         if (!existedUser.getFullName().equals(user.getFullName())) {
             existedUser.setFullName(user.getFullName());
-        }
-        if (existedUser.getRole() != user.getRole()) {
-            existedUser.setRole(user.getRole());
         }
 
         existedUser = userService.save(existedUser);

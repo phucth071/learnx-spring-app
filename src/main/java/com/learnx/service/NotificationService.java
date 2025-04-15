@@ -19,6 +19,7 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final SimpMessagingTemplate messagingTemplate;
     private final UserService userService;
+
     public void sendNotification(String userEmail, String message, String url) {
         User currentUser = null;
         if (SecurityContextHolder.getContext().getAuthentication() != null) {
