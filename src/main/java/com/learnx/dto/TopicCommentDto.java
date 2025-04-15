@@ -10,5 +10,4 @@ import lombok.*;
 public class TopicCommentDto {
     private String content;
     private Long topicId;
-    private Long accountId;
 }

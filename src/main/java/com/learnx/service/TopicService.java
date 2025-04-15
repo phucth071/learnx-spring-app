@@ -5,6 +5,7 @@ import com.learnx.exception.ResourceNotFoundException;
 import com.learnx.repository.TopicCommentRepository;
 import com.learnx.repository.TopicRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,7 +32,7 @@ public class TopicService {
     }
 
     public List<Topic> getTopicsByForumId(Long forumId) {
-        return topicRepository.findAllByForumId(forumId);
+        return topicRepository.findAllByForumId(forumId, Sort.by(Sort.Direction.DESC, "createdAt"));
     }
 
     public Topic saveTopic(Topic topic) {

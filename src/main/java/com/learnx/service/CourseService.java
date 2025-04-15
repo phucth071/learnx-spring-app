@@ -171,7 +171,7 @@ public class CourseService {
             course.ifPresent(c -> {
                 Forum forum = forumRepository.findByCourseId(c.getId()).orElse(null);
                 if (forum != null) {
-                    List<Topic> topics = topicRepository.findAllByForumId(forum.getId());
+                    List<Topic> topics = topicRepository.findAllByForumId(forum.getId(), Sort.by(Sort.Direction.DESC, "createdAt"));
                     for (Topic topic : topics) {
                         List<TopicComment> topicComments = topicCommentRepository.findAllByTopicId(topic.getId(), Sort.by(Sort.Direction.DESC, "createdAt"));
                         topicCommentRepository.deleteAll(topicComments);

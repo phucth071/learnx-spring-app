@@ -3,6 +3,7 @@ package com.learnx.entity;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.learnx.entity.enumClass.Role;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -101,8 +102,12 @@ public class User implements UserDetails {
     private List<ConfirmToken> confirmTokens;
 
     @JsonBackReference
-    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
     private List<Topic> topics;
+
+    @JsonBackReference
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
+    private List<TopicComment> topicComments;
 
     @JsonIgnore
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

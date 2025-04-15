@@ -62,7 +62,7 @@ public class ForumService {
     public Forum deleteForum(Long id) {
         Optional<Forum> forum = forumRepository.findById(id);
         forum.ifPresent(f -> {
-            List<Topic> topics = topicRepository.findAllByForumId(f.getId());
+            List<Topic> topics = topicRepository.findAllByForumId(forum.get().getId(), Sort.by(Sort.Direction.DESC, "createdAt"));
             for (Topic topic : topics) {
                 List<TopicComment> topicComments = topicCommentRepository.findAllByTopicId(topic.getId(), Sort.by(Sort.Direction.DESC, "createdAt"));
                 topicCommentRepository.deleteAll(topicComments);

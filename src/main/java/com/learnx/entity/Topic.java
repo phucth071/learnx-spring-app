@@ -1,5 +1,6 @@
 package com.learnx.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -15,7 +16,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "account", "forum"})
 @Table(name = "topic")
 @Builder
 public class Topic extends Auditable {
@@ -29,7 +29,7 @@ public class Topic extends Auditable {
     private String content;
 
     @JsonManagedReference
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "account_id", foreignKey = @ForeignKey(name = "FK_topic_account"))
     private User account;
 
@@ -41,5 +41,4 @@ public class Topic extends Auditable {
     @OneToMany(mappedBy = "topic", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<TopicComment> topicComments = new ArrayList<>();
-
 }
