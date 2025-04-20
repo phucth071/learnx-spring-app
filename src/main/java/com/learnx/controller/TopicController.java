@@ -1,5 +1,6 @@
 package com.learnx.controller;
 
+import com.learnx.auth.AuthService;
 import com.learnx.dto.TopicDto;
 import com.learnx.entity.Topic;
 import com.learnx.response.Response;
@@ -42,7 +43,7 @@ public class TopicController {
     public Response<?> createTopic(@RequestBody TopicDto topicDto) {
         Topic topic = Topic.builder()
                 .forum(forumService.getForumById(topicDto.getForumId()).orElseThrow(() -> new RuntimeException("Forum not found!")))
-                .account(userService.getUserById(topicDto.getAccountId()))
+                .account(userService.getUserById(AuthService.getCurrentUser().getId()))
                 .content(topicDto.getContent())
                 .build();
         return Response.builder().code(HttpStatus.CREATED.value()).success(true).message("Create topic successfully!").data(topicService.saveTopic(topic)).build();
@@ -64,7 +65,6 @@ public class TopicController {
         Topic topic = optionalTopic.get();
         if (topicDto.getContent() != null) topic.setContent(topicDto.getContent());
         if (topicDto.getForumId() != null) topic.setForum(forumService.getForumById(topicDto.getForumId()).get());
-        if (topicDto.getAccountId() != null) topic.setAccount(userService.getUserById(topicDto.getAccountId()));
         return topic;
     }
 

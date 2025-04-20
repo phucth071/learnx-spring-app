@@ -50,6 +50,9 @@ public class AuthService {
     private final JavaMailService emailService;
     private final ForgotPasswordService forgotPasswordService;
 
+    // TODO: BUG - On google login, isEnabled should be true
+    // TODO: BUG - Email not send when login first time with google
+
     @Value("${app.client.frontend")
     private String CLIENT_FRONTEND;
 
@@ -367,6 +370,7 @@ public class AuthService {
     @Transactional
     public User createOrUpdateUser(User user) {
         User existedUser = userService.findByEmailIgnoreCase(user.getEmail()).orElse(null);
+
         if (existedUser == null) {
             String password = RandomPasswordGenerator.generateCommonLangPassword();
             user.setPassword(passwordEncoder.encode(password));
