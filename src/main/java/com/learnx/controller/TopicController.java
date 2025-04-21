@@ -50,9 +50,13 @@ public class TopicController {
     }
 
     @PatchMapping("/{topicId}")
-    public Response<?> editTopic(@PathVariable Long topicId, @RequestBody TopicDto topicDto){
+    public Response<?> editTopic(@PathVariable Long topicId, @RequestBody String content){
         Optional<Topic> optionalTopic = topicService.getTopicById(topicId);
-        Topic topic = convertTopicDTO(topicDto, optionalTopic);
+        Topic topic = optionalTopic.orElse(null);
+        if (topic == null) {
+            return Response.builder().code(HttpStatus.NOT_FOUND.value()).success(false).message("Topic with id " + topicId + " not found!").build();
+        }
+        topic.setContent(content);
         return Response.builder().code(HttpStatus.OK.value()).success(true).message("Edit topic with id " + topicId + " successfully!").data(topicService.saveTopic(topic)).build();
     }
 

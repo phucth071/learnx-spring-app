@@ -51,16 +51,13 @@ public class TopicCommentController {
     }
 
     @PatchMapping("/{topicCommentId}")
-    public Response<?> editTopicComment(@PathVariable Long topicCommentId, @RequestBody TopicCommentDto topicCommentDto){
+    public Response<?> editTopicComment(@PathVariable Long topicCommentId, @RequestBody String content){
         Optional<TopicComment> optionalTopicComment = topicCommentService.getTopicCommentById(topicCommentId);
         TopicComment topicComment = optionalTopicComment.orElseThrow(() -> new RuntimeException("Topic comment not found!"));
-        topicComment = convertTopicCommentDTO(topicCommentDto, optionalTopicComment);
+
+        topicComment.setContent(content);
 
         TopicComment savedTopicComment = topicCommentService.saveTopicComment(topicComment);
-
-        messagingTemplate.convertAndSend("/topic/comments", new HashMap<String, Object>() {{
-            put("topicId", savedTopicComment.getTopic().getId());
-        }});
 
         return Response.builder().code(HttpStatus.OK.value()).success(true).message("Edit topic comment with id " + topicCommentId + " successfully!").data(savedTopicComment).build();
     }
