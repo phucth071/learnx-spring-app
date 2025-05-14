@@ -64,6 +64,7 @@ public class QuizController {
         return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get quiz questions successfully!").data(questionService.getQuestionsByQuizId(quizId)).build();
     }
 
+    // TODO: BUG Delete bugg
     @DeleteMapping("/{quizId}")
     public Response<?> deleteQuiz(@PathVariable("quizId") Long quizId) {
         Optional<Quiz> quizOptional = quizService.findById(quizId);

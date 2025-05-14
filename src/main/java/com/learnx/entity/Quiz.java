@@ -47,10 +47,12 @@ public class Quiz extends Auditable {
     @Transient
     private int totalQuestions;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "module_id", nullable = false)
     private Module module;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "quiz", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
     private List<QuizSubmission> quizSubmissions = new ArrayList<>();
 

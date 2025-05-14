@@ -21,7 +21,7 @@ public class ApplicationConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return username -> repository.findByEmailIgnoreCase(username).orElseThrow(() -> new RuntimeException("User not found!"));
+        return username -> repository.findByEmailIgnoreCase(username).orElseThrow(() -> new RuntimeException("Tài khoản người dùng không tồn tại!"));
     }
 
     @Bean

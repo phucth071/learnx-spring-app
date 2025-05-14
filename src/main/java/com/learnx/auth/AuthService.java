@@ -373,8 +373,6 @@ public class AuthService {
         User existedUser = userService.findByEmailIgnoreCase(user.getEmail()).orElse(null);
 
         if (existedUser != null) {
-            existedUser.setEnabled(true);
-            userService.save(user);
             return existedUser;
         }
 
