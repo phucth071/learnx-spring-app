@@ -1,7 +1,7 @@
 package com.learnx.controller;
 
 import com.learnx.dto.QuizAnswerDto;
-import com.learnx.entity.QuizAnswer;
+import com.learnx.entity.QuizSubmissionDetail;
 import com.learnx.response.Response;
 import com.learnx.service.QuestionService;
 import com.learnx.service.QuizAnswerService;
@@ -22,64 +22,26 @@ public class QuizAnswerController {
     private final QuestionService questionService;
 
     @GetMapping("")
-    public Response getAllQuizAnswer() {
-        try {
-            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get all quiz answer successfully!").data(quizAnswerService.getAllQuizAnswers()).build();
-        } catch (Exception e) {
-            throw e;
-        }
+    public Response<?> getAllQuizAnswer() {
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get all quiz answer successfully!").data(quizAnswerService.getAllQuizAnswers()).build();
     }
 
     @GetMapping("/{quizAnswerId}")
-    public Response getQuizAnswerById(@PathVariable("quizAnswerId") Long quizAnswerId) {
-        try {
-            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get quiz answer with id " + quizAnswerId + " successfully!").data(quizAnswerService.getQuizAnswerById(quizAnswerId)).build();
-        } catch (Exception e) {
-            throw e;
-        }
+    public Response<?> getQuizAnswerById(@PathVariable("quizAnswerId") Long quizAnswerId) {
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get quiz answer with id " + quizAnswerId + " successfully!").data(quizAnswerService.getQuizAnswerById(quizAnswerId)).build();
     }
 
-    @PostMapping("")
-    public Response createQuizAnswer(@RequestBody QuizAnswerDto quizAnswerDto) {
-        try {
-            QuizAnswer quizAnswer = QuizAnswer.builder()
-                    .answer(quizAnswerDto.getAnswer())
-                    .quizSubmission(quizSubmissionService.getQuizSubmissionById(quizAnswerDto.getQuizSubmissionId()).get())
-                    .quizQuestion(questionService.getQuestionById(quizAnswerDto.getQuizQuestionId()).get())
-                    .build();
-            return Response.builder().code(HttpStatus.CREATED.value()).success(true).message("Create quiz answer successfully!").data(quizAnswerService.saveQuizAnswer(quizAnswer)).build();
-        } catch (Exception e) {
-            throw e;
-        }
-    }
+
 
     @PatchMapping("/{quizAnswerId}")
-    public Response editQuizAnswer(@PathVariable("quizAnswerId") Long quizAnswerId, @RequestBody QuizAnswerDto quizAnswerDto) {
-        try {
-            Optional<QuizAnswer> quizAnswerOptional = quizAnswerService.getQuizAnswerById(quizAnswerId);
-            QuizAnswer quizAnswer = quizAnswerOptional.get();
-            quizAnswer = convertQuizAnswerDTO(quizAnswerDto, quizAnswerOptional);
-            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Edit quiz answer with id " + quizAnswerId + " successfully!").data(quizAnswerService.saveQuizAnswer(quizAnswer)).build();
-        } catch (Exception e) {
-            throw e;
-        }
+    public Response<?> editQuizAnswer(@PathVariable("quizAnswerId") Long quizAnswerId, @RequestBody QuizAnswerDto quizAnswerDto) {
+        // TODO: PATCH QUIZ ANSWER
+        return null;
     }
 
     @DeleteMapping("/{quizAnswerId}")
-    public Response deleteQuizAnswer(@PathVariable("quizAnswerId") Long quizAnswerId) {
-        try {
-            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Delete quiz answer with id " + quizAnswerId + " successfully!").data(quizAnswerService.deleteQuizAnswer(quizAnswerId)).build();
-        } catch (Exception e) {
-            throw e;
-        }
-    }
-
-    private QuizAnswer convertQuizAnswerDTO(QuizAnswerDto quizAnswerDto, Optional<QuizAnswer> quizAnswerOptional) {
-        QuizAnswer quizAnswer = quizAnswerOptional.get();
-        if (quizAnswerDto.getAnswer() != null) quizAnswer.setAnswer(quizAnswerDto.getAnswer());
-        if (quizAnswerDto.getQuizSubmissionId() != null) quizAnswer.setQuizSubmission(quizSubmissionService.getQuizSubmissionById(quizAnswerDto.getQuizSubmissionId()).get());
-        if (quizAnswerDto.getQuizQuestionId() != null) quizAnswer.setQuizQuestion(questionService.getQuestionById(quizAnswerDto.getQuizQuestionId()).get());
-        return quizAnswer;
+    public Response<?> deleteQuizAnswer(@PathVariable("quizAnswerId") Long quizAnswerId) {
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Delete quiz answer with id " + quizAnswerId + " successfully!").data(quizAnswerService.deleteQuizAnswer(quizAnswerId)).build();
     }
 
 }

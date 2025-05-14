@@ -47,7 +47,7 @@ public class Module extends Auditable {
     private Course course;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "module", cascade = CascadeType.ALL)
     private List<Quiz> quizzes = new ArrayList<>();
 
 }

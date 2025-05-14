@@ -1,7 +1,10 @@
 package com.learnx.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.learnx.entity.auditing.Auditable;
+import com.learnx.entity.enumClass.QuestionType;
 import lombok.*;
 
 import jakarta.persistence.*;
@@ -12,7 +15,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "quiz", "module"})
 @Table(name = "question_quiz")
 @Builder
 public class Question extends Auditable {
@@ -26,23 +28,21 @@ public class Question extends Auditable {
     private String content;
 
     @Column(name = "question_type")
-    private String questionType;
-
-    @ElementCollection
-    private List<String> options;
-
-    @ElementCollection
-    private List<String> answers;
+    private QuestionType questionType;
 
     @Column(name = "score")
     private Double score;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumns({
-            @JoinColumn(name = "quiz_id", foreignKey = @ForeignKey(name = "FK_quiz_question")),
-            @JoinColumn(name = "module_id", foreignKey = @ForeignKey(name = "FK_module_question"))
-        }
-    )
+    @JoinColumn(name = "quiz_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "FK_quiz_question"))
     private Quiz quiz;
 
+    @JsonManagedReference
+    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<QuestionOption> options;
+
+    @JsonManagedReference
+    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<QuestionAnswer> answers;
 }

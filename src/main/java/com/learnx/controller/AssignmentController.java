@@ -72,6 +72,22 @@ public class AssignmentController {
         return ResponseEntity.ok(Response.builder().code(HttpStatus.OK.value()).success(true).message("Get all assignment by user successfully!").data(assignmentDtos).build());
     }
 
+    @GetMapping("/get-by-teacher-email")
+    public ResponseEntity<?> getAssignmentsByTeacherEmail() {
+        List<Assignment> assignments = assignmentService.getAllAssignmentsByTeacherEmail();
+        List<AssignmentDto> assignmentDtos = assignments.stream().map(assignment -> AssignmentDto.builder()
+                .id(assignment.getId())
+                .content(assignment.getContent())
+                .startDate(assignment.getStartDate())
+                .endDate(assignment.getEndDate())
+                .state(assignment.getState())
+                .title(assignment.getTitle())
+                .urlDocument(assignment.getUrlDocument())
+                .moduleId(assignment.getModule().getId())
+                .build()).toList();
+        return ResponseEntity.ok(Response.builder().code(HttpStatus.OK.value()).success(true).message("Get all assignment by teacher successfully!").data(assignmentDtos).build());
+    }
+
     @PostMapping(value = "", consumes = "multipart/form-data")
     public Response<?> createAssignment(@RequestPart("assignment") CreateAssignmentRequest req,
                                      @RequestPart(value = "document") @Nullable MultipartFile document) throws IOException, ParseException {

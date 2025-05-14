@@ -1,16 +1,17 @@
 package com.learnx.controller;
 
 import com.learnx.dto.QuestionDto;
-import com.learnx.entity.Question;
-import com.learnx.entity.Quiz;
+import com.learnx.entity.QuestionOption;
+import com.learnx.request.CreateMCQRequest;
+import com.learnx.request.CreateSCQRequest;
+import com.learnx.request.SwapQuestionOptionRequest;
 import com.learnx.response.Response;
+import com.learnx.service.QuestionOptionService;
 import com.learnx.service.QuestionService;
 import com.learnx.service.QuizService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/question-quizzes")
@@ -19,77 +20,59 @@ public class QuestionController {
 
     private final QuestionService questionService;
     private final QuizService quizService;
+    private final QuestionOptionService questionOptionService;
 
     @GetMapping("")
-    public Response getAllQuestion() {
-        try {
-            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get all quiz question successfully!").data(questionService.getAllQuestions()).build();
-        } catch (Exception e) {
-            throw e;
-        }
+    public Response<?> getAllQuestion() {
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get all quiz question successfully!").data(questionService.getAllQuestions()).build();
     }
 
     @GetMapping("/{questionId}")
-    public Response getQuestionById(@PathVariable("questionId") Long questionId) {
-        try {
-            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get question with id " + questionId + " successfully!").data(questionService.getQuestionById(questionId)).build();
-        } catch (Exception e) {
-            throw e;
-        }
+    public Response<?> getQuestionById(@PathVariable("questionId") Long questionId) {
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get question with id " + questionId + " successfully!").data(questionService.getQuestionById(questionId)).build();
     }
 
-    @PostMapping("")
-    public Response createQuestion(@RequestBody QuestionDto questionDto) {
-        try {
-            Optional<Quiz> optionalQuiz = quizService.findById(questionDto.getQuizId(), questionDto.getModuleId());
-            Quiz quiz = optionalQuiz.get();
-            Question question = Question.builder()
-                    .content(questionDto.getContent())
-                    .questionType(questionDto.getQuestionType())
-                    .options(questionDto.getOptions())
-                    .answers(questionDto.getAnswers())
-                    .score(questionDto.getScore())
-                    .quiz(quiz)
-                    .build();
-            return Response.builder().code(HttpStatus.CREATED.value()).success(true).message("Create question successfully!").data(questionService.saveQuestion(question)).build();
-        } catch (Exception e) {
-            throw e;
-        }
+    @PostMapping("/mcq")
+    public Response<?> createMCQ(@RequestBody CreateMCQRequest request) {
+        return Response.builder().code(HttpStatus.CREATED.value()).success(true).message("Create question successfully!").data(questionService.saveMCQ(request)).build();
     }
 
-    @PatchMapping("/{questionId}")
-    public Response editQuestion(@PathVariable("questionId") Long questionId, @RequestBody QuestionDto questionDto) {
-        try {
-            Optional<Question> questionOptional = questionService.getQuestionById(questionId);
-            Question question = questionOptional.get();
-            question = convertQuestionDTO(questionDto, questionOptional);
-            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Edit question with id " + questionId + " successfully!").data(questionService.saveQuestion(question)).build();
-        } catch (Exception e) {
-            throw e;
+    @PatchMapping("/mcq/{questionId}")
+    public Response<?> editMCQ(@PathVariable("questionId") Long questionId, @RequestBody CreateMCQRequest request) {
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Edit question successfully!").data(questionService.updateMCQ(questionId, request)).build();
+    }
+
+    @PostMapping("/scq")
+    public Response<?> createSCQ(@RequestBody CreateSCQRequest request) {
+        return Response.builder().code(HttpStatus.CREATED.value()).success(true).message("Create question successfully!").data(questionService.saveSCQ(request)).build();
+    }
+
+    @PatchMapping("/scq/{questionId}")
+    public Response<?> editSCQ(@PathVariable("questionId") Long questionId, @RequestBody CreateSCQRequest request) {
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Edit question successfully!").data(questionService.updateSCQ(questionId, request)).build();
+    }
+
+    @PatchMapping("/options/{questionId}/{optionId}")
+    public Response<?> editOption(
+            @PathVariable("questionId") Long questionId,
+            @PathVariable("optionId") Long optionId,
+            @RequestBody QuestionOption questionOption) {
+        QuestionOption existingOption = questionOptionService.findByQuestionId(questionId, optionId);
+        if (existingOption == null) {
+            return Response.builder().code(HttpStatus.NOT_FOUND.value()).success(false).message("Question option with id " + optionId + " not found!").build();
         }
+        existingOption.setContent(questionOption.getContent());
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Edit question option with id " + optionId + " successfully!").data(questionOptionService.save(existingOption)).build();
+    }
+
+    @PatchMapping("/options/swap")
+    public Response<?> swapOptions(@RequestBody SwapQuestionOptionRequest req) {
+        questionOptionService.swapOptions(req.getQuestionId(), req.getOptionIdSrc(), req.getOptionIdDest());
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Swap question options successfully!").build();
     }
 
     @DeleteMapping("/{questionId}")
-    public Response deleteQuestion(@PathVariable("questionId") Long questionId) {
-        try {
-            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Delete question with id " + questionId + " successfully!").data(questionService.deleteQuestion(questionId)).build();
-        } catch (Exception e) {
-           throw e;
-        }
+    public Response<?> deleteQuestion(@PathVariable("questionId") Long questionId) {
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Delete question with id " + questionId + " successfully!").data(questionService.deleteQuestion(questionId)).build();
     }
-
-    private Question convertQuestionDTO(QuestionDto questionDto, Optional<Question> questionOptional) {
-        Question question = questionOptional.get();
-        if (questionDto.getContent() != null) question.setContent(questionDto.getContent());
-        if (questionDto.getQuestionType() != null) question.setQuestionType(questionDto.getQuestionType());
-        if (questionDto.getOptions() != null) question.setOptions(questionDto.getOptions());
-        if (questionDto.getAnswers() != null) question.setAnswers(questionDto.getAnswers());
-        if (questionDto.getScore() != null) question.setScore(questionDto.getScore());
-        if (questionDto.getQuizId() != null && questionDto.getModuleId() != null) {
-            Optional<Quiz> optionalQuiz = quizService.findById(questionDto.getQuizId(), questionDto.getModuleId());
-            optionalQuiz.ifPresent(question::setQuiz);
-        }
-        return question;
-    }
-
 }

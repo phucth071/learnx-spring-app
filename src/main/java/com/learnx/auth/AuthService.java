@@ -362,6 +362,7 @@ public class AuthService {
 
         return User.builder()
                 .email(email)
+                .isEnabled(true)
                 .fullName(fullName)
                 .avatarUrl(avatarUrl)
                 .build();
@@ -371,25 +372,20 @@ public class AuthService {
     public User createOrUpdateUser(User user) {
         User existedUser = userService.findByEmailIgnoreCase(user.getEmail()).orElse(null);
 
-        if (existedUser == null) {
-            String password = RandomPasswordGenerator.generateCommonLangPassword();
-            user.setPassword(passwordEncoder.encode(password));
-            String message = "Mật khẩu tự động khởi tạo của bạn là: <span>" + password + "</span>"
-                    + "<br>Hãy thay đổi sau khi đăng nhập lần đầu!";
-            user.setRole(Role.STUDENT);
-            emailService.send(user.getEmail(), buildEmailBody(user.getFullName(), message));
+        if (existedUser != null) {
+            existedUser.setEnabled(true);
             userService.save(user);
-            return user;
-        }
-        if (!existedUser.getAvatarUrl().equals(user.getAvatarUrl())) {
-            existedUser.setAvatarUrl(user.getAvatarUrl());
-        }
-        if (!existedUser.getFullName().equals(user.getFullName())) {
-            existedUser.setFullName(user.getFullName());
+            return existedUser;
         }
 
-        existedUser = userService.save(existedUser);
-        return existedUser == null ? user : existedUser;
+        String password = RandomPasswordGenerator.generateCommonLangPassword();
+        user.setPassword(passwordEncoder.encode(password));
+        String message = "Mật khẩu tự động khởi tạo của bạn là: <span>" + password + "</span>"
+                + "<br>Hãy thay đổi sau khi đăng nhập lần đầu!";
+        user.setRole(Role.STUDENT);
+        emailService.send(user.getEmail(), buildEmailBody(user.getFullName(), message));
+        userService.save(user);
+        return user;
     }
 
     @Transactional 

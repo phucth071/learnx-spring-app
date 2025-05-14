@@ -57,6 +57,11 @@ public class AssignmentService {
         return assignmentRepository.findAllByEmail(user.getEmail());
     }
 
+    public List<Assignment> getAllAssignmentsByTeacherEmail() {
+        User user = AuthService.getCurrentUser();
+        return assignmentRepository.findAllByTeacherEmail(user.getEmail());
+    }
+
     public List<Assignment> getAssignmentsEndingOn(LocalDate date) {
         java.util.Date startDate = java.util.Date.from(date.atStartOfDay().atZone(java.time.ZoneId.systemDefault()).toInstant());
         java.util.Date endDate = java.util.Date.from(date.plusDays(1).atStartOfDay().atZone(java.time.ZoneId.systemDefault()).toInstant());

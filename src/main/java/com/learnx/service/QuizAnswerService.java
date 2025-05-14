@@ -1,8 +1,8 @@
 package com.learnx.service;
 
-import com.learnx.entity.QuizAnswer;
+import com.learnx.entity.QuizSubmissionDetail;
 import com.learnx.exception.ResourceNotFoundException;
-import com.learnx.repository.QuizAnswerRepository;
+import com.learnx.repository.QuizSubmissionDetailRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -13,27 +13,27 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class QuizAnswerService {
 
-    private final QuizAnswerRepository quizAnswerRepository;
+    private final QuizSubmissionDetailRepository quizSubmissionDetailRepository;
 
-    public Optional<QuizAnswer> getQuizAnswerById(Long Id) {
-        Optional<QuizAnswer> quizAnswer = quizAnswerRepository.findById(Id);
+    public Optional<QuizSubmissionDetail> getQuizAnswerById(Long Id) {
+        Optional<QuizSubmissionDetail> quizAnswer = quizSubmissionDetailRepository.findById(Id);
         if (quizAnswer.isEmpty()) {
             throw new ResourceNotFoundException("QuizAnswer with id " + Id + " not found!");
         }
         return quizAnswer;
     }
 
-    public List<QuizAnswer> getAllQuizAnswers() {
-        return quizAnswerRepository.findAll();
+    public List<QuizSubmissionDetail> getAllQuizAnswers() {
+        return quizSubmissionDetailRepository.findAll();
     }
 
-    public QuizAnswer saveQuizAnswer(QuizAnswer quizAnswer) {
-        return quizAnswerRepository.save(quizAnswer);
+    public QuizSubmissionDetail saveQuizAnswer(QuizSubmissionDetail quizSubmissionDetail) {
+        return quizSubmissionDetailRepository.save(quizSubmissionDetail);
     }
 
-    public QuizAnswer deleteQuizAnswer(Long Id) {
-        Optional<QuizAnswer> quizAnswer = quizAnswerRepository.findById(Id);
-        quizAnswer.ifPresent(quizAnswerRepository::delete);
+    public QuizSubmissionDetail deleteQuizAnswer(Long Id) {
+        Optional<QuizSubmissionDetail> quizAnswer = quizSubmissionDetailRepository.findById(Id);
+        quizAnswer.ifPresent(quizSubmissionDetailRepository::delete);
         return quizAnswer.orElse(null);
     }
 

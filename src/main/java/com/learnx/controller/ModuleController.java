@@ -23,6 +23,7 @@ public class ModuleController {
     private final LectureService lectureService;
     private final ResourcesService resourcesService;
     private final AssignmentService assignmentService;
+    private final QuizService quizService;
 
     @GetMapping("")
     public Response<?> getAllModule() {
@@ -75,6 +76,11 @@ public class ModuleController {
     @GetMapping("/{moduleId}/assignments")
     public Response<?> getAssignmentsByModuleId(@PathVariable("moduleId") Long moduleId) {
         return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get all assignments of module with id " + moduleId + " successfully!").data(assignmentService.getAllAssignmentsByModuleId(moduleId)).build();
+    }
+
+    @GetMapping("/{moduleId}/quizzes")
+    public Response<?> getQuizzesByModuleId(@PathVariable("moduleId") Long moduleId) {
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get all quizzes of module with id " + moduleId + " successfully!").data(quizService.findAllByModuleId(moduleId)).build();
     }
 
     private Module convertModuleDTO(ModuleDto moduleDto, Optional<Module> moduleOptional) {

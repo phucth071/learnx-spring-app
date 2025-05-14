@@ -11,11 +11,9 @@ import java.util.Optional;
 @Repository
 public interface QuizRepository extends JpaRepository<Quiz, Long> {
 
-    @Query("SELECT q FROM Quiz q WHERE q.id.id = :id AND q.id.module_id = :moduleId")
-    Optional<Quiz> findByIdAndModuleId(Long id, Long moduleId);
+    Optional<Quiz> findById(Long id);
 
-    List<Quiz> findAllByModuleId(Long moduleId);
+    @Query("SELECT q FROM Quiz q WHERE q.module.id = ?1")
+    List<Quiz> findAllByModuleId(Long id);
 
-    @Query("SELECT MAX(q.id.id) FROM Quiz q WHERE q.id.module_id = :moduleId")
-    Long findMaxIdByModuleId(Long moduleId);
 }

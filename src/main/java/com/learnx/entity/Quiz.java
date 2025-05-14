@@ -1,9 +1,8 @@
 package com.learnx.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.learnx.entity.auditing.Auditable;
-import com.learnx.entity.embeddedId.QuizId;
 import lombok.*;
 
 import jakarta.persistence.*;
@@ -16,15 +15,17 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "module"})
 @Table(name = "quiz")
 @Builder
 public class Quiz extends Auditable {
 
-    @EmbeddedId
-    private QuizId id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     private boolean status;
+
+    private boolean isShuffled;
 
     private String title;
 
@@ -47,12 +48,13 @@ public class Quiz extends Auditable {
     private int totalQuestions;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JsonBackReference
-    @JoinColumn(name = "module_id",
-            referencedColumnName = "id", insertable = false,  updatable = false,
-            foreignKey = @ForeignKey(name = "FK_module_quizzes"))
+    @JoinColumn(name = "module_id", nullable = false)
     private Module module;
 
+    @OneToMany(mappedBy = "quiz", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
+    private List<QuizSubmission> quizSubmissions = new ArrayList<>();
+
+    @JsonIgnore
     @OneToMany(mappedBy = "quiz", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
     private List<Question> questions = new ArrayList<>();
 

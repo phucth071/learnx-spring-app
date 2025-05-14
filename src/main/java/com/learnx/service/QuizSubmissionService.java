@@ -1,9 +1,9 @@
 package com.learnx.service;
 
-import com.learnx.entity.QuizAnswer;
+import com.learnx.entity.QuizSubmissionDetail;
 import com.learnx.entity.QuizSubmission;
 import com.learnx.exception.ResourceNotFoundException;
-import com.learnx.repository.QuizAnswerRepository;
+import com.learnx.repository.QuizSubmissionDetailRepository;
 import com.learnx.repository.QuizSubmissionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,7 +16,7 @@ import java.util.Optional;
 public class QuizSubmissionService {
 
     private final QuizSubmissionRepository quizSubmissionRepository;
-    private final QuizAnswerRepository quizAnswerRepository;
+    private final QuizSubmissionDetailRepository quizSubmissionDetailRepository;
 
     public Optional<QuizSubmission> getQuizSubmissionById(Long Id) {
         Optional<QuizSubmission> quizSubmission = quizSubmissionRepository.findById(Id);
@@ -37,8 +37,8 @@ public class QuizSubmissionService {
     public QuizSubmission deleteQuizSubmission(Long Id) {
         Optional<QuizSubmission> quizSubmission = quizSubmissionRepository.findById(Id);
         quizSubmission.ifPresent(qS -> {
-            List<QuizAnswer> quizAnswers = quizAnswerRepository.findAllByQuizSubmissionId(qS.getId());
-            quizAnswerRepository.deleteAll(quizAnswers);
+            List<QuizSubmissionDetail> quizSubmissionDetails = quizSubmissionDetailRepository.findAllByQuizSubmissionId(qS.getId());
+            quizSubmissionDetailRepository.deleteAll(quizSubmissionDetails);
             quizSubmissionRepository.delete(qS);
         });
         return quizSubmission.orElse(null);
