@@ -57,7 +57,6 @@ public class Quiz extends Auditable {
     private List<QuizSubmission> quizSubmissions = new ArrayList<>();
 
     @JsonIgnore
-    @OneToMany(mappedBy = "quiz", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
-    private List<Question> questions = new ArrayList<>();
-
+    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<QuizQuestion> quizQuestions;
 }

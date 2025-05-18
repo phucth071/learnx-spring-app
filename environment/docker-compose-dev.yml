@@ -115,7 +115,7 @@ services:
     volumes:
       - ./mysqld-exporter/.my.cnf:/etc/mysql/.my.cnf
     environment:
-      - DATA_SOURCE_NAME=root:root1234@tcp(mysql:3316)/
+      - DATA_SOURCE_NAME=root:root1234@tcp(mysql:3306)/
     depends_on:
       - mysql
     networks:
@@ -129,3 +129,12 @@ services:
       - 9121:9121
     networks:
       - learnx-network
+#
+#  # Spring Boot App
+#  spring-boot-app:
+#      build: .
+#      ports:
+#      - "9191:9191"
+#      depends_on:
+#      - mysql
+#      - redis

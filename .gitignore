@@ -35,3 +35,4 @@ build/
 .vscode/
 /environment/data/
 /environment/grafana-storage/
+/environment/learnx-be-0.0.1-SNAPSHOT.jar

@@ -42,7 +42,7 @@ public class QuizController {
                 .startDate(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(quizDto.getStartDate()))
                 .endDate(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(quizDto.getEndDate()))
                 .timeLimit(quizDto.getTimeLimit())
-                .attemptAllowed(quizDto.getAttemptLimit())
+                .attemptAllowed(quizDto.getAttemptAllowed())
                 .description(quizDto.getDescription())
                 .isShuffled(quizDto.isShuffled())
                 .status(true)

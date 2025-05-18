@@ -15,7 +15,7 @@ public class QuizDto {
     private String startDate;
     private String endDate;
     private Integer timeLimit;
-    private Integer attemptLimit;
+    private Integer attemptAllowed;
     private String description;
     private boolean isShuffled;
 }
