@@ -26,6 +26,6 @@ public class SwaggerConfig {
                 .components(new Components()
                         .addSecuritySchemes("bearerAuth", securityScheme()))
                 .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
-                .info(new Info().title("UTEZBE API").version("1.0.0"));
+                .info(new Info().title("LEARN-X API").version("1.0.0"));
     }
 }

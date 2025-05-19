@@ -89,16 +89,13 @@ public class AssignmentController {
     }
 
     @PostMapping(value = "", consumes = "multipart/form-data")
-    public Response<?> createAssignment(@RequestPart("assignment") CreateAssignmentRequest req,
-                                     @RequestPart(value = "document") @Nullable MultipartFile document) throws IOException, ParseException {
-        String urlDocument = document != null ? cloudinaryService.uploadRemainFileName(document) : null;
+    public Response<?> createAssignment(@RequestBody CreateAssignmentRequest req) throws IOException, ParseException {
         Assignment assignment = Assignment.builder()
                 .content(req.getContent())
                 .startDate(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(req.getStartDate()))
                 .endDate(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(req.getEndDate()))
                 .state(req.getState())
                 .title(req.getTitle())
-                .urlDocument(urlDocument)
                 .module(moduleService.getModuleById(req.getModuleId()).get())
                 .build();
         assignmentService.saveAssignment(assignment);

@@ -21,6 +21,8 @@ public class QuestionController {
     private final QuestionOptionService questionOptionService;
     private final QuizQuestionService quizQuestionService;
 
+
+    // TODO: RETURN QUESTION DON'T INCLUDE ANSWER
     @GetMapping("")
     public Response<?> getQuestionsByType(@RequestParam("type") String type) {
         return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get questions by type successfully!").data(questionService.getQuestionsByType(type)).build();
@@ -80,7 +82,7 @@ public class QuestionController {
     @PatchMapping("/options/{questionId}/{optionId}")
     public Response<?> editOption(
             @PathVariable("questionId") Long questionId,
-            @PathVariable("optionId") Long optionId,
+            @PathVariable("optionId") String optionId,
             @RequestBody QuestionOption questionOption) {
         QuestionOption existingOption = questionOptionService.findByQuestionId(questionId, optionId);
         if (existingOption == null) {

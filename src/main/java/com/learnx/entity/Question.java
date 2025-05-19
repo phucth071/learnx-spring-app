@@ -16,6 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @Table(name = "question")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Builder
 public class Question extends Auditable {
 
@@ -38,7 +39,7 @@ public class Question extends Auditable {
     private List<QuizQuestion> quizQuestions;
 
     @JsonManagedReference
-    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "question", cascade = CascadeType.MERGE, orphanRemoval = true)
     private List<QuestionOption> options;
 
     @JsonManagedReference

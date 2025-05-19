@@ -11,6 +11,6 @@ import lombok.Setter;
 @AllArgsConstructor
 public class SwapQuestionOptionRequest {
     private Long questionId;
-    private Long optionIdSrc;
-    private Long optionIdDest;
+    private String optionIdSrc;
+    private String optionIdDest;
 }

@@ -1,12 +1,8 @@
 package com.learnx.service;
 
-import com.learnx.dto.CourseDto;
 import com.learnx.entity.*;
 import com.learnx.entity.Module;
 import com.learnx.exception.ResourceNotFoundException;
-import com.learnx.redis.RedisService;
-import com.learnx.redisson.RedisDistributedLocker;
-import com.learnx.redisson.RedisDistributedService;
 import com.learnx.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,11 +35,6 @@ public class CourseService {
     private final UserService userService;
     private final AssignmentRepository assignmentRepository;
 
-    private final RedisDistributedService redisDistributedService;
-    private final RedisService redisService;
-
-    private final String LOCK_COURSE_KEY = "LOCK_COURSE_KEY";
-
     public Optional<Course> getCourseById(Long id) {
         Course course = courseRepository.findById(id).orElse(null);
         if (course == null) {
@@ -53,68 +43,6 @@ public class CourseService {
         return courseRepository.findById(id);
     }
 
-    public CourseDto getCourseByIdWithCache(Long id) {
-        log.info("Get course by id with cache: {}", id);
-        CourseDto course = redisService.getObject(genCourseItemKey(id), CourseDto.class);
-        if (course != null) {
-            log.info("FROM CACHE EXIST {}", course);
-            return course;
-        }
-        log.info("CACHE NO EXIST, START GET DB AND SET CACHE->, {}", id);
-        RedisDistributedLocker locker = redisDistributedService.getDistributedLock(LOCK_COURSE_KEY + id);
-        try {
-            // 1 - Tao lock
-            boolean isLock = locker.tryLock(1, 5, TimeUnit.SECONDS);
-            // Lưu ý: Cho dù thành công hay không cũng phải unLock, bằng mọi giá.
-            // Lưu ý: Cho dù thành công hay không cũng phải unLock, bằng mọi giá.
-            // Lưu ý: Cho dù thành công hay không cũng phải unLock, bằng mọi giá.
-            if (!isLock) {
-                log.info("LOCK WAIT ITEM PLEASE....");
-                return course;
-            }
-            // Get cache
-            course = redisService.getObject(genCourseItemKey(id), CourseDto.class);
-            // 2. YES
-
-            if (course != null) {
-                log.info("FROM CACHE EXIST {}", course);
-                return course;
-            }
-            // 3 -> Van khong co thi truy van DB
-
-            Course courseEntity = courseRepository.findById(id).orElse(null);
-            assert courseEntity != null;
-            course = CourseDto.builder()
-                    .id(courseEntity.getId())
-                    .name(courseEntity.getName())
-                    .description(courseEntity.getDescription())
-                    .startDate(courseEntity.getStartDate())
-                    .state(courseEntity.getState())
-                    .thumbnail(courseEntity.getThumbnail())
-                    .categoryId(courseEntity.getCategory().getId())
-                    .build();
-            log.info("FROM DBS ->>>> {}", course);
-            if (course == null) { // Neu trong dbs van khong co thi return ve not exists;
-                log.info("COURSE NOT EXITS....");
-                // set
-                redisService.setObject(genCourseItemKey(id), course);
-                return course;
-            }
-
-            // neu co thi set redis
-            redisService.setObject(genCourseItemKey(id), course); // TTL
-            return course;
-
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        } finally {
-            // Lưu ý: Cho dù thành công hay không cũng phải unLock, bằng mọi giá.
-            locker.unlock();
-        }
-    }
-
-
-
     public List<Course> getAllCourses() {
         return courseRepository.findAll();
     }
@@ -122,33 +50,7 @@ public class CourseService {
     @PreAuthorize("hasAnyAuthority('TEACHER', 'ADMIN')")
     @Transactional
     public Course saveCourse(Course course) {
-        RedisDistributedLocker locker = redisDistributedService.getDistributedLock(LOCK_COURSE_KEY + course.getId());
-        try {
-            boolean isLock = locker.tryLock(1, 5, TimeUnit.SECONDS);
-            if (!isLock) {
-                log.info("LOCK WAIT ITEM PLEASE....");
-                return course;
-            }
-            Course savedCourse = courseRepository.save(course);
-            CourseDto courseDto = CourseDto.builder()
-                    .id(savedCourse.getId())
-                    .name(savedCourse.getName())
-                    .description(savedCourse.getDescription())
-                    .startDate(savedCourse.getStartDate())
-                    .state(savedCourse.getState())
-                    .thumbnail(savedCourse.getThumbnail())
-                    .categoryId(savedCourse.getCategory().getId())
-                    .build();
-            if (redisService.getObject(genCourseItemKey(savedCourse.getId()), CourseDto.class) != null) {
-                redisService.setObject(genCourseItemKey(savedCourse.getId()), courseDto);
-            }
-            return courseRepository.save(course);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        } finally {
-            locker.unlock();
-        }
-
+        return courseRepository.save(course);
     }
 
     public Page<Course> getAllCoursesPageable(Pageable pageable) {
@@ -161,47 +63,32 @@ public class CourseService {
     public Course deleteCourse(Long id) {
         Optional<Course> course = courseRepository.findById(id);
 
-        RedisDistributedLocker locker = redisDistributedService.getDistributedLock(LOCK_COURSE_KEY + id);
-        try {
-            boolean isLock = locker.tryLock(1, 5, TimeUnit.SECONDS);
-            if (!isLock) {
-                log.info("LOCK WAIT");
-                return course.orElse(null);
-            }
-            course.ifPresent(c -> {
-                Forum forum = forumRepository.findByCourseId(c.getId()).orElse(null);
-                if (forum != null) {
-                    List<Topic> topics = topicRepository.findAllByForumId(forum.getId(), Sort.by(Sort.Direction.DESC, "createdAt"));
-                    for (Topic topic : topics) {
-                        List<TopicComment> topicComments = topicCommentRepository.findAllByTopicId(topic.getId(), Sort.by(Sort.Direction.DESC, "createdAt"));
-                        topicCommentRepository.deleteAll(topicComments);
-                        topicRepository.delete(topic);
-                    }
-                    forumRepository.delete(forum);
+        course.ifPresent(c -> {
+            Forum forum = forumRepository.findByCourseId(c.getId()).orElse(null);
+            if (forum != null) {
+                List<Topic> topics = topicRepository.findAllByForumId(forum.getId(), Sort.by(Sort.Direction.DESC, "createdAt"));
+                for (Topic topic : topics) {
+                    List<TopicComment> topicComments = topicCommentRepository.findAllByTopicId(topic.getId(), Sort.by(Sort.Direction.DESC, "createdAt"));
+                    topicCommentRepository.deleteAll(topicComments);
+                    topicRepository.delete(topic);
                 }
-                List<Module> modules = moduleRepository.findAllByCourseId(c.getId());
-                for (Module module : modules) {
-                    List<Lecture> lectures = lectureRepository.findAllByModuleId(module.getId());
-                    lectureRepository.deleteAll(lectures);
-
-                    List<Assignment> assignments = module.getAssignments();
-                    assignmentRepository.deleteAll(assignments);
-
-                    List<Resources> resources = resourcesRepository.findAllByModuleId(module.getId());
-                    resourcesRepository.deleteAll(resources);
-                    moduleRepository.delete(module);
-                }
-                courseRegistrationRepository.deleteAllByCourseId(c.getId());
-                courseRepository.delete(c);
-            });
-            if (redisService.getObject(genCourseItemKey(id), CourseDto.class) != null) {
-                redisService.delete(genCourseItemKey(id));
+                forumRepository.delete(forum);
             }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        } finally {
-            locker.unlock();
-        }
+            List<Module> modules = moduleRepository.findAllByCourseId(c.getId());
+            for (Module module : modules) {
+                List<Lecture> lectures = lectureRepository.findAllByModuleId(module.getId());
+                lectureRepository.deleteAll(lectures);
+
+                List<Assignment> assignments = module.getAssignments();
+                assignmentRepository.deleteAll(assignments);
+
+                List<Resources> resources = resourcesRepository.findAllByModuleId(module.getId());
+                resourcesRepository.deleteAll(resources);
+                moduleRepository.delete(module);
+            }
+            courseRegistrationRepository.deleteAllByCourseId(c.getId());
+            courseRepository.delete(c);
+        });
         return course.orElse(null);
     }
 
@@ -225,9 +112,5 @@ public class CourseService {
     public Page<Course> getCourseByTeacherId(Long teacherId, Pageable pageable) {
         log.info("Pageable: " + pageable);
         return courseRepository.findByTeacherId(teacherId, pageable);
-    }
-
-    private String genCourseItemKey(Long itemId) {
-        return "COURSE:ITEM:" + itemId;
     }
 }

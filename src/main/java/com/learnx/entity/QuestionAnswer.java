@@ -18,7 +18,7 @@ public class QuestionAnswer extends Auditable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(updatable = false)
     private Long id;
-    private Long answerId;
+    private String answerId;
     private String answerContent;
 
     @JsonBackReference

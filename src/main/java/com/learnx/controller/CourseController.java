@@ -11,6 +11,7 @@ import com.learnx.entity.Module;
 import com.learnx.entity.User;
 import com.learnx.entity.enumClass.State;
 
+import com.learnx.exception.ResourceNotFoundException;
 import com.learnx.request.CreateCourseRequest;
 import com.learnx.response.Response;
 import com.learnx.service.*;
@@ -62,8 +63,9 @@ public class CourseController {
 
     @GetMapping("/{courseId}")
     public Response<?> getCourseById(@PathVariable("courseId") Long courseId) {
-        CourseDto course = courseService.getCourseByIdWithCache(courseId);
-        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get course by id successfully!").data(course).build();
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get course by id successfully!").data(courseService.getCourseById(courseId).orElseThrow(
+                () -> new ResourceNotFoundException("Course with id " + courseId + " not found!")
+        )).build();
     }
 
     private CourseDto convertToDto(Course course) {
@@ -80,19 +82,6 @@ public class CourseController {
         }
 
         return courseDto;
-    }
-
-    private int[] convertDateToArray(Date date) {
-        LocalDateTime localDateTime = Instant.ofEpochMilli(date.getTime()).atZone(ZoneId.systemDefault()).toLocalDateTime();
-        return new int[]{
-                localDateTime.getYear(),
-                localDateTime.getMonthValue(),
-                localDateTime.getDayOfMonth(),
-                localDateTime.getHour(),
-                localDateTime.getMinute(),
-                localDateTime.getSecond(),
-                localDateTime.getNano()
-        };
     }
 
     @Transactional
@@ -202,27 +191,6 @@ public class CourseController {
         List<Module> modules = moduleService.findAllByCourseId(id);
         return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get modules by course id successfully!").data(modules).build();
 
-    }
-
-
-    private Course convertCourseDTO(CourseDto courseDto, Optional<Course> courseOtp) {
-        Course course = courseOtp.get();
-        if (courseDto.getName() != null) course.setName(courseDto.getName());
-        if (courseDto.getStartDate() != null) course.setStartDate(courseDto.getStartDate());
-        if (courseDto.getState() != null) course.setState(courseDto.getState());
-
-        if (courseDto.getDescription() != null) course.setDescription(courseDto.getDescription());
-        if (courseDto.getCategoryId() != null) course.setCategory(categoryService.getCategoryById(courseDto.getCategoryId()).get());
-        return course;
-    }
-
-    private ModuleDto convertModuleToDto(Module module) {
-        ModuleDto moduleDto = new ModuleDto();
-        moduleDto.setId(module.getId());
-        moduleDto.setCourseId(module.getCourse().getId());
-        moduleDto.setName(module.getName());
-        moduleDto.setDescription(module.getDescription());
-        return moduleDto;
     }
 
 }

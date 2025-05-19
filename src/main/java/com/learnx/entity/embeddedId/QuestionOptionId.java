@@ -5,13 +5,12 @@ import jakarta.persistence.Embeddable;
 import lombok.*;
 
 import java.io.Serializable;
+import java.util.Objects;
 
-@Embeddable
-@Getter
-@Setter
-@EqualsAndHashCode
-@NoArgsConstructor
+@Data
 @AllArgsConstructor
+@NoArgsConstructor
+@Embeddable
 @Builder
 public class QuestionOptionId implements Serializable {
 
@@ -19,7 +18,18 @@ public class QuestionOptionId implements Serializable {
     private Long questionId;
 
     @Column(name = "option_id")
-    private Long optionId;
+    private String optionId;
 
-    public QuestionOptionId(Long qId, long oid) {}
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        QuestionOptionId that = (QuestionOptionId) o;
+        return questionId.equals(that.questionId) && optionId.equals(that.optionId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(questionId, optionId);
+    }
 }

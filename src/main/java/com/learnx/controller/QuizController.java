@@ -57,14 +57,21 @@ public class QuizController {
 
     @GetMapping("/{quizId}/questions")
     public Response<?> getQuizQuestions(@PathVariable("quizId") Long quizId) {
-        Optional<Quiz> quizOptional = quizService.findById(quizId);
-        if (quizOptional.isEmpty()) {
-            return Response.builder().code(HttpStatus.NOT_FOUND.value()).success(false).message("Quiz with id " + quizId + " not found!").build();
-        }
-        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get quiz questions successfully!").data(questionService.getQuestionsByQuizId(quizId)).build();
+        quizService.findById(quizId).orElseThrow(() -> new ResourceNotFoundException("Quiz with id " + quizId + " not found!"));
+
+        return Response.builder()
+                .code(HttpStatus.OK.value())
+                .success(true)
+                .message("Get quiz questions successfully!")
+                .data(quizService.findById(quizId)
+                        .map(quiz -> quiz.isShuffled()
+                                ? questionService.getQuestionsByQuizId(quizId).stream().sorted((q1, q2) -> (int) (Math.random() * 2 - 1)).toList()
+                                : questionService.getQuestionsByQuizId(quizId))
+                        .orElseThrow(() -> new ResourceNotFoundException("Quiz with id " + quizId + " not found!")))
+                .build();
     }
 
-    // TODO: BUG Delete bugg
+    // TODO: BUG Delete
     @DeleteMapping("/{quizId}")
     public Response<?> deleteQuiz(@PathVariable("quizId") Long quizId) {
         Optional<Quiz> quizOptional = quizService.findById(quizId);

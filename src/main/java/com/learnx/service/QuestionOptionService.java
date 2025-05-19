@@ -15,7 +15,7 @@ public class QuestionOptionService {
         questionOptionRepository.deleteAllByQuestionId(questionId);
     }
 
-    public QuestionOption findByQuestionId(Long questionId, Long optionId) {
+    public QuestionOption findByQuestionId(Long questionId, String optionId) {
         QuestionOptionId questionOptionId = QuestionOptionId.builder()
                 .questionId(questionId)
                 .optionId(optionId)
@@ -24,7 +24,11 @@ public class QuestionOptionService {
                 .orElse(null);
     }
 
-    public void swapOptions(Long questionId, Long optionIdSrc, Long optionIdDest) {
+    public void delete(QuestionOption questionOption) {
+        questionOptionRepository.delete(questionOption);
+    }
+
+    public void swapOptions(Long questionId, String optionIdSrc, String optionIdDest) {
         QuestionOption optionSrc = findByQuestionId(questionId, optionIdSrc);
         QuestionOption optionDest = findByQuestionId(questionId, optionIdDest);
 

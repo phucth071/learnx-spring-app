@@ -37,10 +37,14 @@ public class QuestionService {
 
     public List<Question> getQuestionsByQuizId(Long quizId) {
         List<Question> questions = new ArrayList<>();
-        List<QuizQuestion> quizQuestions = quizQuestionService.findAllByQuiz_Id(quizId);
-        for (QuizQuestion quizQuestion : quizQuestions) {
-            questions.add(quizQuestion.getQuestion());
-        }
+        quizQuestionService.findAllByQuiz_Id(quizId).forEach(
+                quizQuestion -> {
+                    Question question = questionRepository.findById(quizQuestion.getQuestion().getId()).orElse(null);
+                    if (question != null) {
+                        questions.add(question);
+                    }
+                }
+        );
         return questions;
     }
 
@@ -79,7 +83,7 @@ public class QuestionService {
                     .build();
             QuestionOptionId questionOptionId = QuestionOptionId.builder()
                     .questionId(question.getId())
-                    .optionId(Math.abs(UUID.randomUUID().getMostSignificantBits()))
+                    .optionId(UUID.randomUUID().toString())
                     .build();
             questionOption.setId(questionOptionId);
             question.getOptions().add(questionOption);
@@ -117,32 +121,51 @@ public class QuestionService {
         }
 
         if (req.getOptions() != null) {
-            List<QuestionOption> options = new ArrayList<>();
+            List<QuestionOption> existingOptions = question.getOptions();
+            Map<Integer, QuestionOption> existingOptionsMap = new HashMap<>();
+            for (QuestionOption option : existingOptions) {
+                existingOptionsMap.put(option.getSeq(), option);
+            }
+
             int seq = 0;
             for (String o : req.getOptions()) {
-                QuestionOption questionOption = QuestionOption.builder()
-                        .content(o)
-                        .question(question)
-                        .seq(seq++)
-                        .build();
-                QuestionOptionId questionOptionId = QuestionOptionId.builder()
-                        .questionId(question.getId())
-                        .optionId(Math.abs(UUID.randomUUID().getMostSignificantBits()))
-                        .build();
-                questionOption.setId(questionOptionId);
-                options.add(questionOption);
-                questionOptionService.save(questionOption);
+                QuestionOption questionOption = existingOptionsMap.get(seq);
+                if (questionOption == null) {
+                    questionOption = QuestionOption.builder()
+                            .content(o)
+                            .question(question)
+                            .seq(seq)
+                            .build();
+                    QuestionOptionId questionOptionId = QuestionOptionId.builder()
+                            .questionId(question.getId())
+                            .optionId(UUID.randomUUID().toString())
+                            .build();
+                    questionOption.setId(questionOptionId);
+                    questionOptionService.save(questionOption);
+                    existingOptions.add(questionOption);
+                } else {
+                    questionOption.setContent(o);
+                }
+                seq++;
             }
-            question.setOptions(options);
+
+            while (seq < existingOptions.size()) {
+                QuestionOption optionToRemove = existingOptions.remove(seq);
+                questionOptionService.delete(optionToRemove);
+            }
         }
 
         if (req.getAnswers() != null) {
             List<QuestionAnswer> answers = new ArrayList<>();
             questionAnswerRepository.deleteAll(question.getAnswers());
             for (Integer a : req.getAnswers()) {
+                QuestionOption correctOption = question.getOptions().stream()
+                        .filter(option -> option.getSeq() == a)
+                        .findFirst()
+                        .orElseThrow(() -> new IllegalArgumentException("Invalid answer index: " + a));
                 QuestionAnswer questionAnswer = QuestionAnswer.builder()
                         .question(question)
-                        .answerId(question.getOptions().get(a).getId().getOptionId())
+                        .answerId(correctOption.getId().getOptionId())
                         .build();
                 answers.add(questionAnswer);
                 questionAnswerRepository.save(questionAnswer);
@@ -179,7 +202,7 @@ public class QuestionService {
                     .build();
             QuestionOptionId questionOptionId = QuestionOptionId.builder()
                     .questionId(question.getId())
-                    .optionId(Math.abs(UUID.randomUUID().getMostSignificantBits()))
+                    .optionId(UUID.randomUUID().toString())
                     .build();
             questionOption.setId(questionOptionId);
             question.getOptions().add(questionOption);
@@ -216,34 +239,54 @@ public class QuestionService {
         }
 
         if (req.getOptions() != null) {
-            int seq = 0;
-            List<QuestionOption> options = new ArrayList<>();
-            for (String o : req.getOptions()) {
-                QuestionOption questionOption = QuestionOption.builder()
-                        .content(o)
-                        .question(question)
-                        .seq(seq++)
-                        .build();
-                QuestionOptionId questionOptionId = QuestionOptionId.builder()
-                        .questionId(question.getId())
-                        .optionId(Math.abs(UUID.randomUUID().getMostSignificantBits()))
-                        .build();
-                questionOption.setId(questionOptionId);
-                options.add(questionOption);
-                questionOptionService.save(questionOption);
+            List<QuestionOption> existingOptions = question.getOptions();
+            Map<Integer, QuestionOption> existingOptionsMap = new HashMap<>();
+            for (QuestionOption option : existingOptions) {
+                existingOptionsMap.put(option.getSeq(), option);
             }
-            question.setOptions(options);
+
+            int seq = 0;
+            for (String o : req.getOptions()) {
+                QuestionOption questionOption = existingOptionsMap.get(seq);
+                if (questionOption == null) {
+                    questionOption = QuestionOption.builder()
+                            .content(o)
+                            .question(question)
+                            .seq(seq)
+                            .build();
+                    QuestionOptionId questionOptionId = QuestionOptionId.builder()
+                            .questionId(question.getId())
+                            .optionId(UUID.randomUUID().toString())
+                            .build();
+                    questionOption.setId(questionOptionId);
+                    questionOptionService.save(questionOption);
+                    existingOptions.add(questionOption);
+                } else {
+                    questionOption.setContent(o);
+                }
+                seq++;
+            }
+
+            while (seq < existingOptions.size()) {
+                QuestionOption optionToRemove = existingOptions.remove(seq);
+                questionOptionService.delete(optionToRemove);
+            }
         }
 
         if (req.getAnswer() != null) {
             questionAnswerRepository.deleteAll(question.getAnswers());
+            QuestionOption correctOption = question.getOptions().stream()
+                    .filter(option -> option.getSeq() == req.getAnswer())
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid answer index: " + req.getAnswer()));
             QuestionAnswer questionAnswer = QuestionAnswer.builder()
                     .question(question)
-                    .answerId(question.getOptions().get(req.getAnswer()).getId().getOptionId())
+                    .answerId(correctOption.getId().getOptionId())
                     .build();
             questionAnswerRepository.save(questionAnswer);
             question.setAnswers(new ArrayList<>(List.of(questionAnswer)));
         }
+
         questionRepository.save(question);
 
         return question;
@@ -275,7 +318,7 @@ public class QuestionService {
                     .build();
             QuestionOptionId questionOptionId = QuestionOptionId.builder()
                     .questionId(question.getId())
-                    .optionId(Math.abs(UUID.randomUUID().getMostSignificantBits()))
+                    .optionId(UUID.randomUUID().toString())
                     .build();
             questionOption.setId(questionOptionId);
             question.getOptions().add(questionOption);
@@ -312,34 +355,54 @@ public class QuestionService {
         }
 
         if (req.getOptions() != null) {
-            int seq = 0;
-            List<QuestionOption> options = new ArrayList<>();
-            for (String o : req.getOptions()) {
-                QuestionOption questionOption = QuestionOption.builder()
-                        .content(o)
-                        .question(question)
-                        .seq(seq++)
-                        .build();
-                QuestionOptionId questionOptionId = QuestionOptionId.builder()
-                        .questionId(question.getId())
-                        .optionId(Math.abs(UUID.randomUUID().getMostSignificantBits()))
-                        .build();
-                questionOption.setId(questionOptionId);
-                options.add(questionOption);
-                questionOptionService.save(questionOption);
+            List<QuestionOption> existingOptions = question.getOptions();
+            Map<Integer, QuestionOption> existingOptionsMap = new HashMap<>();
+            for (QuestionOption option : existingOptions) {
+                existingOptionsMap.put(option.getSeq(), option);
             }
-            question.setOptions(options);
+
+            int seq = 0;
+            for (String o : req.getOptions()) {
+                QuestionOption questionOption = existingOptionsMap.get(seq);
+                if (questionOption == null) {
+                    questionOption = QuestionOption.builder()
+                            .content(o)
+                            .question(question)
+                            .seq(seq)
+                            .build();
+                    QuestionOptionId questionOptionId = QuestionOptionId.builder()
+                            .questionId(question.getId())
+                            .optionId(UUID.randomUUID().toString())
+                            .build();
+                    questionOption.setId(questionOptionId);
+                    questionOptionService.save(questionOption);
+                    existingOptions.add(questionOption);
+                } else {
+                    questionOption.setContent(o);
+                }
+                seq++;
+            }
+
+            while (seq < existingOptions.size()) {
+                QuestionOption optionToRemove = existingOptions.remove(seq);
+                questionOptionService.delete(optionToRemove);
+            }
         }
 
         if (req.getAnswer() != null) {
             questionAnswerRepository.deleteAll(question.getAnswers());
+            QuestionOption correctOption = question.getOptions().stream()
+                    .filter(option -> option.getSeq() == req.getAnswer())
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid answer index: " + req.getAnswer()));
             QuestionAnswer questionAnswer = QuestionAnswer.builder()
                     .question(question)
-                    .answerId(question.getOptions().get(req.getAnswer()).getId().getOptionId())
+                    .answerId(correctOption.getId().getOptionId())
                     .build();
             questionAnswerRepository.save(questionAnswer);
             question.setAnswers(new ArrayList<>(List.of(questionAnswer)));
         }
+
         questionRepository.save(question);
 
         return question;
@@ -400,6 +463,7 @@ public class QuestionService {
             questionAnswerRepository.save(questionAnswer);
             question.setAnswers(new ArrayList<>(List.of(questionAnswer)));
         }
+
         questionRepository.save(question);
         return question;
     }
