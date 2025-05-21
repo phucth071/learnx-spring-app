@@ -32,6 +32,12 @@ public class QuizController {
         return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get all quiz successfully!").data(quizService.findAll()).build();
     }
 
+    @GetMapping("/{quizId}")
+    public Response<?> getQuizById(@PathVariable("quizId") Long quizId) {
+        Quiz quiz = quizService.findById(quizId).orElseThrow(() -> new ResourceNotFoundException("Quiz with id " + quizId + " not found!"));
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get quiz with id " + quizId + " successfully!").data(quiz).build();
+    }
+
     @PostMapping("")
     public Response<?> createQuiz(@RequestBody QuizDto quizDto) throws IOException, ParseException {
         Module module = moduleService.getModuleById(quizDto.getModuleId()).orElseThrow(() -> new ResourceNotFoundException("Module with id " + quizDto.getModuleId() + " not found!"));

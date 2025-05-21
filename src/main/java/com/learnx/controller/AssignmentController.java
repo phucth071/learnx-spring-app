@@ -88,7 +88,7 @@ public class AssignmentController {
         return ResponseEntity.ok(Response.builder().code(HttpStatus.OK.value()).success(true).message("Get all assignment by teacher successfully!").data(assignmentDtos).build());
     }
 
-    @PostMapping(value = "", consumes = "multipart/form-data")
+    @PostMapping(value = "")
     public Response<?> createAssignment(@RequestBody CreateAssignmentRequest req) throws IOException, ParseException {
         Assignment assignment = Assignment.builder()
                 .content(req.getContent())
@@ -133,16 +133,6 @@ public class AssignmentController {
         if (title != null) assignment.setTitle(title);
         if (urlDocument != null) assignment.setUrlDocument(urlDocument);
         assignmentService.saveAssignment(assignment);
-        AssignmentDto assignmentDto = AssignmentDto.builder()
-                .id(assignment.getId())
-                .content(assignment.getContent())
-                .startDate(assignment.getStartDate())
-                .endDate(assignment.getEndDate())
-                .state(assignment.getState())
-                .title(assignment.getTitle())
-                .urlDocument(assignment.getUrlDocument())
-                .moduleId(assignment.getModule().getId())
-                .build();
         return Response.builder().code(HttpStatus.OK.value()).success(true).message("Chỉnh sửa bài tập thành công!").data(assignment).build();
     }
 
@@ -165,17 +155,6 @@ public class AssignmentController {
         return ResponseEntity.ok(Response.builder().code(HttpStatus.OK.value()).success(true).message("Lấy dữ liệu bài học thành công!").data(assignmentDtos).build());
     }
 
-    private Assignment convertAssignmentDTO(AssignmentDto assignmentDto, Optional<Assignment> assignmentOptional) {
-        Assignment assignment = assignmentOptional.get();
-        if (assignmentDto.getContent() != null) assignment.setContent(assignmentDto.getContent());
-        if (assignmentDto.getStartDate() != null) assignment.setStartDate(assignmentDto.getStartDate());
-        if (assignmentDto.getState() != null) assignment.setState(assignmentDto.getState());
-        if (assignmentDto.getEndDate() != null) assignment.setEndDate(assignmentDto.getEndDate());
-        if (assignmentDto.getTitle() != null) assignment.setTitle(assignmentDto.getTitle());
-        if (assignmentDto.getModuleId() != null) assignment.setModule(moduleService.getModuleById(assignmentDto.getModuleId()).get());
-        return assignment;
-    }
-
     @GetMapping("/get-by-next-x-day")
     public ResponseEntity<?> getAssignmentByNextXDay(@RequestParam("day") int day, @RequestParam("month") int month, @RequestParam("year") int year) {
         List<Assignment> assignments = assignmentService.getAssignmentByNextXDay(day, month, year);
@@ -189,8 +168,6 @@ public class AssignmentController {
         List<AssignmentWithCourseId> assignmentDtos = convertToListAssignmentWithCourseId(assignments);
         return ResponseEntity.ok(Response.builder().code(HttpStatus.OK.value()).success(true).message("Get assignment by keyword successfully!").data(assignmentDtos).build());
     }
-
-
 
     private List<AssignmentWithCourseId> convertToListAssignmentWithCourseId(List<Assignment> assignments) {
         return assignments.stream().map(assignment -> AssignmentWithCourseId.builder()
