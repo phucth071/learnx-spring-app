@@ -12,10 +12,12 @@ spring:
       max-request-size: 50MB
 
   datasource:
+#    url: jdbc:mysql://learnxdb.mysql.database.azure.com:3306/learnxdb
+#    username: 'learnxdb'
+#    password: '@Root1234'
     url: ${JDBC_DATABASE_URL}
     username: ${JDBC_DATABASE_USERNAME}
     password: ${JDBC_DATABASE_PASSWORD}
-    driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
     show-sql: true
