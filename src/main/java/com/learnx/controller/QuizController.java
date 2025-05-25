@@ -6,9 +6,7 @@ import com.learnx.entity.Quiz;
 import com.learnx.exception.ResourceNotFoundException;
 import com.learnx.request.CreateQuizRequest;
 import com.learnx.response.Response;
-import com.learnx.service.ModuleService;
-import com.learnx.service.QuestionService;
-import com.learnx.service.QuizService;
+import com.learnx.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -24,8 +22,10 @@ import java.util.Optional;
 public class QuizController {
 
     private final QuizService quizService;
+    private final QuizSessionService quizSessionService;
     private final ModuleService moduleService;
     private final QuestionService questionService;
+    private final QuizSubmissionService quizSubmissionService;
 
     @GetMapping("")
     public Response<?> getAllQuiz() {
@@ -36,6 +36,16 @@ public class QuizController {
     public Response<?> getQuizById(@PathVariable("quizId") Long quizId) {
         Quiz quiz = quizService.findById(quizId).orElseThrow(() -> new ResourceNotFoundException("Quiz with id " + quizId + " not found!"));
         return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get quiz with id " + quizId + " successfully!").data(quiz).build();
+    }
+
+    @GetMapping("/{quizId}/submissions")
+    public Response<?> getQuizSubmissions(@PathVariable("quizId") Long quizId) {
+        return Response.builder()
+                .code(HttpStatus.OK.value())
+                .success(true)
+                .message("Get quiz submissions successfully!")
+                .data(quizSubmissionService.getQuizSubmissionsByQuizId(quizId))
+                .build();
     }
 
     @PostMapping("")
@@ -59,6 +69,27 @@ public class QuizController {
     @PatchMapping("/{quizId}")
     public Response<?> editQuiz(@PathVariable("quizId") Long quizId, @RequestBody CreateQuizRequest req) {
         return Response.builder().code(HttpStatus.OK.value()).success(true).message("Edit quiz successfully!").data(quizService.updateQuiz(quizId, req)).build();
+    }
+
+    @GetMapping("/{quizId}/attemptAllowed")
+    public Response<?> getQuizAttemptAllowed(@PathVariable("quizId") Long quizId) {
+        Quiz quiz = quizService.findById(quizId).orElseThrow(() -> new ResourceNotFoundException("Quiz with id " + quizId + " not found!"));
+        return Response.builder()
+                .code(HttpStatus.OK.value())
+                .success(true)
+                .message("Get quiz attempt allowed successfully!")
+                .data(quiz.getAttemptAllowed())
+                .build();
+    }
+
+    @GetMapping("/{quizId}/session")
+    public Response<?> startQuizSession(@PathVariable("quizId") Long quizId) {
+        return Response.builder()
+                .code(HttpStatus.OK.value())
+                .success(true)
+                .message("Start quiz session successfully!")
+                .data(quizSessionService.getSession(quizId))
+                .build();
     }
 
     @GetMapping("/{quizId}/questions")

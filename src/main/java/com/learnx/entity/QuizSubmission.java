@@ -1,6 +1,8 @@
 package com.learnx.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.learnx.entity.auditing.Auditable;
 import lombok.*;
 
@@ -25,19 +27,22 @@ public class QuizSubmission extends Auditable {
 
     private Double score;
 
-    @Column(name = "total_times")
-    private int totalTimes;
+    @Column(name = "total_time_taken_seconds")
+    private int totalTimeTakenInSeconds;
 
     @Transient
     private int totalCorrects;
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "quizSubmission", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
     private List<QuizSubmissionDetail> answers = new ArrayList<>();
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "quiz_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "FK_quiz_submission_quiz"))
     private Quiz quiz;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "student_id", foreignKey = @ForeignKey(name = "FK_quiz_submission_account"))
     private User student;

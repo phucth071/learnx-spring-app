@@ -1,14 +1,21 @@
 package com.learnx.controller;
 
+import com.learnx.auth.AuthService;
 import com.learnx.dto.QuizSubmissionDto;
 import com.learnx.entity.QuizSubmission;
+import com.learnx.exception.ResourceNotFoundException;
+import com.learnx.request.CreateQuizSubmissionRequest;
 import com.learnx.response.Response;
 import com.learnx.service.QuizSubmissionService;
 import com.learnx.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -19,66 +26,79 @@ public class QuizSubmissionController {
     private final QuizSubmissionService quizSubmissionService;
     private final UserService userService;
 
-    @GetMapping("")
-    public Response getAllQuizSubmission() {
-        try {
-            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get all quiz submission successfully!").data(quizSubmissionService.getAllQuizSubmissions()).build();
-        } catch (Exception e) {
-            throw e;
-        }
+    @PostMapping
+    public Response<?> submitQuiz(@RequestBody CreateQuizSubmissionRequest requestDTO) {
+        QuizSubmission submission = quizSubmissionService.createQuizSubmission(requestDTO);
+        return Response.builder()
+                .message("Quiz submission has been submitted!")
+                .code(HttpStatus.CREATED.value())
+                .success(true)
+                .data(submission)
+                .build();
     }
 
-    @GetMapping("/{quizSubmissionId}")
-    public Response getQuizSubmissionById(@PathVariable("quizSubmissionId") Long quizSubmissionId) {
-        try {
-            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get quiz submission with id " + quizSubmissionId + " successfully!").data(quizSubmissionService.getQuizSubmissionById(quizSubmissionId)).build();
-        } catch (Exception e) {
-            throw e;
-        }
+    @GetMapping("/{id}")
+    public Response<?> getQuizSubmission(@PathVariable Long id) {
+        return Response.builder()
+                .message("Quiz submission retrieved successfully!")
+                .code(HttpStatus.OK.value())
+                .success(true)
+                .data(quizSubmissionService.getQuizSubmissionById(id).orElseThrow(() -> new ResourceNotFoundException("Quiz submission with id " + id + " not found!")))
+                .build();
     }
 
-    @PostMapping("")
-    public Response createQuizSubmission(@RequestBody QuizSubmissionDto quizSubmissionDto) {
-        try {
-            QuizSubmission quizSubmission = QuizSubmission.builder()
-                    .score(quizSubmissionDto.getScore())
-                    .totalTimes(quizSubmissionDto.getTotalTimes())
-                    .totalCorrects(quizSubmissionDto.getTotalCorrects())
-                    .student(userService.getUserById(quizSubmissionDto.getStudentId()))
+    @GetMapping("/student/{studentId}/quiz/{quizId}")
+    public Response<?> getStudentQuizSubmissions(
+            @PathVariable Long studentId,
+            @PathVariable Long quizId) {
+        List<QuizSubmission> submissions = quizSubmissionService.getQuizSubmissionByQuizIdAndStudentId(studentId, quizId);
+        return Response.builder()
+                .message("Quiz submissions retrieved successfully!")
+                .code(HttpStatus.OK.value())
+                .success(true)
+                .data(submissions)
+                .build();
+    }
+
+    @GetMapping("/get-by-user/quizSubmission")
+    public Response<?> getQuizSubmissionsByUser() {
+        Long userId = AuthService.getCurrentUser().getId();
+        List<QuizSubmission> submissions = quizSubmissionService.getQuizSubmissionsByStudentId(userId);
+
+        if (submissions.isEmpty()) {
+            return Response.builder()
+                    .message("No quiz submissions found for user with id " + userId)
+                    .code(HttpStatus.NOT_FOUND.value())
+                    .success(false)
                     .build();
-            return Response.builder().code(HttpStatus.CREATED.value()).success(true).message("Create quiz submission successfully!").data(quizSubmissionService.saveQuizSubmission(quizSubmission)).build();
-        } catch (Exception e) {
-            throw e;
         }
+
+        return Response.builder()
+                .message("Quiz submissions retrieved successfully!")
+                .code(HttpStatus.OK.value())
+                .success(true)
+                .data(submissions)
+                .build();
     }
 
-    @PatchMapping("/{quizSubmissionId}")
-    public Response editQuizSubmission(@PathVariable("quizSubmissionId") Long quizSubmissionId, @RequestBody QuizSubmissionDto quizSubmissionDto) {
-        try {
-            Optional<QuizSubmission> quizSubmissionOptional = quizSubmissionService.getQuizSubmissionById(quizSubmissionId);
-            QuizSubmission quizSubmission = convertQuizSubmissionDTO(quizSubmissionDto, quizSubmissionOptional);
-            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Edit quiz submission with id " + quizSubmissionId + " successfully!").data(quizSubmissionService.saveQuizSubmission(quizSubmission)).build();
-        } catch (Exception e) {
-            throw e;
+    @GetMapping("/get-by-user/quizSubmission/attemptedTake")
+    public Response<?> getQuizSubmissionsByUserAttemptedTake() {
+        Long userId = AuthService.getCurrentUser().getId();
+        List<QuizSubmission> submissions = quizSubmissionService.getQuizSubmissionsByStudentId(userId);
+
+        if (submissions.isEmpty()) {
+            return Response.builder()
+                    .message("No quiz submissions found for user with id " + userId)
+                    .code(HttpStatus.NOT_FOUND.value())
+                    .success(false)
+                    .build();
         }
-    }
 
-    @DeleteMapping("/{quizSubmissionId}")
-    public Response deleteQuizSubmission(@PathVariable("quizSubmissionId") Long quizSubmissionId) {
-        try {
-            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Delete quiz submission with id " + quizSubmissionId + " successfully!").data(quizSubmissionService.deleteQuizSubmission(quizSubmissionId)).build();
-        } catch (Exception e) {
-            throw e;
-        }
+        return Response.builder()
+                .message("Quiz submissions retrieved successfully!")
+                .code(HttpStatus.OK.value())
+                .success(true)
+                .data(submissions.size())
+                .build();
     }
-
-    private QuizSubmission convertQuizSubmissionDTO(QuizSubmissionDto quizSubmissionDto, Optional<QuizSubmission> quizSubmissionOptional) {
-        QuizSubmission quizSubmission = quizSubmissionOptional.get();
-        if (quizSubmissionDto.getScore() != null) quizSubmission.setScore(quizSubmissionDto.getScore());
-        if (quizSubmissionDto.getTotalTimes() > 0) quizSubmission.setTotalTimes(quizSubmissionDto.getTotalTimes());
-        if (quizSubmissionDto.getTotalCorrects() > 0) quizSubmission.setTotalCorrects(quizSubmissionDto.getTotalCorrects());
-        if (quizSubmissionDto.getStudentId() != null) quizSubmission.setStudent(userService.getUserById(quizSubmissionDto.getStudentId()));
-        return quizSubmission;
-    }
-
 }

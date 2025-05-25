@@ -45,4 +45,9 @@ public class Question extends Auditable {
     @JsonManagedReference
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<QuestionAnswer> answers;
+
+    @JsonIgnore
+    @OneToMany
+    @JoinColumn(name = "question_id", referencedColumnName = "id")
+    private List<QuizSubmissionDetail> quizSubmissionDetails;
 }

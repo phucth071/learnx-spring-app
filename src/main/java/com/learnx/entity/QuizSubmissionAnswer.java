@@ -1,6 +1,7 @@
 package com.learnx.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.learnx.entity.auditing.Auditable;
 import jakarta.persistence.*;
 import lombok.*;
@@ -18,8 +19,12 @@ public class QuizSubmissionAnswer extends Auditable {
     private Long id;
 
     @Column(name = "answer")
-    private Long answerId;
+    private String answerId;
 
+    @Column(name = "is_correct")
+    private boolean isCorrect;
+
+    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "quiz_submission_detail_id", referencedColumnName = "id")
     private QuizSubmissionDetail quizSubmissionDetail;

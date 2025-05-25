@@ -25,7 +25,7 @@ public class JavaMailService {
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
             helper.setText(body, true);
             helper.setTo(to);
-            helper.setSubject("[UTEz] Notification");
+            helper.setSubject("[Learn-X] Notification");
             mailSender.send(mimeMessage);
         } catch (MessagingException e) {
             LOGGER.error("Failed to send email!", e);
