@@ -30,6 +30,7 @@ public interface AssignmentRepository extends JpaRepository<Assignment, Long> {
     @Query("SELECT a FROM Assignment a JOIN a.module m JOIN m.course c JOIN c.courseRegistrations cr WHERE cr.email = ?1 ORDER BY a.endDate DESC")
     List<Assignment> findTop3ByStudentIdOrderByDateTimeDesc(String email);
 
+
     @Query("SELECT a FROM Assignment a JOIN a.module m JOIN m.course c JOIN c.courseRegistrations cr WHERE cr.email = ?1 AND MONTH(a.endDate) = ?2 AND YEAR(a.endDate) = ?3")
     List<Assignment> findAllByEmailAndEndDateMonthYear(String email, int month, int year);
 

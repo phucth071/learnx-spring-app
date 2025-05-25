@@ -6,12 +6,15 @@ import com.learnx.entity.AssignmentSubmission;
 import com.learnx.entity.User;
 import com.learnx.repository.AssignmentRepository;
 import com.learnx.repository.AssignmentSubmissionRepository;
+import com.learnx.request.CreateAssignmentRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -37,8 +40,26 @@ public class AssignmentService {
 
     @Transactional
     public Assignment saveAssignment(Assignment assignment) {
-
         return assignmentRepository.save(assignment);
+    }
+
+    @Transactional
+    public Assignment updateAssignment(Long id, CreateAssignmentRequest req) throws ParseException {
+        Assignment assignment = assignmentRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Assignment not found with id: " + id));
+        if (req.getTitle() != null) {
+            assignment.setTitle(req.getTitle());
+        }
+        if (req.getContent() != null) {
+            assignment.setContent(req.getContent());
+        }
+        if (req.getStartDate() != null) {
+            assignment.setStartDate(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(req.getStartDate()));
+        }
+        if (req.getEndDate() != null) {
+            assignment.setEndDate(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(req.getEndDate()));
+        }
+        assignmentRepository.save(assignment);
+        return assignment;
     }
 
     @Transactional

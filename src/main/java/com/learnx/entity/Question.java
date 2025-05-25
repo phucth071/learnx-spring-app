@@ -42,7 +42,7 @@ public class Question extends Auditable {
     @OneToMany(mappedBy = "question", cascade = CascadeType.MERGE, orphanRemoval = true)
     private List<QuestionOption> options;
 
-    @JsonManagedReference
+    @JsonIgnore
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<QuestionAnswer> answers;
 

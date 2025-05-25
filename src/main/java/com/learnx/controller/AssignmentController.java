@@ -113,26 +113,8 @@ public class AssignmentController {
     }
 
     @PatchMapping("/{assignmentId}")
-    public Response<?> editAssignment(@PathVariable("assignmentId") Long assignmentId,
-                                      @RequestParam("content") @Nullable String content,
-                                      @RequestParam("startDate") @Nullable String startDate,
-                                      @RequestParam("endDate") @Nullable String endDate,
-                                      @RequestParam("state") @Nullable String state,
-                                      @RequestParam("title") @Nullable String title,
-                                      @RequestPart(value = "document", required = false) @Nullable MultipartFile document) throws ParseException {
-        Optional<Assignment> optionalAssignment = assignmentService.getAssignmentById(assignmentId);
-        if (optionalAssignment.isEmpty()) {
-            return Response.builder().code(HttpStatus.NOT_FOUND.value()).success(false).message("Không tìm thấy bài tập!").build();
-        }
-        String urlDocument = document != null ? cloudinaryService.upload(document) : null;
-        Assignment assignment = optionalAssignment.get();
-        if (content != null) assignment.setContent(content);
-        if (startDate != null) assignment.setStartDate(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(startDate));
-        if (endDate != null) assignment.setEndDate(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(endDate));
-        if (state != null) assignment.setState(State.valueOf(state));
-        if (title != null) assignment.setTitle(title);
-        if (urlDocument != null) assignment.setUrlDocument(urlDocument);
-        assignmentService.saveAssignment(assignment);
+    public Response<?> editAssignment(@PathVariable("assignmentId") Long assignmentId, @RequestBody CreateAssignmentRequest req) throws ParseException {
+        Assignment assignment = assignmentService.updateAssignment(assignmentId, req);
         return Response.builder().code(HttpStatus.OK.value()).success(true).message("Chỉnh sửa bài tập thành công!").data(assignment).build();
     }
 
