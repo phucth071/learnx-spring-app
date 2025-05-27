@@ -15,9 +15,12 @@ spring:
 #    url: jdbc:mysql://learnxdb.mysql.database.azure.com:3306/learnxdb
 #    username: 'learnxdb'
 #    password: '@Root1234'
-    url: ${JDBC_DATABASE_URL}
-    username: ${JDBC_DATABASE_USERNAME}
-    password: ${JDBC_DATABASE_PASSWORD}
+#    url: ${JDBC_DATABASE_URL}
+#    username: ${JDBC_DATABASE_USERNAME}
+#    password: ${JDBC_DATABASE_PASSWORD}
+    url: jdbc:mysql://localhost:3316/learnx_db
+    username: root
+    password: root1234
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:

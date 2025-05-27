@@ -47,10 +47,10 @@ public class QuizSubmissionController {
                 .build();
     }
 
-    @GetMapping("/student/{studentId}/quiz/{quizId}")
+    @GetMapping("/student/quiz/{quizId}")
     public Response<?> getStudentQuizSubmissions(
-            @PathVariable Long studentId,
             @PathVariable Long quizId) {
+        Long studentId = AuthService.getCurrentUser().getId();
         List<QuizSubmission> submissions = quizSubmissionService.getQuizSubmissionByQuizIdAndStudentId(studentId, quizId);
         return Response.builder()
                 .message("Quiz submissions retrieved successfully!")

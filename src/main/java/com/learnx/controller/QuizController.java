@@ -1,19 +1,25 @@
 package com.learnx.controller;
 
+import com.learnx.auth.AuthService;
 import com.learnx.dto.QuizDto;
 import com.learnx.entity.Module;
+import com.learnx.entity.Question;
 import com.learnx.entity.Quiz;
+import com.learnx.entity.enumClass.Role;
+import com.learnx.entity.views.QuestionAnswerViews;
 import com.learnx.exception.ResourceNotFoundException;
 import com.learnx.request.CreateQuizRequest;
 import com.learnx.response.Response;
 import com.learnx.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -93,22 +99,40 @@ public class QuizController {
     }
 
     @GetMapping("/{quizId}/questions")
-    public Response<?> getQuizQuestions(@PathVariable("quizId") Long quizId) {
+    public MappingJacksonValue getQuizQuestions(@PathVariable("quizId") Long quizId) {
         quizService.findById(quizId).orElseThrow(() -> new ResourceNotFoundException("Quiz with id " + quizId + " not found!"));
+        String role = AuthService.getCurrentUser().getRole().toString();
+        Class<?> jsonView = Role.TEACHER.name().equalsIgnoreCase(role) ?
+                QuestionAnswerViews.Teacher.class : QuestionAnswerViews.Student.class;
 
-        return Response.builder()
+        List<Question> questions = quizService.findById(quizId)
+                .map(quiz -> {
+                    if (quiz.isShuffled()) {
+                        return questionService.getQuestionsByQuizId(quizId).stream()
+                                .sorted((q1, q2) -> (int) (Math.random() * 2 - 1))
+                                .toList();
+                    } else {
+                        return questionService.getQuestionsByQuizId(quizId);
+                    }
+                })
+                .orElseThrow(() -> new ResourceNotFoundException("Quiz with id " + quizId + " not found!"));
+
+        // Create the Response object first
+        Response<?> response = Response.builder()
                 .code(HttpStatus.OK.value())
                 .success(true)
                 .message("Get quiz questions successfully!")
-                .data(quizService.findById(quizId)
-                        .map(quiz -> quiz.isShuffled()
-                                ? questionService.getQuestionsByQuizId(quizId).stream().sorted((q1, q2) -> (int) (Math.random() * 2 - 1)).toList()
-                                : questionService.getQuestionsByQuizId(quizId))
-                        .orElseThrow(() -> new ResourceNotFoundException("Quiz with id " + quizId + " not found!")))
+                .data(questions)
                 .build();
+
+        // Then wrap it with MappingJacksonValue
+        MappingJacksonValue mappingJacksonValue = new MappingJacksonValue(response);
+        mappingJacksonValue.setSerializationView(jsonView);
+
+        // Return the MappingJacksonValue directly
+        return mappingJacksonValue;
     }
 
-    // TODO: BUG Delete
     @DeleteMapping("/{quizId}")
     public Response<?> deleteQuiz(@PathVariable("quizId") Long quizId) {
         Optional<Quiz> quizOptional = quizService.findById(quizId);
