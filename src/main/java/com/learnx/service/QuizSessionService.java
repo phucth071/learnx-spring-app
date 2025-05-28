@@ -49,14 +49,6 @@ public class QuizSessionService {
             throw new ResourceNotFoundException("Student with id " + studentId + " is not enrolled in the course for this quiz.");
         }
 
-        // Create new QuizSubmission
-        QuizSubmission submission = new QuizSubmission();
-        submission.setQuiz(quiz);
-        submission.setStudent(student);
-        submission.setTotalTimeTakenInSeconds(0);
-        submission.setScore(0.00);
-        QuizSubmission savedSubmission = quizSubmissionRepository.save(submission);
-
         List<QuizSubmission> previousSubmissions = quizSubmissionRepository.findAllByQuizIdAndStudentId(quiz.getId(), studentId);
         int attemptsMade = previousSubmissions.size();
         int attemptsAllowed = quiz.getAttemptAllowed();
@@ -64,6 +56,14 @@ public class QuizSessionService {
         if (attemptsMade >= attemptsAllowed) {
             throw new ResourceNotFoundException("You have already used all " + attemptsAllowed + " attempts for this quiz.");
         }
+
+        // Create new QuizSubmission
+        QuizSubmission submission = new QuizSubmission();
+        submission.setQuiz(quiz);
+        submission.setStudent(student);
+        submission.setTotalTimeTakenInSeconds(0);
+        submission.setScore(0.00);
+        QuizSubmission savedSubmission = quizSubmissionRepository.save(submission);
 
         // Create new session
         LocalDateTime now = LocalDateTime.now();

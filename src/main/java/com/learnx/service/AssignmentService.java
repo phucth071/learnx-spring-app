@@ -103,6 +103,11 @@ public class AssignmentService {
         return assignmentRepository.findAllByEmailAndEndDateMonthYear(user.getEmail(), month, year);
     }
 
+    public List<Assignment> getAllAssignmentsByTeacherIdAndEndDateMonthYear(int month, int year) {
+        User user = AuthService.getCurrentUser();
+        return assignmentRepository.findAllByTeacherIdAndEndDateMonthYear(user.getId(), month, year);
+    }
+
     public List<Assignment> getAssignmentByNextXDay(int day, int month, int year) {
         User user = AuthService.getCurrentUser();
         return assignmentRepository.findAssignmentByNextXDay(user.getEmail(), day, month, year);

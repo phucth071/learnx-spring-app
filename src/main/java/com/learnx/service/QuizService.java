@@ -2,6 +2,7 @@ package com.learnx.service;
 
 import com.learnx.auth.AuthService;
 import com.learnx.entity.Quiz;
+import com.learnx.entity.User;
 import com.learnx.entity.enumClass.Role;
 import com.learnx.exception.AccessDeniedException;
 import com.learnx.exception.ResourceNotFoundException;
@@ -66,6 +67,16 @@ public class QuizService {
             return quizRepository.save(quiz);
         }
         return null;
+    }
+
+    public List<Quiz> getAllQuizzesByStudentIdAndEndDateMonthYear(int month, int year) {
+        User user = AuthService.getCurrentUser();
+        return quizRepository.findAllByEmailAndEndDateMonthYear(user.getEmail(), month, year);
+    }
+
+    public List<Quiz> getAllQuizzesByTeacherIdAndEndDateMonthYear(int month, int year) {
+        User user = AuthService.getCurrentUser();
+        return quizRepository.findAllByTeacherIdAndEndDateMonthYear(user.getId(), month, year);
     }
 
     private static Quiz getQuiz(CreateQuizRequest request, Optional<Quiz> quizOtp) {

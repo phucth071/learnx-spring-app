@@ -94,7 +94,7 @@ public class QuizSubmissionService {
         int attemptsMade = previousSubmissions.size();
         int attemptsAllowed = quiz.getAttemptAllowed();
 
-        if (attemptsMade >= attemptsAllowed) {
+        if (attemptsMade > attemptsAllowed) {
             throw new ResourceNotFoundException("You have already used all " + attemptsAllowed + " attempts for this quiz.");
         }
 

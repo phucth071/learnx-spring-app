@@ -51,7 +51,7 @@ public class QuizSubmissionController {
     public Response<?> getStudentQuizSubmissions(
             @PathVariable Long quizId) {
         Long studentId = AuthService.getCurrentUser().getId();
-        List<QuizSubmission> submissions = quizSubmissionService.getQuizSubmissionByQuizIdAndStudentId(studentId, quizId);
+        List<QuizSubmission> submissions = quizSubmissionService.getQuizSubmissionByQuizIdAndStudentId(quizId, studentId);
         return Response.builder()
                 .message("Quiz submissions retrieved successfully!")
                 .code(HttpStatus.OK.value())
