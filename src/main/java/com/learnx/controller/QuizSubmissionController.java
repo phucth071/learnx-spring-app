@@ -2,10 +2,12 @@ package com.learnx.controller;
 
 import com.learnx.auth.AuthService;
 import com.learnx.dto.QuizSubmissionDto;
+import com.learnx.entity.QuizSession;
 import com.learnx.entity.QuizSubmission;
 import com.learnx.exception.ResourceNotFoundException;
 import com.learnx.request.CreateQuizSubmissionRequest;
 import com.learnx.response.Response;
+import com.learnx.service.QuizSessionService;
 import com.learnx.service.QuizSubmissionService;
 import com.learnx.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,6 +27,7 @@ import java.util.Optional;
 public class QuizSubmissionController {
 
     private final QuizSubmissionService quizSubmissionService;
+    private final QuizSessionService quizSessionService;
     private final UserService userService;
 
     @PostMapping
@@ -51,7 +55,14 @@ public class QuizSubmissionController {
     public Response<?> getStudentQuizSubmissions(
             @PathVariable Long quizId) {
         Long studentId = AuthService.getCurrentUser().getId();
-        List<QuizSubmission> submissions = quizSubmissionService.getQuizSubmissionByQuizIdAndStudentId(quizId, studentId);
+        List<QuizSession> quizSessions = quizSessionService.getSessionCompletedByStudentIdAndQuizId(studentId, quizId);
+        List<QuizSubmission> submissions = new ArrayList<>();
+        for (QuizSession session : quizSessions) {
+            QuizSubmission submission = quizSubmissionService.getQuizSubmissionByQuizSessionId(session.getId());
+            if (submission != null) {
+                submissions.add(submission);
+            }
+        }
         return Response.builder()
                 .message("Quiz submissions retrieved successfully!")
                 .code(HttpStatus.OK.value())

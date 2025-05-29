@@ -81,6 +81,10 @@ public class QuizSessionService {
         return quizSessionRepository.save(session);
     }
 
+    public List<QuizSession> getSessionCompletedByStudentIdAndQuizId(Long studentId, Long quizId) {
+        return quizSessionRepository.findAllByStudentIdAndQuizIdAndStatus(studentId, quizId, QuizSessionStatus.COMPLETED);
+    }
+
 
     @Transactional
     public QuizSession completeQuizSession(Long sessionId) {

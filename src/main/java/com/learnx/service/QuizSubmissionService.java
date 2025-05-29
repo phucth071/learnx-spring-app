@@ -237,6 +237,18 @@ public class QuizSubmissionService {
         }
     }
 
+    public QuizSubmission getQuizSubmissionByQuizSessionId(Long quizSessionId) {
+        QuizSession quizSession = quizSessionRepository.findById(quizSessionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Quiz session not found with id: " + quizSessionId));
+
+        QuizSubmission submission = quizSession.getSubmission();
+        if (submission == null) {
+            throw new ResourceNotFoundException("No submission found for this session.");
+        }
+
+        return submission;
+    }
+
     private double calculateScore(int totalCorrects, int totalQuestions) {
         if (totalQuestions == 0) return 0;
         return (double) totalCorrects / totalQuestions * 100;

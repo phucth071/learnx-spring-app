@@ -42,7 +42,7 @@ public class QuizSession {
     @Column(name = "status", nullable = false)
     private QuizSessionStatus status;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "submission_id")
     private QuizSubmission submission;
 }
