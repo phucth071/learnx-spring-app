@@ -12,6 +12,7 @@ import com.learnx.request.UserPatchRequest;
 import com.learnx.response.Response;
 import com.learnx.service.ChangeRoleQueueService;
 import com.learnx.service.CloudinaryService;
+import com.learnx.service.JavaMailService;
 import com.learnx.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -32,6 +33,7 @@ public class UserController {
     private final CloudinaryService cloudinary;
     private final AuthService authService;
     private final ChangeRoleQueueService changeRoleQueueService;
+    private final JavaMailService mailService;
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping("")

@@ -60,7 +60,7 @@ public class AuthService {
     private String CLIENT_ID;
     @Value("${spring.security.oauth2.client.registration.google.client-secret}")
     private String CLIENT_SECRET;
-    private static final String REDIRECT_URI = "http://localhost:3001";
+    private static final String REDIRECT_URI = "https://phuong13.github.io/LEARNX";
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public UserDto register(RegisterRequest request) {
@@ -95,7 +95,7 @@ public class AuthService {
         confirmTokenService.saveConfirmationToken(confirmToken);
         String message = "Mã OTP để xác nhận tài khoản của bạn là: <span>" + token + "</span>"
                 + "<br>OTP sẽ hết hạn sau 15 phút!"
-                + "<br>Hoặc ấn vào liên kết sau để xác nhận: <a href='http://localhost:3001/register/verify?otp=" + token + "&email=" + user.getEmail() + "'>Xác nhận</a>";
+                + "<br>Hoặc ấn vào liên kết sau để xác nhận: <a href='https://phuong13.github.io/LEARNX/register/verify?otp=" + token + "&email=" + user.getEmail() + "'>Xác nhận</a>";
         emailService.send(request.getEmail(), buildEmailBody(request.getFullName(), message));
         return UserDto.convertToDto(user);
     }
@@ -313,7 +313,7 @@ public class AuthService {
                 .expiredAt(LocalDateTime.now().plusMinutes(15))
                 .build();
         forgotPasswordService.saveForgotPasswordToken(forgotPasswordToken);
-        String message = "Ấn vào liên kết sau để reset mật khẩu của bạn: <a href='http://localhost:3001/reset-password?token=" + token + "'>Reset Password</a>";
+        String message = "Ấn vào liên kết sau để reset mật khẩu của bạn: <a href='https://phuong13.github.io/LEARNX/reset-password?token=" + token + "'>Reset Password</a>";
         emailService.send(email, buildEmailBody(user.getFullName(), message));
         return Response.builder()
                 .code(HttpStatus.OK.value())

@@ -19,8 +19,17 @@ import java.util.List;
 public class ChangeRoleQueueService {
     private final ChangeRoleRepository repository;
     private final UserService userService;
+    private final JavaMailService mailService;
 
     public ChangeRoleQueue save(ChangeRoleQueue changeRoleQueue) {
+        if (changeRoleQueue.getStatus() == null) {
+            changeRoleQueue.setStatus(State.PENDING);
+        }
+        User admin = userService.findByEmailIgnoreCase("phucth0710+admin@gmail.com").get();
+        String message = "Tài khoản " + changeRoleQueue.getUser().getFullName() + "có yêu cầu thay đổi quyền từ "
+                + changeRoleQueue.getOldRole().name() + " thành " + changeRoleQueue.getNewRole().name()
+                + "<br>. Vui lòng kiểm tra và xử lý yêu cầu này.";
+        mailService.send(admin.getEmail(), buildEmailBody(changeRoleQueue.getUser().getEmail(), message));
         return repository.save(changeRoleQueue);
     }
 
@@ -60,6 +69,9 @@ public class ChangeRoleQueueService {
         userService.save(user);
         changeRoleQueue.setStatus(State.ACCEPTED);
         repository.save(changeRoleQueue);
+        String message = "Tài khoản " + user.getFullName() + " đã được phê duyệt thay đổi quyền từ "
+                + changeRoleQueue.getOldRole().name() + " thành " + changeRoleQueue.getNewRole().name();
+        mailService.send(user.getEmail(), buildEmailBody(user.getFullName(), message));
         return Response.builder()
                 .code(HttpStatus.OK.value())
                 .success(true)
@@ -81,6 +93,10 @@ public class ChangeRoleQueueService {
         }
         changeRoleQueue.setStatus(State.REJECTED);
         repository.save(changeRoleQueue);
+        User user = changeRoleQueue.getUser();
+        String message = "Tài khoản " + user.getFullName() + " đã bị từ chối yêu cầu thay đổi quyền từ "
+                + changeRoleQueue.getOldRole().name() + " thành " + changeRoleQueue.getNewRole().name();
+        mailService.send(user.getEmail(), buildEmailBody(user.getFullName(), message));
         return Response.builder()
                 .code(HttpStatus.OK.value())
                 .success(true)
@@ -94,5 +110,47 @@ public class ChangeRoleQueueService {
 
     public void deleteByUserEmail(String email) {
         repository.deleteByUserEmail(email);
+    }
+
+    private String buildEmailBody(String name, String message) {
+        return "<html>\n" +
+                "  <head>\n" +
+                "    <style>\n" +
+                "      body {\n" +
+                "        font-family: Arial, sans-serif;\n" +
+                "        background-color: #f4f4f4;\n" +
+                "        margin: 0;\n" +
+                "        padding: 0;\n" +
+                "      }\n" +
+                "      .container {\n" +
+                "        max-width: 600px;\n" +
+                "        margin: 50px auto;\n" +
+                "        padding: 20px;\n" +
+                "        background-color: #fff;\n" +
+                "        border-radius: 10px;\n" +
+                "        box-shadow: 0 0 10px rgba(0,0,0,0.1);\n" +
+                "      }\n" +
+                "      h1 {\n" +
+                "        color: #333;\n" +
+                "      }\n" +
+                "      h2 {\n" +
+                "        color: #555;\n" +
+                "      }\n" +
+                "      span {\n" +
+                "        color: #ff0000;\n" +
+                "        font-weight: bold;\n" +
+                "        letter-spacing: 2px;\n" +
+                "        font-size: 24px;\n" +
+                "      }\n" +
+                "    </style>\n" +
+                "  </head>\n" +
+                "  <body>\n" +
+                "    <div class=\"container\">\n" +
+                "      <h1>Xin Chào, " + name + "!</h1>\n" +
+                "      <h2> " + message + "</h2>\n" +
+                "      <h3>Trân trọng!</h3>\n" +
+                "    </div>\n" +
+                "  </body>\n" +
+                "</html>";
     }
 }

@@ -32,6 +32,7 @@ public class QuizController {
     private final ModuleService moduleService;
     private final QuestionService questionService;
     private final QuizSubmissionService quizSubmissionService;
+    private final UserService userService;
 
     @GetMapping("")
     public Response<?> getAllQuiz() {
@@ -46,6 +47,7 @@ public class QuizController {
 
     @GetMapping("/{quizId}/submissions")
     public Response<?> getQuizSubmissions(@PathVariable("quizId") Long quizId) {
+
         return Response.builder()
                 .code(HttpStatus.OK.value())
                 .success(true)

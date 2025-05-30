@@ -7,7 +7,9 @@ import com.learnx.exception.ResourceNotFoundException;
 import com.learnx.repository.QuizSessionRepository;
 import com.learnx.repository.QuizSubmissionDetailRepository;
 import com.learnx.repository.QuizSubmissionRepository;
+import com.learnx.repository.UserRepository;
 import com.learnx.request.CreateQuizSubmissionRequest;
+import com.learnx.response.QuizSubmissionWithStudentInfoResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +28,7 @@ public class QuizSubmissionService {
     private final QuizSubmissionAnswerService quizSubmissionAnswerService;
     private final QuizService quizService;
     private final UserService userService;
+    private final UserRepository userRepository;
     private final QuestionService questionService;
 
     public Optional<QuizSubmission> getQuizSubmissionById(Long Id) {
@@ -48,7 +51,8 @@ public class QuizSubmissionService {
         return quizSubmissionRepository.findAllByQuizIdAndStudentId(quizId, studentId);
     }
 
-    public List<QuizSubmission> getQuizSubmissionsByQuizId(Long quizId) {
+    public List<QuizSubmissionWithStudentInfoResponse> getQuizSubmissionsByQuizId(Long quizId) {
+        // Fetch submissions with student information eagerly loaded
         List<QuizSubmission> allSubmissions = quizSubmissionRepository.findAllByQuizId(quizId);
 
         // Group submissions by student ID and find the one with highest score for each student
@@ -62,8 +66,19 @@ public class QuizSubmissionService {
             }
         }
 
-        // Return only the highest scoring submission for each student
-        return new ArrayList<>(highestSubmissionsByStudent.values());
+        // Create a new list with the highest submissions
+        List<QuizSubmission> result = new ArrayList<>(highestSubmissionsByStudent.values());
+        List<QuizSubmissionWithStudentInfoResponse> responseList = new ArrayList<>();
+        // Explicitly load student data for each submission
+        result.forEach(submission -> {
+            QuizSubmissionWithStudentInfoResponse qs = QuizSubmissionWithStudentInfoResponse.builder()
+                    .quizSubmission(submission)
+                    .email(submission.getStudent().getEmail())
+                    .build();
+            responseList.add(qs);
+        });
+
+        return responseList;
     }
 
     public QuizSubmission deleteQuizSubmission(Long Id) {

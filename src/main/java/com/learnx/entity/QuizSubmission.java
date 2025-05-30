@@ -42,8 +42,7 @@ public class QuizSubmission extends Auditable {
     @JoinColumn(name = "quiz_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "FK_quiz_submission_quiz"))
     private Quiz quiz;
 
-    @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "student_id", foreignKey = @ForeignKey(name = "FK_quiz_submission_account"))
     private User student;
 
