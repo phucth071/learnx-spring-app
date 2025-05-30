@@ -20,7 +20,7 @@ public class InitUserAdmin implements CommandLineRunner {
     private static final Logger logger = LoggerFactory.getLogger(InitUserAdmin.class);
     private static final String ROOT_ADMIN_USERNAME = "Admin";
     private static final String ROOT_ADMIN_EMAIL = "phucth0710+admin@gmail.com";
-    private static final String DEFAULT_PASSWORD = "@rootadmin";
+    private static final String DEFAULT_PASSWORD = "@Rootadmin";
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
