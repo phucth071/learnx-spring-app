@@ -82,7 +82,9 @@ public class QuizSessionService {
     }
 
     public List<QuizSession> getSessionCompletedByStudentIdAndQuizId(Long studentId, Long quizId) {
-        return quizSessionRepository.findAllByStudentIdAndQuizIdAndStatus(studentId, quizId, QuizSessionStatus.COMPLETED);
+        List<QuizSession> sessions = quizSessionRepository.findAllByStudentIdAndQuizIdAndStatusIn(
+                studentId, quizId, List.of(QuizSessionStatus.COMPLETED, QuizSessionStatus.EXPIRED));
+        return sessions;
     }
 
 

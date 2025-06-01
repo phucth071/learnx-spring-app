@@ -24,4 +24,6 @@ public interface QuizSessionRepository extends JpaRepository<QuizSession, Long> 
     List<QuizSession> findByStatusAndEndTimeBefore(
             QuizSessionStatus status, LocalDateTime dateTime);
 
+    List<QuizSession> findAllByStudentIdAndQuizIdAndStatusIn(Long studentId, Long quizId, List<QuizSessionStatus> statuses);
+
 }
