@@ -26,10 +26,10 @@ public class ChangeRoleQueueService {
             changeRoleQueue.setStatus(State.PENDING);
         }
         User admin = userService.findByEmailIgnoreCase("phucth0710+admin@gmail.com").get();
-        String message = "Tài khoản " + changeRoleQueue.getUser().getFullName() + "có yêu cầu thay đổi quyền từ "
+        String message = "Tài khoản " + changeRoleQueue.getUser().getFullName() + " có yêu cầu thay đổi quyền từ "
                 + changeRoleQueue.getOldRole().name() + " thành " + changeRoleQueue.getNewRole().name()
-                + "<br>. Vui lòng kiểm tra và xử lý yêu cầu này.";
-        mailService.send(admin.getEmail(), buildEmailBody(changeRoleQueue.getUser().getEmail(), message));
+                + ". <br>Vui lòng kiểm tra và xử lý yêu cầu này.";
+        mailService.send(admin.getEmail(), buildEmailBody(changeRoleQueue.getUser().getFullName(), message));
         return repository.save(changeRoleQueue);
     }
 
