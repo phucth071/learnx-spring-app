@@ -35,6 +35,10 @@ public class QuestionService {
         return question.get();
     }
 
+    public Question findByContent(String content) {
+        return questionRepository.findByContent(content).orElse(null);
+    }
+
     public List<Question> getQuestionsByQuizId(Long quizId) {
         List<Question> questions = new ArrayList<>();
         quizQuestionService.findAllByQuiz_Id(quizId).forEach(
@@ -63,6 +67,11 @@ public class QuestionService {
         Quiz quiz = quizRepository.findById(req.getQuizId()).orElse(null);
         if (quiz == null) {
             throw new ResourceNotFoundException("Quiz with id " + req.getQuizId() + " not found!");
+        }
+
+        Question existingQuestion = findByContent(req.getContent());
+        if (existingQuestion != null) {
+            return existingQuestion;
         }
 
         Question question = Question.builder()
@@ -184,6 +193,11 @@ public class QuestionService {
             throw new ResourceNotFoundException("Quiz with id " + req.getQuizId() + " not found!");
         }
 
+        Question existingQuestion = findByContent(req.getContent());
+        if (existingQuestion != null) {
+            return existingQuestion;
+        }
+
         Question question = Question.builder()
                 .content(req.getContent())
                 .questionType(QuestionType.SINGLE_CHOICE)
@@ -300,6 +314,11 @@ public class QuestionService {
             throw new ResourceNotFoundException("Quiz with id " + req.getQuizId() + " not found!");
         }
 
+        Question existingQuestion = findByContent(req.getContent());
+        if (existingQuestion != null) {
+            return existingQuestion;
+        }
+
         Question question = Question.builder()
                 .content(req.getContent())
                 .questionType(QuestionType.TRUE_FALSE)
@@ -414,6 +433,11 @@ public class QuestionService {
         Quiz quiz = quizRepository.findById(req.getQuizId()).orElse(null);
         if (quiz == null) {
             throw new ResourceNotFoundException("Quiz with id " + req.getQuizId() + " not found!");
+        }
+
+        Question existingQuestion = findByContent(req.getContent());
+        if (existingQuestion != null) {
+            return existingQuestion;
         }
 
         Question question = Question.builder()
