@@ -92,7 +92,7 @@ public class AssignmentSubmissionController {
     }
 
     @Transactional
-    @PatchMapping("/{assignmentId}")
+    @PatchMapping(value = "/{assignmentId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Response<?> updateAssignmentSubmisson(
             @PathVariable("assignmentId") Long assignmentId,
             @RequestPart("textSubmission") @Nullable String textSubmission,
