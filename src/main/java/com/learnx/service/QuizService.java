@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Field;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -57,13 +59,32 @@ public class QuizService {
         return 0;
     }
 
-    public Quiz updateQuiz(Long id, CreateQuizRequest request) {
+    public Quiz updateQuiz(Long id, CreateQuizRequest request) throws ParseException {
         if (AuthService.isUserNotHaveRole(Role.TEACHER) && AuthService.isUserNotHaveRole(Role.ADMIN)) {
             throw new AccessDeniedException("You do not have permission to do this action!");
         }
         Optional<Quiz> quizOtp = quizRepository.findById(id);
         if (quizOtp.isPresent()) {
             Quiz quiz = getQuiz(request, quizOtp);
+            if (request.getStartDate() != null) {
+                quiz.setStartDate(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(request.getStartDate()));
+            }
+            if (request.getEndDate() != null) {
+                quiz.setEndDate(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(request.getEndDate()));
+            }
+            if (request.getTimeLimit() != 0) {
+                quiz.setTimeLimit(request.getTimeLimit());
+            }
+            if (request.getAttemptAllowed() != 0) {
+                quiz.setAttemptAllowed(request.getAttemptAllowed());
+            }
+            if (request.getDescription() != null) {
+                quiz.setDescription(request.getDescription());
+            }
+            if (request.isShuffled() != quiz.isShuffled()) {
+                quiz.setShuffled(request.isShuffled());
+            }
+
             return quizRepository.save(quiz);
         }
         return null;
@@ -79,11 +100,11 @@ public class QuizService {
         return quizRepository.findAllByTeacherIdAndEndDateMonthYear(user.getId(), month, year);
     }
 
-    private static Quiz getQuiz(CreateQuizRequest request, Optional<Quiz> quizOtp) {
+    private static Quiz getQuiz(CreateQuizRequest request, Optional<Quiz> quizOtp) throws ParseException {
         Quiz quiz = quizOtp.get();
         if (request.getTitle() != null) quiz.setTitle(request.getTitle());
-        if (request.getStartDate() != null) quiz.setStartDate(request.getStartDate());
-        if (request.getEndDate() != null) quiz.setEndDate(request.getEndDate());
+        if (request.getStartDate() != null) quiz.setStartDate(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(request.getStartDate()));
+        if (request.getEndDate() != null) quiz.setEndDate(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(request.getEndDate()));
         if (request.getTimeLimit() != 0) quiz.setTimeLimit(request.getTimeLimit());
         if (request.getAttemptAllowed() != 0) quiz.setAttemptAllowed(request.getAttemptAllowed());
         if (request.getDescription() != null) quiz.setDescription(request.getDescription());

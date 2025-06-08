@@ -75,7 +75,7 @@ public class QuizController {
     }
 
     @PatchMapping("/{quizId}")
-    public Response<?> editQuiz(@PathVariable("quizId") Long quizId, @RequestBody CreateQuizRequest req) {
+    public Response<?> editQuiz(@PathVariable("quizId") Long quizId, @RequestBody CreateQuizRequest req) throws ParseException {
         return Response.builder().code(HttpStatus.OK.value()).success(true).message("Edit quiz successfully!").data(quizService.updateQuiz(quizId, req)).build();
     }
 

@@ -95,6 +95,7 @@ public class AssignmentSubmissionController {
     @PatchMapping("/{assignmentId}")
     public Response<?> updateAssignmentSubmisson(
             @PathVariable("assignmentId") Long assignmentId,
+            @RequestPart("textSubmission") @Nullable String textSubmission,
             @RequestPart("document") @Nullable MultipartFile file) throws IOException {
 
         String fileUrl = null;
@@ -106,6 +107,9 @@ public class AssignmentSubmissionController {
                 assignmentSubmissionService.getAssignmentSubmissionByAssignmentIdAndStudentId(assignmentId, AuthService.getCurrentUser().getId()).orElseThrow(ResourceNotFoundException::new);
 
         assignmentSubmission.setFileSubmissionUrl(fileUrl);
+        if (textSubmission != null) {
+            assignmentSubmission.setTextSubmission(textSubmission);
+        }
 
         assignmentSubmission = assignmentSubmissionService.saveAssignmentSubmission(assignmentSubmission);
         return Response.builder().code(HttpStatus.CREATED.value()).success(true).message("Chỉnh sửa thành công!").data(assignmentSubmission).build();

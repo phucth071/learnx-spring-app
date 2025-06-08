@@ -15,8 +15,8 @@ public class CreateQuizRequest {
     private String title;
     private String description;
     private int timeLimit;
-    private Date startDate;
-    private Date endDate;
+    private String startDate;
+    private String endDate;
     private int attemptAllowed;
     private boolean status;
     private boolean isShuffled;
