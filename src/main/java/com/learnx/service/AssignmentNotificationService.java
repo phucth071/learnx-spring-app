@@ -22,8 +22,8 @@ public class AssignmentNotificationService {
     private final UserService userService;
 
     @Transactional
-//    @Scheduled(cron = "0 0 0 * * ?") // Run daily at midnight
-    @Scheduled(cron = "0 0 1/2 * * ?") // Run every 2 hours starting at 1 AM
+    @Scheduled(cron = "0 0 0 * * ?") // Run daily at midnight
+//    @Scheduled(cron = "0 0 1/2 * * ?") // Run every 2 hours starting at 1 AM
 //    @Scheduled(cron = "0 */10 * * * ?") // Run every 10 minutes
 //    @Scheduled(cron = "0 */5 * * * ?") // Run every 5 minutes
 //    @Scheduled(cron = "0 * * * * ?") // Run every 1 minute

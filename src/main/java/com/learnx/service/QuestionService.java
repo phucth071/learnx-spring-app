@@ -71,6 +71,7 @@ public class QuestionService {
 
         Question existingQuestion = findByContent(req.getContent());
         if (existingQuestion != null) {
+            quizQuestionService.addExistedQuestionToQuiz(quiz.getId(), existingQuestion.getId());
             return existingQuestion;
         }
 
@@ -195,6 +196,7 @@ public class QuestionService {
 
         Question existingQuestion = findByContent(req.getContent());
         if (existingQuestion != null) {
+            quizQuestionService.addExistedQuestionToQuiz(quiz.getId(), existingQuestion.getId());
             return existingQuestion;
         }
 
@@ -316,6 +318,7 @@ public class QuestionService {
 
         Question existingQuestion = findByContent(req.getContent());
         if (existingQuestion != null) {
+            quizQuestionService.addExistedQuestionToQuiz(quiz.getId(), existingQuestion.getId());
             return existingQuestion;
         }
 
@@ -437,6 +440,7 @@ public class QuestionService {
 
         Question existingQuestion = findByContent(req.getContent());
         if (existingQuestion != null) {
+            quizQuestionService.addExistedQuestionToQuiz(quiz.getId(), existingQuestion.getId());
             return existingQuestion;
         }
 
