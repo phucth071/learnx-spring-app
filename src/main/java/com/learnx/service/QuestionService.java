@@ -36,7 +36,7 @@ public class QuestionService {
     }
 
     public Question findByContent(String content) {
-        return questionRepository.findByContent(content).orElse(null);
+        return questionRepository.findByContent(content).get(0);
     }
 
     public List<Question> getQuestionsByQuizId(Long quizId) {
