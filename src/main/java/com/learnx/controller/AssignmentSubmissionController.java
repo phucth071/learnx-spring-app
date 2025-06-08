@@ -115,19 +115,6 @@ public class AssignmentSubmissionController {
         return Response.builder().code(HttpStatus.CREATED.value()).success(true).message("Chỉnh sửa thành công!").data(assignmentSubmission).build();
     }
 
-    @PatchMapping("/{assignmentId}/{studentId}")
-    public Response<?> editAssignmentSubmission(@PathVariable("assignmentId") Long assignmentId, @PathVariable("studentId") Long studentId, @RequestBody AssignmentSubmissionDto assignmentSubmissionDto) {
-        Optional<AssignmentSubmission> assignmentSubmissionOpt = assignmentSubmissionService.getAssignmentSubmissionByAssignmentIdAndStudentId(assignmentId, studentId);
-        if (assignmentSubmissionOpt.isPresent()) {
-            AssignmentSubmission existingSubmission = assignmentSubmissionOpt.get();
-            AssignmentSubmission updatedSubmission = convertAssignmentSubmissionDTO(assignmentSubmissionDto, existingSubmission);
-            AssignmentSubmission savedSubmission = assignmentSubmissionService.updateAssignmentSubmission(existingSubmission, updatedSubmission);
-            return Response.builder().code(HttpStatus.OK.value()).success(true).message("Chỉnh sửa thành công!").data(savedSubmission).build();
-        } else {
-            throw new ResourceNotFoundException();
-        }
-    }
-
     @PreAuthorize("hasAnyAuthority('TEACHER', 'ADMIN')")
     @PostMapping("/{assignmentId}/{studentId}/score")
     public Response<?> updateScore(@PathVariable("assignmentId") Long assignmentId, @PathVariable("studentId") Long studentId, @RequestBody @Valid ScoreRequest req) {
