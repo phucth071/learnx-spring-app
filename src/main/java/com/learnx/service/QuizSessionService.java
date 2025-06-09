@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 
@@ -65,8 +66,8 @@ public class QuizSessionService {
         submission.setScore(0.00);
         QuizSubmission savedSubmission = quizSubmissionRepository.save(submission);
 
-        // Create new session
-        LocalDateTime now = LocalDateTime.now();
+        ZoneId zoneId = ZoneId.of("Asia/Bangkok");
+        LocalDateTime now = LocalDateTime.now(zoneId);
         LocalDateTime endTime = now.plusMinutes(quiz.getTimeLimit());
 
         QuizSession session = QuizSession.builder()
