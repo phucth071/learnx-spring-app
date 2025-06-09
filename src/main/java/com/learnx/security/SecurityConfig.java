@@ -66,7 +66,7 @@ public class SecurityConfig {
     @Bean
     public CorsFilter corsFilter() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-        corsConfiguration.setAllowedOriginPatterns(List.of("http://localhost:3001", "http://localhost:4000", "http://localhost:9191", "https://phuong13.github.io"));
+        corsConfiguration.setAllowedOriginPatterns(List.of("http://localhost:3001", "http://localhost:4000", "http://localhost:9191", "https://phuong13.github.io", "https://phucth071.github.io"));
         corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         corsConfiguration.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type"));
         corsConfiguration.setAllowCredentials(true);
