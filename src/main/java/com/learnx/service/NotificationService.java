@@ -33,9 +33,7 @@ public class NotificationService {
                 .createdBy(userId)
                 .build();
         messagingTemplate.convertAndSendToUser(userEmail, "/notifications", notification);
-        log.info("Saving notification for user: {}", userEmail);
         notificationRepository.save(notification);
-        log.info("Notification saved successfully for user: {}", userEmail);
     }
 
     public List<Notification> getNotificationsForUser(Long userId) {

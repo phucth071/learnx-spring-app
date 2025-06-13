@@ -12,6 +12,7 @@ spring:
       max-request-size: 50MB
 
   datasource:
+#    Dành cho local testing, KHÔNG dùng trong production
     url: jdbc:mysql://learnxdb.mysql.database.azure.com:3306/learnxdb
     username: 'learnxdb'
     password: '@Root1234'

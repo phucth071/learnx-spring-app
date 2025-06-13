@@ -4,10 +4,7 @@ import com.learnx.auth.AuthService;
 import com.learnx.dto.TopicDto;
 import com.learnx.entity.Topic;
 import com.learnx.response.Response;
-import com.learnx.service.ForumService;
-import com.learnx.service.TopicCommentService;
-import com.learnx.service.TopicService;
-import com.learnx.service.UserService;
+import com.learnx.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +20,7 @@ public class TopicController {
     private final TopicCommentService topicCommentService;
     private final ForumService forumService;
     private final UserService userService;
+    private final NotificationService notificationService;
 
     @GetMapping("")
     public Response<?> getAllTopic(){
@@ -46,6 +44,10 @@ public class TopicController {
                 .account(userService.getUserById(AuthService.getCurrentUser().getId()))
                 .content(topicDto.getContent())
                 .build();
+        String message = "Có sinh viên đã tạo chủ đề mới trong khóa học " + topic.getForum().getCourse().getName();
+        String teacherEmail = topic.getForum().getCourse().getTeacher().getEmail();
+        String url = "/courses/" + topic.getForum().getCourse().getId();
+        notificationService.sendNotification(teacherEmail, message, url);
         return Response.builder().code(HttpStatus.CREATED.value()).success(true).message("Create topic successfully!").data(topicService.saveTopic(topic)).build();
     }
 
