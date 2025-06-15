@@ -1,11 +1,14 @@
 package com.learnx.request;
 
+import com.learnx.dto.OutcomeDTO;
 import com.learnx.entity.enumClass.State;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -19,4 +22,6 @@ public class CreateCourseRequest {
     private String categoryName;
     private String startDate;
     private State state;
+    private String code;
+    private List<OutcomeDTO> outcomes;
 }

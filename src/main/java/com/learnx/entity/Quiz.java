@@ -29,7 +29,7 @@ public class Quiz extends Auditable {
 
     private String title;
 
-    @Column(name="description", columnDefinition = "TEXT")
+    @Column(name="description", length = 1000)
     private String description;
 
     @Column(name="time_limit")

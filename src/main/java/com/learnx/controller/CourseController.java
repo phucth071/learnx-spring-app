@@ -5,10 +5,8 @@ import com.learnx.dto.CourseDto;
 import com.learnx.dto.ModuleDto;
 import com.learnx.dto.UserDto;
 
-import com.learnx.entity.Category;
-import com.learnx.entity.Course;
+import com.learnx.entity.*;
 import com.learnx.entity.Module;
-import com.learnx.entity.User;
 import com.learnx.entity.enumClass.State;
 
 import com.learnx.exception.ResourceNotFoundException;
@@ -30,9 +28,7 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -44,6 +40,7 @@ public class CourseController {
     private final CategoryService categoryService;
     private final ModuleService moduleService;
     private final UserService userService;
+    private final OutcomeService outcomeService;
 
     private final CloudinaryService cloudinaryService;
 
@@ -76,6 +73,7 @@ public class CourseController {
         courseDto.setDescription(course.getDescription());
         courseDto.setState(course.getState());
         courseDto.setStartDate(course.getStartDate());
+        courseDto.setCode(course.getCode());
 
         if (course.getCategory() != null) {
             courseDto.setCategoryId(course.getCategory().getId());
@@ -87,7 +85,7 @@ public class CourseController {
     @Transactional
     @PostMapping(value = "", consumes = {"multipart/form-data"})
     public Response<?> createCourse(@RequestPart("courseInfo") @Valid CreateCourseRequest req,
-                                 @RequestPart("thumbnail") @Nullable MultipartFile thumbnail) throws ParseException {
+                                 @RequestPart(value = "thumbnail", required = false) @Nullable MultipartFile thumbnail) throws ParseException {
         String thumbnailUrl;
         SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
         Category category = categoryService.getCategoryByName(req.getCategoryName()).orElseGet(() -> categoryService.saveCategory(Category.builder().name(req.getCategoryName()).build()));
@@ -104,8 +102,15 @@ public class CourseController {
                 .startDate(dateFormatter.parse(req.getStartDate()))
                 .thumbnail(thumbnailUrl)
                 .state(req.getState() != null ? req.getState() : State.OPEN)
+                .code(req.getCode())
                 .teacher(user)
                 .build();
+
+        if (req.getOutcomes() != null && !req.getOutcomes().isEmpty()) {
+            Set<Outcome> outcomes = outcomeService.createOutcomesForCourse(req.getOutcomes(), course);
+            course.setOutcomes(outcomes);
+        }
+
         return Response.builder().code(HttpStatus.CREATED.value()).success(true).message("Tạo khóa học thành công!").data(courseService.saveCourse(course)).build();
     }
 
@@ -116,6 +121,7 @@ public class CourseController {
                                   @RequestParam("categoryName") @Nullable String categoryName,
                                   @RequestParam("startDate") @Nullable String startDate,
                                   @RequestParam("state") @Nullable String state,
+                                  @RequestParam("code") @Nullable String code,
                                   @RequestPart("thumbnail") @Nullable MultipartFile thumbnail) throws ParseException {
         Optional<Course> courseOtp = courseService.getCourseById(courseId);
         if (courseOtp.isEmpty()) {
@@ -136,8 +142,19 @@ public class CourseController {
         if (thumbnail != null) {
             course.setThumbnail(cloudinaryService.upload(thumbnail));
         }
+        if (code != null) course.setCode(code);
         courseService.saveCourse(course);
         return Response.builder().code(HttpStatus.OK.value()).success(true).message("Sửa khóa học thành công!").data(course).build();
+    }
+
+    @PatchMapping("/outcomes/{outcomeId}")
+    public Response<?> editOutcome(@PathVariable("outcomeId") Long outcomeId,
+                                   @RequestParam("code") @Nullable String code,
+                                   @RequestParam("description") @Nullable String description) {
+        Outcome outcome = outcomeService.getById(outcomeId).orElseThrow(() -> new ResourceNotFoundException("Outcome with id " + outcomeId + " not found!"));
+        if (code != null) outcome.setCode(code);
+        if (description != null) outcome.setDescription(description);
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Sửa outcome thành công!").data(outcomeService.update(outcomeId, outcome)).build();
     }
 
     @DeleteMapping("/{courseId}")
@@ -160,6 +177,17 @@ public class CourseController {
 //            throw e;
 //        }
 //    }
+    @GetMapping("/{courseId}/outcomes")
+    public Response<?> getOutcomeOfCourse(@PathVariable("courseId") Long courseId) {
+        Course course = courseService.getCourseById(courseId).orElseThrow(() -> new ResourceNotFoundException("Course with id " + courseId + " not found!"));
+        Set<Outcome> outcomes = course.getOutcomes().stream()
+                .sorted(Comparator.comparing(Outcome::getCode))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+        if (outcomes.isEmpty()) {
+            return Response.builder().code(HttpStatus.NOT_FOUND.value()).success(false).message("No outcomes found for this course!").build();
+        }
+        return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get outcomes by course id successfully!").data(outcomes).build();
+    }
 
     @GetMapping("/{courseId}/teacher")
     public Response<?> getTeacherByCourseId(@PathVariable("courseId") Long courseId) {

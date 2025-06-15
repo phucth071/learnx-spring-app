@@ -17,4 +17,5 @@ public class CreateMCQRequest {
     private List<Integer> answers;
     private List<String> options;
     private Double score;
+    private Long outcomeId;
 }

@@ -18,4 +18,5 @@ public class CourseDto {
     private String description;
     private String thumbnail;
     private Long categoryId;
+    private String code;
 }

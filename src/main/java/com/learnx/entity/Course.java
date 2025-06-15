@@ -1,6 +1,7 @@
 package com.learnx.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.learnx.entity.auditing.Auditable;
 import com.learnx.entity.enumClass.State;
 import lombok.*;
@@ -8,6 +9,7 @@ import lombok.*;
 import jakarta.persistence.*;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -41,6 +43,8 @@ public class Course extends Auditable {
     @Column(name="description", length = 1000)
     private String description;
 
+    @Column(name="code", unique = true)
+    private String code;
 
     @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
@@ -53,12 +57,19 @@ public class Course extends Auditable {
     @JoinColumn(name = "teacher_id")
     private User teacher;
 
-    @JsonBackReference
+    @JsonManagedReference("course-registration")
     @OneToMany(mappedBy = "course", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
     private Set<CourseRegistration> courseRegistrations;
 
-    @JsonBackReference
+    @JsonManagedReference("course-module")
     @OneToMany(mappedBy = "course", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
     private List<Module> modules;
 
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(
+            name = "course_outcome",
+            joinColumns = @JoinColumn(name = "course_id"),
+            inverseJoinColumns = @JoinColumn(name = "outcome_id")
+    )
+    private Set<Outcome> outcomes = new HashSet<>();
 }

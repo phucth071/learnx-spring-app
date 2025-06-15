@@ -1,5 +1,6 @@
 package com.learnx.controller;
 
+import com.learnx.entity.Question;
 import com.learnx.entity.QuestionOption;
 import com.learnx.request.*;
 import com.learnx.response.Response;
@@ -10,6 +11,8 @@ import com.learnx.service.QuizService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/question-quizzes")
@@ -22,7 +25,6 @@ public class QuestionController {
     private final QuizQuestionService quizQuestionService;
 
 
-    // TODO: RETURN QUESTION DON'T INCLUDE ANSWER
     @GetMapping("")
     public Response<?> getQuestionsByType(@RequestParam("type") String type) {
         return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get questions by type successfully!").data(questionService.getQuestionsByType(type)).build();
@@ -31,6 +33,58 @@ public class QuestionController {
     @GetMapping("/{questionId}")
     public Response<?> getQuestionById(@PathVariable("questionId") Long questionId) {
         return Response.builder().code(HttpStatus.OK.value()).success(true).message("Get question with id " + questionId + " successfully!").data(questionService.findById(questionId)).build();
+    }
+
+    @GetMapping("/outcome/{outcomeId}")
+    public Response<?> getQuestionsByOutcomeId(@PathVariable Long outcomeId) {
+        List<Question> questions = questionService.getQuestionsByOutcomeId(outcomeId);
+        return Response.builder()
+                .code(HttpStatus.OK.value())
+                .success(true)
+                .message("Questions retrieved successfully")
+                .data(questions)
+                .build();
+    }
+
+    @GetMapping("/outcome/code/{outcomeCode}")
+    public Response<?> getQuestionsByOutcomeCode(@PathVariable String outcomeCode) {
+        List<Question> questions = questionService.getQuestionsByOutcomeCode(outcomeCode);
+        return Response.builder()
+                .code(HttpStatus.OK.value())
+                .success(true)
+                .message("Questions retrieved successfully")
+                .data(questions)
+                .build();
+    }
+
+    @GetMapping("/outcome/{outcomeId}/random")
+    public Response<?> getRandomQuestionsByOutcomeId(
+            @PathVariable("outcomeId") Long outcomeId,
+            @RequestParam(defaultValue = "1", name = "count") int count) {
+
+        List<Question> randomQuestions = questionService.getRandomQuestionsByOutcomeId(outcomeId, count);
+
+        return Response.builder()
+                .code(HttpStatus.OK.value())
+                .success(true)
+                .message(randomQuestions.size() + " random questions retrieved successfully")
+                .data(randomQuestions)
+                .build();
+    }
+
+    @GetMapping("/outcome/code/{outcomeCode}/random")
+    public Response<?> getRandomQuestionsByOutcomeCode(
+            @PathVariable String outcomeCode,
+            @RequestParam(defaultValue = "1", name = "count") int count) {
+
+        List<Question> randomQuestions = questionService.getRandomQuestionsByOutcomeCode(outcomeCode, count);
+
+        return Response.builder()
+                .code(HttpStatus.OK.value())
+                .success(true)
+                .message(randomQuestions.size() + " random questions retrieved successfully")
+                .data(randomQuestions)
+                .build();
     }
 
     @PostMapping("")

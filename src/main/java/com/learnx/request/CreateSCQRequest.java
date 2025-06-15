@@ -17,4 +17,5 @@ public class CreateSCQRequest {
     private Integer answer;
     private List<String> options;
     private Double score;
+    private Long outcomeId;
 }

@@ -1,9 +1,6 @@
 package com.learnx.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.annotation.*;
 import com.learnx.entity.auditing.Auditable;
 import com.learnx.entity.enumClass.QuestionType;
 import com.learnx.entity.views.QuestionAnswerViews;
@@ -53,4 +50,8 @@ public class Question extends Auditable {
     @OneToMany
     @JoinColumn(name = "question_id", referencedColumnName = "id")
     private List<QuizSubmissionDetail> quizSubmissionDetails;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "outcome_id")
+    private Outcome outcome;
 }

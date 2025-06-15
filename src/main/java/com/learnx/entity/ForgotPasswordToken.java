@@ -20,7 +20,7 @@ public class ForgotPasswordToken {
     @Column(updatable = false)
     private Long id;
 
-    @Column(name = "token", columnDefinition = "TEXT", unique = true)
+    @Column(name = "token", unique = true, length = 1000)
     private String token;
 
     @Column(name = "expired_at")

@@ -21,7 +21,7 @@ public class ConfirmToken {
     @Column(updatable = false)
     private Long id;
 
-    @Column(name = "token", columnDefinition = "TEXT", unique = true)
+    @Column(name = "token", length = 1000, unique = true)
     private String token;
 
     @Column(name = "created_at")

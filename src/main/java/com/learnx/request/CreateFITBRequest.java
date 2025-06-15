@@ -16,4 +16,5 @@ public class CreateFITBRequest {
     private Long quizId;
     private String answerContent;
     private Double score;
+    private Long outcomeId;
 }

@@ -53,6 +53,12 @@ public class CourseService {
         return courseRepository.save(course);
     }
 
+    @PreAuthorize("hasAnyAuthority('TEACHER', 'ADMIN')")
+    @Transactional
+    public Course createCourse(Course course) {
+        return courseRepository.save(course);
+    }
+
     public Page<Course> getAllCoursesPageable(Pageable pageable) {
         return courseRepository.findAllPageable(pageable);
     }

@@ -4,6 +4,7 @@ import com.learnx.entity.*;
 import com.learnx.entity.embeddedId.QuestionOptionId;
 import com.learnx.entity.enumClass.QuestionType;
 import com.learnx.exception.ResourceNotFoundException;
+import com.learnx.repository.OutcomeRepository;
 import com.learnx.repository.QuestionAnswerRepository;
 import com.learnx.repository.QuestionRepository;
 import com.learnx.repository.QuizRepository;
@@ -26,6 +27,7 @@ public class QuestionService {
     private final QuizRepository quizRepository;
     private final QuestionAnswerRepository questionAnswerRepository;
     private final QuizQuestionService quizQuestionService;
+    private final OutcomeRepository outcomeRepository;
 
     public Question findById(Long id) {
         Optional<Question> question = questionRepository.findById(id);
@@ -109,6 +111,12 @@ public class QuestionService {
             questionAnswerRepository.save(questionAnswer);
         }
 
+        if (req.getOutcomeId() != null) {
+            Outcome outcome = outcomeRepository.findById(req.getOutcomeId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Outcome with id " + req.getOutcomeId() + " not found!"));
+            question.setOutcome(outcome);
+        }
+
         quizQuestionService.addNewQuestionToQuiz(req.getQuizId(), question);
         questionRepository.save(question);
 
@@ -182,8 +190,43 @@ public class QuestionService {
             }
             question.setAnswers(answers);
         }
+
+        if (req.getOutcomeId() != null) {
+            Outcome outcome = outcomeRepository.findById(req.getOutcomeId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Outcome with id " + req.getOutcomeId() + " not found!"));
+            question.setOutcome(outcome);
+        }
+
         questionRepository.save(question);
         return question;
+    }
+
+    public List<Question> getRandomQuestionsByOutcomeId(Long outcomeId, int count) {
+        List<Question> allQuestions = questionRepository.findByOutcomeId(outcomeId);
+
+        if (allQuestions.isEmpty()) {
+            return allQuestions;
+        }
+
+        int actualCount = Math.min(count, allQuestions.size());
+
+        Collections.shuffle(allQuestions);
+
+        return allQuestions.subList(0, actualCount);
+    }
+
+    public List<Question> getRandomQuestionsByOutcomeCode(String outcomeCode, int count) {
+        List<Question> allQuestions = questionRepository.findByOutcomeCode(outcomeCode);
+
+        if (allQuestions.isEmpty()) {
+            return allQuestions;
+        }
+
+        int actualCount = Math.min(count, allQuestions.size());
+
+        Collections.shuffle(allQuestions);
+
+        return allQuestions.subList(0, actualCount);
     }
 
     @PreAuthorize("hasAnyAuthority('TEACHER', 'ADMIN')")
@@ -232,6 +275,12 @@ public class QuestionService {
         questionAnswerRepository.save(questionAnswer);
 
         question.setAnswers(new ArrayList<>(List.of(questionAnswer)));
+
+        if (req.getOutcomeId() != null) {
+            Outcome outcome = outcomeRepository.findById(req.getOutcomeId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Outcome with id " + req.getOutcomeId() + " not found!"));
+            question.setOutcome(outcome);
+        }
 
         quizQuestionService.addNewQuestionToQuiz(req.getQuizId(), question);
         questionRepository.save(question);
@@ -303,6 +352,12 @@ public class QuestionService {
             question.setAnswers(new ArrayList<>(List.of(questionAnswer)));
         }
 
+        if (req.getOutcomeId() != null) {
+            Outcome outcome = outcomeRepository.findById(req.getOutcomeId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Outcome with id " + req.getOutcomeId() + " not found!"));
+            question.setOutcome(outcome);
+        }
+
         questionRepository.save(question);
 
         return question;
@@ -352,6 +407,12 @@ public class QuestionService {
                 .answerId(question.getOptions().get(req.getAnswer()).getId().getOptionId())
                 .build();
         questionAnswerRepository.save(questionAnswer);
+
+        if (req.getOutcomeId() != null) {
+            Outcome outcome = outcomeRepository.findById(req.getOutcomeId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Outcome with id " + req.getOutcomeId() + " not found!"));
+            question.setOutcome(outcome);
+        }
 
         question.setAnswers(new ArrayList<>(List.of(questionAnswer)));
 
@@ -425,6 +486,12 @@ public class QuestionService {
             question.setAnswers(new ArrayList<>(List.of(questionAnswer)));
         }
 
+        if (req.getOutcomeId() != null) {
+            Outcome outcome = outcomeRepository.findById(req.getOutcomeId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Outcome with id " + req.getOutcomeId() + " not found!"));
+            question.setOutcome(outcome);
+        }
+
         questionRepository.save(question);
 
         return question;
@@ -459,6 +526,12 @@ public class QuestionService {
                 .build();
         questionAnswerRepository.save(questionAnswer);
 
+        if (req.getOutcomeId() != null) {
+            Outcome outcome = outcomeRepository.findById(req.getOutcomeId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Outcome with id " + req.getOutcomeId() + " not found!"));
+            question.setOutcome(outcome);
+        }
+
         question.setAnswers(new ArrayList<>(List.of(questionAnswer)));
 
         quizQuestionService.addNewQuestionToQuiz(req.getQuizId(), question);
@@ -492,8 +565,22 @@ public class QuestionService {
             question.setAnswers(new ArrayList<>(List.of(questionAnswer)));
         }
 
+        if (req.getOutcomeId() != null) {
+            Outcome outcome = outcomeRepository.findById(req.getOutcomeId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Outcome with id " + req.getOutcomeId() + " not found!"));
+            question.setOutcome(outcome);
+        }
+
         questionRepository.save(question);
         return question;
+    }
+
+    public List<Question> getQuestionsByOutcomeId(Long outcomeId) {
+        return questionRepository.findByOutcomeId(outcomeId);
+    }
+
+    public List<Question> getQuestionsByOutcomeCode(String outcomeCode) {
+        return questionRepository.findByOutcomeCode(outcomeCode);
     }
 
     @PreAuthorize("hasAnyAuthority('TEACHER', 'ADMIN')")
