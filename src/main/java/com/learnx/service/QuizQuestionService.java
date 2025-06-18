@@ -27,7 +27,11 @@ public class QuizQuestionService {
     public QuizQuestion addExistedQuestionToQuiz(Long quizId, Long questionId) {
         Quiz quiz = quizService.findById(quizId).orElseThrow(() -> new ResourceNotFoundException("Quiz not found"));
         Question question = questionRepository.findById(questionId).orElseThrow(() -> new ResourceNotFoundException("Question not found"));
-
+        // Check if the question already exists in the quiz
+        QuizQuestion eQuizQuestion = quizQuestionRepository.findByQuestionIdAndQuizId(questionId, quizId).orElse(null);
+        if (eQuizQuestion != null) {
+            return eQuizQuestion; // Return existing quiz question if it already exists
+        }
         List<QuizQuestion> quizQuestions = quizQuestionRepository.findAllByQuiz_Id(quizId);
         int nextSequence = quizQuestions.stream()
                 .mapToInt(QuizQuestion::getSeq)
@@ -45,6 +49,11 @@ public class QuizQuestionService {
     @Transactional
     public QuizQuestion addNewQuestionToQuiz(Long quizId, Question question) {
         List<QuizQuestion> quizQuestions = quizQuestionRepository.findAllByQuiz_Id(quizId);
+        // Check if the question already exists in the quiz
+        QuizQuestion eQuizQuestion = quizQuestionRepository.findByQuestionIdAndQuizId(question.getId(), quizId).orElse(null);
+        if (eQuizQuestion != null) {
+            return eQuizQuestion; // Return existing quiz question if it already exists
+        }
         int nextSequence = quizQuestions.stream()
                 .mapToInt(QuizQuestion::getSeq)
                 .max()

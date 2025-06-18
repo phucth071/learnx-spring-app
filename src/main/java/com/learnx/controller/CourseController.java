@@ -10,6 +10,7 @@ import com.learnx.entity.Module;
 import com.learnx.entity.enumClass.State;
 
 import com.learnx.exception.ResourceNotFoundException;
+import com.learnx.request.CourseCloneRequest;
 import com.learnx.request.CreateCourseRequest;
 import com.learnx.response.Response;
 import com.learnx.service.*;
@@ -101,9 +102,10 @@ public class CourseController {
                 .description(req.getDescription() == null ? "" : req.getDescription())
                 .startDate(dateFormatter.parse(req.getStartDate()))
                 .thumbnail(thumbnailUrl)
-                .state(req.getState() != null ? req.getState() : State.OPEN)
+                .state(State.OPEN)
                 .code(req.getCode())
                 .teacher(user)
+                .deleted(false)
                 .build();
 
         if (req.getOutcomes() != null && !req.getOutcomes().isEmpty()) {
@@ -112,6 +114,13 @@ public class CourseController {
         }
 
         return Response.builder().code(HttpStatus.CREATED.value()).success(true).message("Tạo khóa học thành công!").data(courseService.saveCourse(course)).build();
+    }
+
+    @PostMapping(value = "/clone", consumes = {"multipart/form-data"})
+    public Response<?> cloneCourse(@RequestPart("courseInfo") CourseCloneRequest req,
+                                   @RequestPart(value = "thumbnail", required = false) @Nullable MultipartFile thumbnail) throws ParseException {
+        Course clonedCourse = courseService.cloneCourse(req, thumbnail);
+        return Response.builder().code(HttpStatus.CREATED.value()).success(true).message("Tạo khóa học thành công!").data(courseService.saveCourse(clonedCourse)).build();
     }
 
     @PatchMapping("/{courseId}")

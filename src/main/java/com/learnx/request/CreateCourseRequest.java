@@ -21,7 +21,6 @@ public class CreateCourseRequest {
     @NotBlank(message = "Tên danh mục không được để trống")
     private String categoryName;
     private String startDate;
-    private State state;
     private String code;
     private List<OutcomeDTO> outcomes;
 }

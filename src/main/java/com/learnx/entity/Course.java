@@ -43,8 +43,11 @@ public class Course extends Auditable {
     @Column(name="description", length = 1000)
     private String description;
 
-    @Column(name="code", unique = true)
+    @Column(name="code", unique = false)
     private String code;
+
+    @Column(name="deleted")
+    private boolean deleted = false;
 
     @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})

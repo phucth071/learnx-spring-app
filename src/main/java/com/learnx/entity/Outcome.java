@@ -22,7 +22,7 @@ public class Outcome extends Auditable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "code", nullable = false, unique = true)
+    @Column(name = "code", nullable = true)
     private String code;
 
     @Column(name = "description", length = 2000)

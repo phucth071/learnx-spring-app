@@ -55,7 +55,7 @@ public class CategoryService {
     public Category deleteCategory(Long id) {
         Optional<Category> category = categoryRepository.findById(id);
         category.ifPresent(cate -> {
-            List<Course> courses = courseRepository.findByCategoryId(cate.getId());
+            List<Course> courses = courseRepository.findByCategoryIdAndDeletedFalse(cate.getId());
             for (Course course : courses) {
                 Forum forum = forumRepository.findByCourseId(course.getId()).orElse(null);
                 if (forum != null) {

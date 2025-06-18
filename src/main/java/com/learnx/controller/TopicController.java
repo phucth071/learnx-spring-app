@@ -46,7 +46,7 @@ public class TopicController {
                 .build();
         String message = "Có sinh viên đã tạo chủ đề mới trong khóa học " + topic.getForum().getCourse().getName();
         String teacherEmail = topic.getForum().getCourse().getTeacher().getEmail();
-        String url = "/courses/" + topic.getForum().getCourse().getId();
+        String url = "/course-detail/" + topic.getForum().getCourse().getId();
         notificationService.sendNotification(teacherEmail, message, url);
         return Response.builder().code(HttpStatus.CREATED.value()).success(true).message("Create topic successfully!").data(topicService.saveTopic(topic)).build();
     }
