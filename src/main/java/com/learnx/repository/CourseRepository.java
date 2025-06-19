@@ -14,7 +14,7 @@ import java.util.Optional;
 @Repository
 public interface CourseRepository extends JpaRepository<Course, Long> {
     Optional<Course> findByIdAndDeletedFalse(Long id);
-
+    List<Course> findAllByDeletedFalse();
     @Query("SELECT c FROM Course c WHERE c.deleted = false")
     Page<Course> findAllPageable(Pageable pageable);
 
