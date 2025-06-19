@@ -212,6 +212,13 @@ public class CourseService {
                         );
                     }
 
+                    // Clone resources
+                    if (sourceModule.getResources() != null) {
+                        savedModule.setResources(
+                                cloneResources(sourceModule.getResources(), savedModule)
+                        );
+                    }
+
                     // Clone assignments
                     if (sourceModule.getAssignments() != null) {
                         savedModule.setAssignments(
