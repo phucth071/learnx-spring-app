@@ -13,12 +13,12 @@ spring:
 
   datasource:
 #    Dành cho local testing, KHÔNG dùng trong production
-    url: jdbc:mysql://learnxdb123.mysql.database.azure.com:3306/learnxdb
-    username: 'learnx_admin'
-    password: '@Root12349'
-#    url: ${JDBC_DATABASE_URL}
-#    username: ${JDBC_DATABASE_USERNAME}
-#    password: ${JDBC_DATABASE_PASSWORD}
+#    url: jdbc:mysql://learnxdb123.mysql.database.azure.com:3306/learnxdb
+#    username: 'learnx_admin'
+#    password: '@Root1234'
+    url: ${JDBC_DATABASE_URL}
+    username: ${JDBC_DATABASE_USERNAME}
+    password: ${JDBC_DATABASE_PASSWORD}
 #    url: jdbc:mysql://localhost:3316/learnx_db
 #    username: root
 #    password: root1234

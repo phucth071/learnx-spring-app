@@ -121,7 +121,7 @@ public class CourseService {
         if (thumbnail != null) {
             thumbnailUrl = cloudinaryService.upload(thumbnail);
         } else {
-            thumbnailUrl = "https://res.cloudinary.com/dnarlcqth/image/upload/v1719906429/samples/landscapes/architecture-signs.jpg";
+            thumbnailUrl = sourceCourse.getThumbnail();
         }
         User user = AuthService.getCurrentUser();
 
